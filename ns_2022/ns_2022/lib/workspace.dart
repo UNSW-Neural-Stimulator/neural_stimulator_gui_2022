@@ -29,6 +29,8 @@ class _workspaceState extends State<workspace> {
   Widget build(BuildContext context) {
     var phase1Time = Provider.of<Data>(context).getPhase1Time;
     var interPhaseDelayTime = Provider.of<Data>(context).getInterPhaseDelay;
+    var phase2Time = Provider.of<Data>(context).getPhase2Time;
+    var interstimDelayTime = Provider.of<Data>(context).getInterstimDelay;
     var deviceNumber = Provider.of<Data>(context).getDeviceNumber;
 
     /////////////////////////////////////////////////////////////////////////
@@ -51,7 +53,7 @@ class _workspaceState extends State<workspace> {
                   color: Color.fromARGB(255, 255, 255, 255)
                 ),
                 child:  
-                    MyCustomForm(title: "Phase Time"),
+                    const MyCustomForm(),
                 ),
             )
             
@@ -73,7 +75,9 @@ class _workspaceState extends State<workspace> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('AlertDialog Title'),
-          content:Text("Phase 1 Time (μs):"' $phase1Time' "\n" "Inter-Phase Delay (μs):"'$interPhaseDelayTime'),
+          content:Text("Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
+                       "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"                       
+                        ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -95,10 +99,7 @@ class _workspaceState extends State<workspace> {
 
 
 class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
+  const MyCustomForm({Key? key}) : super(key: key);
   @override
   _MyCustomFormState createState() => _MyCustomFormState();
 }
@@ -111,6 +112,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
   // of the TextField.
   TextEditingController? _textField1;
   TextEditingController? _textField2;
+  TextEditingController? _textField3;
+  TextEditingController? _textField4;
 
   @override
   void initState() {
@@ -119,14 +122,17 @@ class _MyCustomFormState extends State<MyCustomForm> {
     super.initState();
     _textField1 = TextEditingController(text: myProvider.getPhase1TimeString);
     _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
-
+    _textField3 = TextEditingController(text: myProvider.getPhase2TimeString);
+    _textField4 = TextEditingController(text: myProvider.getInterstimDelayString);
   }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    _textField1!.dispose();
-    _textField2!.dispose();
+    _textField1?.dispose();
+    _textField2?.dispose();
+    _textField3?.dispose();
+    _textField4?.dispose();
     super.dispose();
   }
 
@@ -134,72 +140,94 @@ class _MyCustomFormState extends State<MyCustomForm> {
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);
     return 
-      Container(
-        height: 300,
-        width: 300,
-        child: Column(
-          children: [
-            Container(
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 102, 102, 102)
-                    ),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(widget.title, 
-                                    style: const TextStyle(color: Color.fromARGB(255, 255, 255, 255), 
-                                                    fontSize: 30,
-                                                    fontFamily: 'Raleway', 
-                                                    fontWeight: FontWeight.w300,
-                                                    ),
-                                    textAlign: TextAlign.center,
-                                    
-                                    ),
-                        )
-                      ],
-                    ),
-                  ),
-                  const Text("Phase 1 Time (μs)", 
-                                    style: TextStyle(color: Color.fromARGB(255, 48, 48, 48), 
-                                                    fontSize: 15,
-                                                    fontFamily: 'Raleway', 
-                                                    fontWeight: FontWeight.w500,
-                                                    ),
-                                    textAlign: TextAlign.center,
-                                    
-                                    ),
-                  TextField(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const Text("Phase Time", style: TextStyle( color: Color.fromARGB(255, 0, 60, 109), fontWeight: FontWeight.bold, fontSize: 30),),
+                  const SizedBox(height: 10),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextFormField(
                       keyboardType: TextInputType.number,
                       controller: _textField1,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: const InputDecoration(labelText: "Enter a numeric value"),
                       onChanged: myProvider.setphase1,
-                    
+                      decoration: const InputDecoration(
+                        labelText: 'Phase 1 Time (µs)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
                   ),
-                  const Text("Inter-Phase Delay (μs)", 
-                                    style: TextStyle(color: Color.fromARGB(255, 48, 48, 48), 
-                                                    fontSize: 15,
-                                                    fontFamily: 'Raleway', 
-                                                    fontWeight: FontWeight.w500,
-                                                    ),
-                                    textAlign: TextAlign.center,
-                                    
-                                    ),
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    controller: _textField2,
-                    decoration: const InputDecoration(labelText: "Enter a numeric value"),
-                    onChanged: myProvider.setinterphasedelay,
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller: _textField2,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: myProvider.setinterphasedelay,
+                      decoration: const InputDecoration(
+                        labelText: 'Inter-phase delay (µs)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
                   ),
 
-          ],
 
-        ),
+                ],
+              ),
+              const SizedBox(width: 10),
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const Text("Frequency", style: TextStyle( color: Color.fromARGB(255, 0, 60, 109), fontWeight: FontWeight.bold, fontSize: 30),),
+                  const SizedBox(height: 10),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller: _textField3,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: myProvider.setphase2,
+                      decoration: const InputDecoration(
+                        labelText: 'Phase 2 Time (µs)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextFormField(
+                      keyboardType: TextInputType.number,
+                      controller: _textField4,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: myProvider.setinterstimdelay,
+                      decoration: const InputDecoration(
+                        labelText: 'Inter-stim delay (µs)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
 
-      );
+
+                ],
+              ),
+            ],
+          );
   }
+
 }
 
 

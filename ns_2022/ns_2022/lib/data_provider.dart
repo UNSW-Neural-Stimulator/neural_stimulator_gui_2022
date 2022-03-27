@@ -7,6 +7,10 @@ class Data extends ChangeNotifier {
   var _deviceNumber = 0;
   var _phase1TimeMicrosec = 0;
   var _interPhaseDelayMicrosec = 0;
+  var _phase2TimeMicrosec = 0;
+  var _interstimDelayMicrosec = 0;
+  var _phase2Time = "";
+  var _interstimDelay = "";
   var _phase1Time = "";
   var _interPhaseDelay = "";
 
@@ -21,11 +25,25 @@ class Data extends ChangeNotifier {
     return _interPhaseDelayMicrosec;
   }
 
+  int get getPhase2Time {
+    return _phase2TimeMicrosec;
+  }
+  int get getInterstimDelay {
+    return _interstimDelayMicrosec;
+  }
+
   String get getPhase1TimeString {
     return _phase1Time;
   }
   String get getInterPhaseDelayString {
     return _interPhaseDelay;
+  }
+
+  String get getPhase2TimeString {
+    return _phase2Time;
+  }
+  String get getInterstimDelayString {
+    return _interstimDelay;
   }
 
   setphase1(String getPhase1TimeString) {
@@ -35,6 +53,16 @@ class Data extends ChangeNotifier {
 
   setinterphasedelay(String getInterPhaseDelayString) {
     _interPhaseDelayMicrosec =  int.tryParse(getInterPhaseDelayString) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setphase2(String getPhase2TimeString) {
+    _phase2TimeMicrosec = int.tryParse(getPhase2TimeString) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setinterstimdelay(String getInterstimDelayString) {
+    _interstimDelayMicrosec =  int.tryParse(getInterstimDelayString) ?? defaultValue;
     notifyListeners();
   }
 

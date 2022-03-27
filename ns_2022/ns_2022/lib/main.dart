@@ -1,3 +1,6 @@
+import 'package:ns_2022/data_provider.dart';
+import 'package:provider/provider.dart';
+
 import 'full_page_layout.dart';
 import 'package:flutter/material.dart';
 
@@ -6,12 +9,19 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const FullPageContainer(),
-      
-    );
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: Data (),
+        ),
+      ],
+      child: MaterialApp (
+              theme: ThemeData (
+                          primarySwatch: Colors.blue,
+                      ),
+              home: const FullPageContainer(),
+
+             ),
+          ); 
   }
 }

@@ -1,9 +1,17 @@
+import 'dart:developer';
+import 'dart:ffi';
+
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 
+import 'package:provider/provider.dart';
+import 'package:collection/collection.dart';
+import 'package:nested/nested.dart';
+
 import 'device_item.dart';
 import 'list_devices.dart';
+import "data_provider.dart";
 
 class workspace extends StatefulWidget {
   const workspace({Key? key, deviceNumber}) : super(key: key);
@@ -16,13 +24,17 @@ class workspace extends StatefulWidget {
 
 class _workspaceState extends State<workspace> {
 
-   final int deviceNumber = 0;
-   String containerValue1 = '';
-   String containerValue2 = '';
-
 
   @override
   Widget build(BuildContext context) {
+    var phase1Time = Provider.of<Data>(context).getPhase1Time;
+    var interPhaseDelayTime = Provider.of<Data>(context).getInterPhaseDelay;
+    var deviceNumber = Provider.of<Data>(context).getDeviceNumber;
+
+    /////////////////////////////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////////////////////////////
+
     final textTheme = Theme.of(context).textTheme;
     final content = Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -39,13 +51,7 @@ class _workspaceState extends State<workspace> {
                   color: Color.fromARGB(255, 255, 255, 255)
                 ),
                 child:  
-                    MyCustomForm(title: "Phase Time", onChangeContainer1: (val1) => setState(() {
-                      containerValue1 = val1;
-                    }),
-                    onChangeContainer2: (val2) => setState(() {
-                      containerValue2 = val2;
-                    }),
-                    ),
+                    MyCustomForm(title: "Phase Time"),
                 ),
             )
             
@@ -67,7 +73,7 @@ class _workspaceState extends State<workspace> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('AlertDialog Title'),
-          content:Text("Phase 1 Time (μs):"+containerValue1 + "\n"+ "Inter-Phase Delay (μs):"+containerValue2),
+          content:Text("Phase 1 Time (μs):"' $phase1Time' "\n" "Inter-Phase Delay (μs):"'$interPhaseDelayTime'),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -89,11 +95,9 @@ class _workspaceState extends State<workspace> {
 
 
 class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({Key? key, required this.title, required this.onChangeContainer1, required this.onChangeContainer2}) : super(key: key);
+  const MyCustomForm({Key? key, required this.title}) : super(key: key);
 
   final String title;
-  final Function(String) onChangeContainer1;
-  final Function(String) onChangeContainer2;
 
   @override
   _MyCustomFormState createState() => _MyCustomFormState();
@@ -105,21 +109,30 @@ class _MyCustomFormState extends State<MyCustomForm> {
   
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
-  final textField1 = TextEditingController();
-  final textField2 = TextEditingController();
+  TextEditingController? _textField1;
+  TextEditingController? _textField2;
 
+  @override
+  void initState() {
+    final Data myProvider = Provider.of<Data>(context, listen: false);
+
+    super.initState();
+    _textField1 = TextEditingController(text: myProvider.getPhase1TimeString);
+    _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
+
+  }
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    textField1.dispose();
-    textField2.dispose();
+    _textField1!.dispose();
+    _textField2!.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
+    final Data myProvider = Provider.of<Data>(context);
     return 
       Container(
         height: 300,
@@ -158,10 +171,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
                                     ),
                   TextField(
                       keyboardType: TextInputType.number,
-                      controller: textField1,
+                      controller: _textField1,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: const InputDecoration(labelText: "Enter a numeric value"),
-                      onChanged: widget.onChangeContainer1,
+                      onChanged: myProvider.setphase1,
                     
                   ),
                   const Text("Inter-Phase Delay (μs)", 
@@ -176,9 +189,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                   TextField(
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    controller: textField2,
+                    controller: _textField2,
                     decoration: const InputDecoration(labelText: "Enter a numeric value"),
-                    onChanged: widget.onChangeContainer2,
+                    onChanged: myProvider.setinterphasedelay,
                   ),
 
           ],

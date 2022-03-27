@@ -56,7 +56,7 @@ class Item extends StatelessWidget{
                 title: Text("Device " + index.toString()),
                 onTap: () => Navigator.push(
                                           context,
-                                              MaterialPageRoute(builder: (context) => workspace(deviceNumber: index)),
+                                              MaterialPageRoute(builder: (context) => workspace()),
                                         )
       );
   }

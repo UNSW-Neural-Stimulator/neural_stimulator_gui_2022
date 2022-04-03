@@ -3,16 +3,22 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 class Data extends ChangeNotifier {
+  // the following are int variables
   var defaultValue = 0;
   var _deviceNumber = 0;
   var _phase1TimeMicrosec = 0;
   var _interPhaseDelayMicrosec = 0;
   var _phase2TimeMicrosec = 0;
   var _interstimDelayMicrosec = 0;
+  var _burstPeriodMs = 0;
+  var _dutyCyclePercentage = 0;
+  // the following are string variables to recieve and edit input from the user
   var _phase2Time = "";
   var _interStimDelay = "";
   var _phase1Time = "";
   var _interPhaseDelay = "";
+  var _burstPeriodMsString = "";
+  var _dutyCyclePercentageString = "";
 
   int get getDeviceNumber {
     return _deviceNumber;
@@ -32,6 +38,13 @@ class Data extends ChangeNotifier {
     return _interstimDelayMicrosec;
   }
 
+  int get getBurstPeriod {
+    return _burstPeriodMs;
+  }
+  int get getDutyCycle {
+    return _dutyCyclePercentage;
+  }
+
   String get getPhase1TimeString {
     return _phase1Time;
   }
@@ -44,6 +57,13 @@ class Data extends ChangeNotifier {
   }
   String get getInterstimDelayString {
     return _interStimDelay;
+  }
+
+  String get getBurstPeriodMsString {
+    return _burstPeriodMsString;
+  }
+  String get getDutyCycleString {
+    return _dutyCyclePercentageString;
   }
 
   setphase1(String phase1TimeStringFromTextfield) {
@@ -67,6 +87,18 @@ class Data extends ChangeNotifier {
   setinterstimdelay(String interStimDelayStringFromTextField) {
     _interstimDelayMicrosec =  int.tryParse(interStimDelayStringFromTextField) ?? defaultValue;
     _interStimDelay = interStimDelayStringFromTextField;
+    notifyListeners();
+  }
+
+  setburstcycle(String burstCycleFromTextField) {
+    _burstPeriodMs = int.tryParse(burstCycleFromTextField) ?? defaultValue;
+    _burstPeriodMsString = burstCycleFromTextField;
+    notifyListeners();
+  }
+
+  setdutycycle(String dutyCycleFromTextField) {
+    _dutyCyclePercentage =  int.tryParse(dutyCycleFromTextField) ?? defaultValue;
+    _dutyCyclePercentageString = dutyCycleFromTextField;
     notifyListeners();
   }
 

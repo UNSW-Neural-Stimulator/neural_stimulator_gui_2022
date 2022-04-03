@@ -47,7 +47,7 @@ class _workspaceState extends State<workspace> {
           child: Container(
             alignment: Alignment.topLeft,
             child: Container(
-                height: 300,
+                height: 350,
                 width: 600,
                 alignment: Alignment.topCenter,
                 margin: EdgeInsets.all(20),
@@ -116,7 +116,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
   TextEditingController? _textField2;
   TextEditingController? _textField3;
   TextEditingController? _textField4;
-
+  TextEditingController? _textField5;
+  TextEditingController? _textField6;
 
   @override
   void initState() {
@@ -127,6 +128,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
     _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
     _textField3 = TextEditingController(text: myProvider.getPhase2TimeString);
     _textField4 = TextEditingController(text: myProvider.getInterstimDelayString);
+    _textField5 = TextEditingController(text: myProvider.getBurstPeriodMsString);
+    _textField6 = TextEditingController(text: myProvider.getDutyCycleString);
   }
 
   @override
@@ -147,6 +150,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
       context,
       listen: true, // Be sure to listen
     ).getInterstimDelayString;
+    _textField5!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getBurstPeriodMsString;
+    _textField6!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getDutyCycleString;
   super.didChangeDependencies();
   }
 
@@ -166,6 +177,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
     final Data myProvider = Provider.of<Data>(context);    
 
     return 
+        Column( 
+          children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -251,7 +264,63 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 ],
               ),
             ],
-          );
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const Text("Burst Cycle", style: TextStyle( color: Color.fromARGB(255, 0, 60, 109), fontWeight: FontWeight.bold, fontSize: 30),),
+                  const SizedBox(height: 10),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _textField1,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setburstcycle(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'Burst Cycle (ms)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+
+                ],
+              ),
+              const SizedBox(width: 10),
+              Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const Text("Duty cycle", style: TextStyle( color: Color.fromARGB(255, 0, 60, 109), fontWeight: FontWeight.bold, fontSize: 30),),
+                  const SizedBox(height: 10),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _textField3,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setphase2(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'Duty Cycle (%)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+        
+        ],
+      );
   }
 
 }

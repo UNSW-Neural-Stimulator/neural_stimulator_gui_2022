@@ -412,24 +412,58 @@ class _RightSideInputsState extends State<RightSideInputs> {
       Expanded(child: 
         Column( 
           children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-                FlutterSwitch(
-                  activeColor: Colors.greenAccent,
-                  inactiveColor: Colors.redAccent,
-                  activeText: "Start",
-                  inactiveText: "Stop",
-                  width: 80,
-                  activeTextColor: Colors.white,
-                  showOnOff: true,
-                  onToggle: (bool start) {
-                    Provider.of<Data>(context, listen: false).togglestart(start);
-                  },
-                  value: Provider.of<Data>(context).getstart,  // remove `listen: false` 
-                ),
-              ],
-          ),
+            const SizedBox(height: 20),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                  
+                  SizedBox(
+                    height: 40,
+                    width: 100,
+                    child:
+                      ElevatedButton.icon(
+                          onPressed: () {
+                              // Respond to button press by saving all values
+                          },
+                          style: ElevatedButton.styleFrom(primary: Colors.greenAccent, textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          icon: Icon(Icons.save, size: 18),
+                          label: Text("save"),
+                        )               
+                  ),
+                  SizedBox(width: 50,),
+                  FlutterSwitch(
+                    activeColor: Colors.greenAccent,
+                    inactiveColor: Colors.redAccent,
+                    activeText: "DC mode on",
+                    inactiveText: "DC mode off",
+                    width: 150,
+                    height: 40,
+                    activeTextColor: Colors.white,
+                    showOnOff: true,
+                    onToggle: (bool dcmode) {
+                      Provider.of<Data>(context, listen: false).toggleDC(dcmode);
+                    },
+                    value: Provider.of<Data>(context).getDcMode,  // remove `listen: false` 
+                  ),
+                  SizedBox(width: 50,),
+                  FlutterSwitch(
+                    activeColor: Colors.greenAccent,
+                    inactiveColor: Colors.redAccent,
+                    activeText: "start",
+                    inactiveText: "stop",
+                    width: 85,
+                    height: 40,
+                    activeTextColor: Colors.white,
+                    showOnOff: true,
+                    onToggle: (bool start) {
+                      Provider.of<Data>(context, listen: false).togglestart(start);
+                    },
+                    value: Provider.of<Data>(context).getstart,  // remove `listen: false` 
+                  ),
+
+                ],
+            ),
         
         ],
       ),

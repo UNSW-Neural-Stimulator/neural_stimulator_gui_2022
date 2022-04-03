@@ -21,14 +21,25 @@ class Data extends ChangeNotifier {
   var _dutyCyclePercentageString = "";
   //buttons
   bool _start = false;
+  bool _dcMode = false;
+
+
 
   void togglestart(bool start) {
     _start = start;
     notifyListeners();
   }
 
+  void toggleDC(bool dcmode) {
+    _dcMode = dcmode;
+    notifyListeners();
+  }
+
   bool get getstart {
     return _start;
+  }
+  bool get getDcMode {
+    return _dcMode;
   }
 
   int get getDeviceNumber {

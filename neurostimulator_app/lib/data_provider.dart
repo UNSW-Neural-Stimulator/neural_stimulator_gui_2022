@@ -19,6 +19,17 @@ class Data extends ChangeNotifier {
   var _interPhaseDelay = "";
   var _burstPeriodMsString = "";
   var _dutyCyclePercentageString = "";
+  //buttons
+  bool _start = false;
+
+  void togglestart(bool start) {
+    _start = start;
+    notifyListeners();
+  }
+
+  bool get getstart {
+    return _start;
+  }
 
   int get getDeviceNumber {
     return _deviceNumber;

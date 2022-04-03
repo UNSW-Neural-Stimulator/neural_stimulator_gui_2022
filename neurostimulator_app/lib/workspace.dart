@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 import 'package:nested/nested.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 import 'device_item.dart';
 import 'list_devices.dart';
@@ -32,6 +33,8 @@ class _workspaceState extends State<workspace> {
     var phase2Time = Provider.of<Data>(context).getPhase2Time;
     var interstimDelayTime = Provider.of<Data>(context).getInterstimDelay;
     var deviceNumber = Provider.of<Data>(context).getDeviceNumber;
+    var start = Provider.of<Data>(context).getstart;
+
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -40,22 +43,24 @@ class _workspaceState extends State<workspace> {
     /////////////////////////////////////////////////////////////////////////
 
     final textTheme = Theme.of(context).textTheme;
-    final content = Column(
+    final content =       
+      Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [ 
         Expanded(
           child: Container(
             alignment: Alignment.topLeft,
             child: Container(
-                height: 350,
-                width: 600,
                 alignment: Alignment.topCenter,
                 margin: EdgeInsets.all(20),
                 decoration: const BoxDecoration(
                   color: Color.fromARGB(255, 255, 255, 255)
                 ),
-                child:  
+                child:  Row( children: [
                     const MyCustomForm(),
+                    const RightSideInputs(),
+                ]
+                ),
                 ),
             )
             
@@ -79,6 +84,7 @@ class _workspaceState extends State<workspace> {
           title: const Text('AlertDialog Title'),
           content:Text("Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
                        "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"                       
+                       "start: $start"
                         ),
           actions: <Widget>[
             TextButton(
@@ -169,6 +175,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
     _textField2?.dispose();
     _textField3?.dispose();
     _textField4?.dispose();
+    _textField5?.dispose();
+    _textField6?.dispose();
+
     super.dispose();
   }
 
@@ -279,7 +288,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField1,
+                      controller: _textField5,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setburstcycle(value);},
                       decoration: const InputDecoration(
@@ -303,9 +312,9 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField3,
+                      controller: _textField6,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onSubmitted:(value) {myProvider.setphase2(value);},
+                      onSubmitted:(value) {myProvider.setdutycycle(value);},
                       decoration: const InputDecoration(
                         labelText: 'Duty Cycle (%)',
                         labelStyle: TextStyle(fontSize: 20),
@@ -325,6 +334,111 @@ class _MyCustomFormState extends State<MyCustomForm> {
 
 }
 
+////////////////////////////////////////////////////////////////////
+
+
+class RightSideInputs extends StatefulWidget {
+  const RightSideInputs({Key? key}) : super(key: key);
+  @override
+  _RightSideInputsState createState() => _RightSideInputsState();
+}
+
+// Define a corresponding State class.
+// This class holds the data related to the Form.
+class _RightSideInputsState extends State<RightSideInputs> {
+  
+  // Create a text controller and use it to retrieve the current value
+  // of the TextField.
+  TextEditingController? _textField1;
+  TextEditingController? _textField2;
+  TextEditingController? _textField3;
+  TextEditingController? _textField4;
+  TextEditingController? _textField5;
+
+
+  @override
+  void initState() {
+    final Data myProvider = Provider.of<Data>(context, listen: false);
+
+    super.initState();
+    _textField1 = TextEditingController(text: myProvider.getPhase1TimeString);
+    _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
+    _textField3 = TextEditingController(text: myProvider.getPhase2TimeString);
+    _textField4 = TextEditingController(text: myProvider.getInterstimDelayString);
+    _textField5 = TextEditingController(text: myProvider.getBurstPeriodMsString);
+  }
+
+  @override
+  void didChangeDependencies() {
+    _textField1!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getPhase1TimeString;
+    _textField2!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getInterPhaseDelayString;
+    _textField3!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getPhase2TimeString;
+    _textField4!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getInterstimDelayString;
+    _textField5!.text = Provider.of<Data>(
+      context,
+      listen: true, // Be sure to listen
+    ).getBurstPeriodMsString;
+  super.didChangeDependencies();
+  }
+
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    _textField1?.dispose();
+    _textField2?.dispose();
+    _textField3?.dispose();
+    _textField4?.dispose();
+    _textField5?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Data myProvider = Provider.of<Data>(context);    
+    return 
+      Expanded(child: 
+        Column( 
+          children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+                FlutterSwitch(
+                  activeColor: Colors.greenAccent,
+                  inactiveColor: Colors.redAccent,
+                  activeText: "Start",
+                  inactiveText: "Stop",
+                  width: 80,
+                  activeTextColor: Colors.white,
+                  showOnOff: true,
+                  onToggle: (bool start) {
+                    Provider.of<Data>(context, listen: false).togglestart(start);
+                  },
+                  value: Provider.of<Data>(context).getstart,  // remove `listen: false` 
+                ),
+              ],
+          ),
+        
+        ],
+      ),
+      );
+  }
+
+}
+
+////////////////////////////////////////////////////////////////////
 
 
 

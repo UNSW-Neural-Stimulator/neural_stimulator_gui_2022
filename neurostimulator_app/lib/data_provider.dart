@@ -3,27 +3,42 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 class Data extends ChangeNotifier {
-  // the following are int variables
   var defaultValue = 0;
   var _deviceNumber = 0;
+  // the following are int variables for the left side of the workspace
   var _phase1TimeMicrosec = 0;
   var _interPhaseDelayMicrosec = 0;
   var _phase2TimeMicrosec = 0;
-  var _interstimDelayMicrosec = 0;
+  var _interStimDelayMicrosec = 0;
   var _burstPeriodMs = 0;
   var _dutyCyclePercentage = 0;
-  // the following are string variables to recieve and edit input from the user
-  var _phase2Time = "";
-  var _interStimDelay = "";
-  var _phase1Time = "";
-  var _interPhaseDelay = "";
-  var _burstPeriodMsString = "";
-  var _dutyCyclePercentageString = "";
-  //buttons
+  //ints for right side of workspace
+  var _phase1CurrentMicroAmp = 0;
+  var _vref0 = 0;
+  var _phase2CurrentMicroAmp = 0;
+  var _vref65535 = 0;
+  //end stimulation
+  var _endByDuraionValue = 0;
+  var _endByBurstValue = 0;
+
+  //buttons from right side of workspace
   bool _start = false;
   bool _dcMode = false;
 
+  //end simulation toggle button
+  bool _endByDuration = true;
+  bool _endByBurst = false;
+  bool _stimForever = false;
 
+  // if false then anodic first is true
+  bool _cathodicFirst = true;
+  bool _anodicFirst = false;
+  
+  void toggleCathodicAnodic(bool option) {
+    _cathodicFirst = option;
+    _anodicFirst = !option;
+    notifyListeners();
+  }
 
   void togglestart(bool start) {
     _start = start;
@@ -33,6 +48,62 @@ class Data extends ChangeNotifier {
   void toggleDC(bool dcmode) {
     _dcMode = dcmode;
     notifyListeners();
+  }
+
+  void toggleEndByDuration(bool option) {
+    _endByDuration = option;
+    notifyListeners();
+  }
+
+  void toggleEndByBurst (bool option) {
+    _endByBurst = option;
+    notifyListeners();
+  }
+
+  void toggleStimForever (bool option) {
+    _stimForever = option;
+    notifyListeners();
+  }
+
+  bool get endByDuration {
+    return _endByDuration;
+  }
+  bool get endByBurst {
+    return _endByBurst;
+  }
+  bool get stimilateForever {
+    return _stimForever;
+  }
+
+  String get getendByValue {
+    if (endByDuration) {
+      return _endByDuraionValue.toString();
+    }
+    if (endByBurst) {
+      return _endByBurstValue.toString();
+    }
+    else {
+      return "";
+    }
+  }
+
+
+  String get endByDurationTitle {
+    if (_endByDuration) {
+      return "Stimulation Duration (s)";
+    }
+    else if (_endByBurst) {
+      return "Number of Bursts";
+    }
+    else {
+      return "Stimulating forever, text box will not accept any input";
+    }
+  }
+
+
+
+  bool get getCathodicFirst {
+    return _cathodicFirst;
   }
 
   bool get getstart {
@@ -57,7 +128,7 @@ class Data extends ChangeNotifier {
     return _phase2TimeMicrosec;
   }
   int get getInterstimDelay {
-    return _interstimDelayMicrosec;
+    return _interStimDelayMicrosec;
   }
 
   int get getBurstPeriod {
@@ -67,77 +138,121 @@ class Data extends ChangeNotifier {
     return _dutyCyclePercentage;
   }
 
+//
+  int get getPhase1Current {
+    return _phase1CurrentMicroAmp;
+  }
+  int get getvref0 {
+    return _vref0;
+  }
+
+  int get getPhase2Current {
+    return _phase2CurrentMicroAmp;
+  }
+  int get vref65535 {
+    return _vref65535;
+  }
+//
   String get getPhase1TimeString {
-    return _phase1Time;
+    return _phase1TimeMicrosec.toString();
   }
   String get getInterPhaseDelayString {
-    return _interPhaseDelay;
+    return _interPhaseDelayMicrosec.toString();
   }
 
   String get getPhase2TimeString {
-    return _phase2Time;
+    return _phase2TimeMicrosec.toString();
   }
   String get getInterstimDelayString {
-    return _interStimDelay;
+    return _interStimDelayMicrosec.toString();
   }
 
   String get getBurstPeriodMsString {
-    return _burstPeriodMsString;
+    return _burstPeriodMs.toString();
   }
   String get getDutyCycleString {
-    return _dutyCyclePercentageString;
+    return _dutyCyclePercentage.toString();
   }
 
+  //
+  String get getPhase1CurrentString {
+    return _phase1CurrentMicroAmp.toString();
+  }
+  String get getVref0String {
+    return _vref0.toString();
+  }
+
+  String get getPhase2CurrentString {
+    return _phase2CurrentMicroAmp.toString();
+  }
+  String get getVref65535String {
+    return _vref65535.toString();
+  }
+  //
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? defaultValue;
-    _phase1Time = phase1TimeStringFromTextfield;
     notifyListeners();
   }
 
   setinterphasedelay(String interPhaseDelayStringFromTextField) {
     _interPhaseDelayMicrosec =  int.tryParse(interPhaseDelayStringFromTextField) ?? defaultValue;
-    _interPhaseDelay = interPhaseDelayStringFromTextField;
     notifyListeners();
   }
 
   setphase2(String phase2TimeStringFromTextfield) {
     _phase2TimeMicrosec = int.tryParse(phase2TimeStringFromTextfield) ?? defaultValue;
-    _phase2Time = phase2TimeStringFromTextfield;
     notifyListeners();
   }
 
   setinterstimdelay(String interStimDelayStringFromTextField) {
-    _interstimDelayMicrosec =  int.tryParse(interStimDelayStringFromTextField) ?? defaultValue;
-    _interStimDelay = interStimDelayStringFromTextField;
+    _interStimDelayMicrosec =  int.tryParse(interStimDelayStringFromTextField) ?? defaultValue;
     notifyListeners();
   }
 
   setburstcycle(String burstCycleFromTextField) {
     _burstPeriodMs = int.tryParse(burstCycleFromTextField) ?? defaultValue;
-    _burstPeriodMsString = burstCycleFromTextField;
     notifyListeners();
   }
 
   setdutycycle(String dutyCycleFromTextField) {
     _dutyCyclePercentage =  int.tryParse(dutyCycleFromTextField) ?? defaultValue;
-    _dutyCyclePercentageString = dutyCycleFromTextField;
     notifyListeners();
+  }
+//
+  setphase1current(String phase1current) {
+    _phase1CurrentMicroAmp =  int.tryParse(phase1current) ?? defaultValue;
+    notifyListeners();
+  }
+  setphase2current(String phase2current) {
+    _phase2CurrentMicroAmp =  int.tryParse(phase2current) ?? defaultValue;
+    notifyListeners();
+  }
+  setvref0(String vref0) {
+    _vref0 =  int.tryParse(vref0) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setvref65535(String vref65535) {
+    _vref65535 =  int.tryParse(vref65535) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setendbyvalue(String endby) {
+    if (endByDuration) {
+      _endByDuraionValue =  int.tryParse(endby) ?? defaultValue;
+    }
+    if (endByBurst) {
+      _endByBurstValue =  int.tryParse(endby) ?? defaultValue;
+    }
+    else {
+      _endByDuraionValue =  int.tryParse(endby) ?? defaultValue;
+      _endByBurstValue =  int.tryParse(endby) ?? defaultValue;
+    }
   }
 
   void changeDeviceNumber(int newDeviceNumber) {
     _deviceNumber = newDeviceNumber;
     notifyListeners();
   }
-
-
-  // void changePhase1Time(String newPhase1Time) {
-  //   _phase1TimeMicrosec = int.parse(newPhase1Time);
-  //   notifyListeners();
-  // }
-
-  // void changeInterPhaseDelay(String newInterPhaseDelay) {
-  //   _interPhaseDelayMicrosec =  int.parse(newInterPhaseDelay);
-  //   notifyListeners();
-  //  }
 
 }

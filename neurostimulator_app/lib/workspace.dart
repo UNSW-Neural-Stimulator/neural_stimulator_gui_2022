@@ -34,6 +34,10 @@ class _workspaceState extends State<workspace> {
     var interstimDelayTime = Provider.of<Data>(context).getInterstimDelay;
     var deviceNumber = Provider.of<Data>(context).getDeviceNumber;
     var start = Provider.of<Data>(context).getstart;
+    var endbyduration = Provider.of<Data>(context).endByDuration;
+    var endbyburst= Provider.of<Data>(context).endByBurst;
+    var stimforever = Provider.of<Data>(context).stimilateForever;
+
 
 
     /////////////////////////////////////////////////////////////////////////
@@ -57,7 +61,7 @@ class _workspaceState extends State<workspace> {
                   color: Color.fromARGB(255, 255, 255, 255)
                 ),
                 child:  Row( children: [
-                    const MyCustomForm(),
+                    const leftTextFields(),
                     const RightSideInputs(),
                 ]
                 ),
@@ -85,6 +89,11 @@ class _workspaceState extends State<workspace> {
           content:Text("Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
                        "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"                       
                        "start: $start"
+                       "endbyduration: $endbyduration\n"
+                       "endbyburst: $endbyburst\n"
+                       "stimforever: $stimforever\n"
+
+
                         ),
           actions: <Widget>[
             TextButton(
@@ -106,61 +115,61 @@ class _workspaceState extends State<workspace> {
 }
 
 
-class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({Key? key}) : super(key: key);
+class leftTextFields extends StatefulWidget {
+  const leftTextFields({Key? key}) : super(key: key);
   @override
-  _MyCustomFormState createState() => _MyCustomFormState();
+  _leftTextFieldsState createState() => _leftTextFieldsState();
 }
 
 // Define a corresponding State class.
 // This class holds the data related to the Form.
-class _MyCustomFormState extends State<MyCustomForm> {
+class _leftTextFieldsState extends State<leftTextFields> {
   
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
-  TextEditingController? _textField1;
-  TextEditingController? _textField2;
-  TextEditingController? _textField3;
-  TextEditingController? _textField4;
-  TextEditingController? _textField5;
-  TextEditingController? _textField6;
+  TextEditingController? _phase1Textfield;
+  TextEditingController? _interPhaseDelayTextfield;
+  TextEditingController? _phase2Textfield;
+  TextEditingController? _interStimDelayTexfield;
+  TextEditingController? _burstPeriodTextfield;
+  TextEditingController? _dutyCycleTextfield;
 
   @override
   void initState() {
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
     super.initState();
-    _textField1 = TextEditingController(text: myProvider.getPhase1TimeString);
-    _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
-    _textField3 = TextEditingController(text: myProvider.getPhase2TimeString);
-    _textField4 = TextEditingController(text: myProvider.getInterstimDelayString);
-    _textField5 = TextEditingController(text: myProvider.getBurstPeriodMsString);
-    _textField6 = TextEditingController(text: myProvider.getDutyCycleString);
+    _phase1Textfield = TextEditingController(text: myProvider.getPhase1TimeString);
+    _interPhaseDelayTextfield = TextEditingController(text: myProvider.getInterPhaseDelayString);
+    _phase2Textfield = TextEditingController(text: myProvider.getPhase2TimeString);
+    _interStimDelayTexfield = TextEditingController(text: myProvider.getInterstimDelayString);
+    _burstPeriodTextfield = TextEditingController(text: myProvider.getBurstPeriodMsString);
+    _dutyCycleTextfield = TextEditingController(text: myProvider.getDutyCycleString);
   }
 
   @override
   void didChangeDependencies() {
-    _textField1!.text = Provider.of<Data>(
+    _phase1Textfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getPhase1TimeString;
-    _textField2!.text = Provider.of<Data>(
+    _interPhaseDelayTextfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getInterPhaseDelayString;
-    _textField3!.text = Provider.of<Data>(
+    _phase2Textfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getPhase2TimeString;
-    _textField4!.text = Provider.of<Data>(
+    _interStimDelayTexfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getInterstimDelayString;
-    _textField5!.text = Provider.of<Data>(
+    _burstPeriodTextfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getBurstPeriodMsString;
-    _textField6!.text = Provider.of<Data>(
+    _dutyCycleTextfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
     ).getDutyCycleString;
@@ -171,12 +180,12 @@ class _MyCustomFormState extends State<MyCustomForm> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    _textField1?.dispose();
-    _textField2?.dispose();
-    _textField3?.dispose();
-    _textField4?.dispose();
-    _textField5?.dispose();
-    _textField6?.dispose();
+    _phase1Textfield?.dispose();
+    _interPhaseDelayTextfield?.dispose();
+    _phase2Textfield?.dispose();
+    _interStimDelayTexfield?.dispose();
+    _burstPeriodTextfield?.dispose();
+    _dutyCycleTextfield?.dispose();
 
     super.dispose();
   }
@@ -201,7 +210,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField1,
+                      controller: _phase1Textfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setphase1(value);},
                       decoration: const InputDecoration(
@@ -217,7 +226,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField2,
+                      controller: _interPhaseDelayTextfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setinterphasedelay(value);},
                       decoration: const InputDecoration(
@@ -242,7 +251,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField3,
+                      controller: _phase2Textfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setphase2(value);},
                       decoration: const InputDecoration(
@@ -258,7 +267,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField4,
+                      controller: _interStimDelayTexfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setinterstimdelay(value);},
                       decoration: const InputDecoration(
@@ -288,7 +297,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField5,
+                      controller: _burstPeriodTextfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setburstcycle(value);},
                       decoration: const InputDecoration(
@@ -312,7 +321,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                     child:
                       TextField(
                       keyboardType: TextInputType.number,
-                      controller: _textField6,
+                      controller: _dutyCycleTextfield,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted:(value) {myProvider.setdutycycle(value);},
                       decoration: const InputDecoration(
@@ -349,11 +358,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
   
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
-  TextEditingController? _textField1;
-  TextEditingController? _textField2;
-  TextEditingController? _textField3;
-  TextEditingController? _textField4;
-  TextEditingController? _textField5;
+  TextEditingController? _phase1CurrentTextfield;
+  TextEditingController? _phase2CurrentTextfield;
+  TextEditingController? _vref0Textfield;
+  TextEditingController? _vref65535Texfield;
+  TextEditingController? _endStimulationTextField;
+  List<bool> fixedLengthList = [true, false, false];
 
 
   @override
@@ -361,35 +371,43 @@ class _RightSideInputsState extends State<RightSideInputs> {
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
     super.initState();
-    _textField1 = TextEditingController(text: myProvider.getPhase1TimeString);
-    _textField2 = TextEditingController(text: myProvider.getInterPhaseDelayString);
-    _textField3 = TextEditingController(text: myProvider.getPhase2TimeString);
-    _textField4 = TextEditingController(text: myProvider.getInterstimDelayString);
-    _textField5 = TextEditingController(text: myProvider.getBurstPeriodMsString);
+    _phase1CurrentTextfield = TextEditingController(text: myProvider.getPhase1CurrentString);
+    _phase2CurrentTextfield = TextEditingController(text: myProvider.getPhase2CurrentString);
+    _vref0Textfield = TextEditingController(text: myProvider.getVref0String);
+    _vref65535Texfield = TextEditingController(text: myProvider.getVref65535String);
+    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
+    List<bool> fixedLengthList;
+
   }
 
   @override
   void didChangeDependencies() {
-    _textField1!.text = Provider.of<Data>(
+    _phase1CurrentTextfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
-    ).getPhase1TimeString;
-    _textField2!.text = Provider.of<Data>(
+    ).getPhase1CurrentString;
+    
+    _phase2CurrentTextfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
-    ).getInterPhaseDelayString;
-    _textField3!.text = Provider.of<Data>(
+    ).getPhase2CurrentString;
+
+    _vref0Textfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
-    ).getPhase2TimeString;
-    _textField4!.text = Provider.of<Data>(
+    ).getVref0String;
+
+    _vref65535Texfield!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
-    ).getInterstimDelayString;
-    _textField5!.text = Provider.of<Data>(
+    ).getVref65535String;
+
+    _endStimulationTextField!.text = Provider.of<Data>(
       context,
       listen: true, // Be sure to listen
-    ).getBurstPeriodMsString;
+    ).getendByValue;
+
+    fixedLengthList = [Provider.of<Data>(context).endByDuration, Provider.of<Data>(context).endByBurst,  Provider.of<Data>(context).stimilateForever];
   super.didChangeDependencies();
   }
 
@@ -397,17 +415,18 @@ class _RightSideInputsState extends State<RightSideInputs> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    _textField1?.dispose();
-    _textField2?.dispose();
-    _textField3?.dispose();
-    _textField4?.dispose();
-    _textField5?.dispose();
+    _phase1CurrentTextfield?.dispose();
+    _phase2CurrentTextfield?.dispose();
+    _vref0Textfield?.dispose();
+    _vref65535Texfield?.dispose();
+    _endStimulationTextField?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);    
+    var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     return 
       Expanded(child: 
         Column( 
@@ -426,15 +445,15 @@ class _RightSideInputsState extends State<RightSideInputs> {
                           onPressed: () {
                               // Respond to button press by saving all values
                           },
-                          style: ElevatedButton.styleFrom(primary: Colors.greenAccent, textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          style: ElevatedButton.styleFrom(primary: Colors.green, textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                           icon: Icon(Icons.save, size: 18),
                           label: Text("save"),
                         )               
                   ),
                   SizedBox(width: 50,),
                   FlutterSwitch(
-                    activeColor: Colors.greenAccent,
-                    inactiveColor: Colors.redAccent,
+                    activeColor: Colors.green,
+                    inactiveColor: Colors.red,
                     activeText: "DC mode on",
                     inactiveText: "DC mode off",
                     width: 150,
@@ -448,11 +467,11 @@ class _RightSideInputsState extends State<RightSideInputs> {
                   ),
                   SizedBox(width: 50,),
                   FlutterSwitch(
-                    activeColor: Colors.greenAccent,
-                    inactiveColor: Colors.redAccent,
-                    activeText: "start",
-                    inactiveText: "stop",
-                    width: 85,
+                    activeColor: Colors.green,
+                    inactiveColor: Colors.red,
+                    activeText: "On",
+                    inactiveText: "Off",
+                    width: 70,
                     height: 40,
                     activeTextColor: Colors.white,
                     showOnOff: true,
@@ -461,16 +480,159 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     },
                     value: Provider.of<Data>(context).getstart,  // remove `listen: false` 
                   ),
-
                 ],
             ),
-        
+            Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                children: [
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _phase1CurrentTextfield,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setphase1current(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'Phase 1 Current (µA)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _phase2CurrentTextfield,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setinterphasedelay(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'Phase 2 Current (µA)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+
+
+                ],
+              ),
+              const SizedBox(width: 10),
+              Column(
+                children: [
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _vref0Textfield,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setvref0(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'VREF 0',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      keyboardType: TextInputType.number,
+                      controller: _vref65535Texfield,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setvref65535(value);},
+                      decoration: const InputDecoration(
+                        labelText: 'VREF 65535',
+                        labelStyle: TextStyle(fontSize: 20),
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 10,),
+          FlutterSwitch(
+                    activeColor: Colors.green,
+                    inactiveColor: Colors.blue,
+                    activeText: "cathodic first",
+                    inactiveText: "anodic first",
+                    width: 150,
+                    height: 40,
+                    activeTextColor: Colors.white,
+                    showOnOff: true,
+                    onToggle: (bool cathodic) {
+                      Provider.of<Data>(context, listen: false).toggleCathodicAnodic(cathodic);
+                    },
+                    value: Provider.of<Data>(context).getCathodicFirst,  // remove `listen: false` 
+            ),
+          SizedBox(height: 10,),
+          Text("End stimulation by:"),
+          SizedBox(height: 10,),
+          ToggleButtons(
+              constraints: BoxConstraints(minWidth: 160, minHeight: 50),
+              children: <Widget>[
+                Text("Stimulation Duration (s)"),
+                Text("Number of Bursts"),
+                Text("Stimulate Forever"),
+              ],
+              onPressed: (int index) {
+                  if (index == 0) {
+                    Provider.of<Data>(context, listen: false).toggleEndByDuration(true);
+                    Provider.of<Data>(context, listen: false).toggleEndByBurst(false);
+                    Provider.of<Data>(context, listen: false).toggleStimForever(false);
+                  }
+                  else if (index == 1) {
+                    Provider.of<Data>(context, listen: false).toggleEndByDuration(false);
+                    Provider.of<Data>(context, listen: false).toggleEndByBurst(true);
+                    Provider.of<Data>(context, listen: false).toggleStimForever(false);
+                  }
+                  else if (index == 2) {
+                    Provider.of<Data>(context, listen: false).toggleEndByDuration(false);
+                    Provider.of<Data>(context, listen: false).toggleEndByBurst(false);
+                    Provider.of<Data>(context, listen: false).toggleStimForever(true);
+                  }
+              },
+              isSelected: fixedLengthList,
+              ),
+              SizedBox(height: 10),
+              Text("$endStimulationTitle"),
+              SizedBox(height: 10),
+              SizedBox( 
+                    width: 250,
+                    child:
+                      TextField(
+                      enabled: !Provider.of<Data>(context).stimilateForever,
+                      keyboardType: TextInputType.number,
+                      controller: _endStimulationTextField,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onSubmitted:(value) {myProvider.setendbyvalue(value);},
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        ),
+                      ),
+                  ),
+
         ],
       ),
       );
   }
 
 }
+
+
+
 
 ////////////////////////////////////////////////////////////////////
 

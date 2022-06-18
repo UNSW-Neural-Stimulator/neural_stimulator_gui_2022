@@ -38,6 +38,10 @@ dependencies:
   collection: ^1.15.0
   nested: ^1.0.0
   flutter_switch: ^0.3.2
+  quick_blue_windows: ^0.3.2
+  quick_blue_macos: ^0.3.1+2
+  quick_blue_platform_interface: ^0.3.2
+  quick_blue: ^0.4.1+1
 
 dev_dependencies:
   flutter_test:

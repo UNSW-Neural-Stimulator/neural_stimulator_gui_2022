@@ -1,16 +1,21 @@
 import 'workspace.dart';
-import 'list_devices.dart';
+import 'device_list.dart';
 import 'package:flutter/material.dart';
 
-class FullPageContainer extends StatefulWidget {
-  const FullPageContainer({Key? key}) : super(key: key);
+class FullPageLayout extends StatefulWidget {
+  const FullPageLayout({Key? key}) : super(key: key);
 
   @override
-  _FullPageContainerState createState() =>
-      _FullPageContainerState();
+  _FullPageLayoutState createState() =>
+      _FullPageLayoutState();
 }
 
-class _FullPageContainerState extends State<FullPageContainer> {
+
+/*
+The full page layout holds the list of devices and the homepage on the right
+*/ 
+
+class _FullPageLayoutState extends State<FullPageLayout> {
 
   Widget _buildFullPageLayout() {
     return Row(
@@ -19,7 +24,7 @@ class _FullPageContainerState extends State<FullPageContainer> {
           flex: 1,
           child: Material(
             elevation: 4.0,
-            child: ItemListing(),
+            child: DeviceList(),
             ),
           ),
       

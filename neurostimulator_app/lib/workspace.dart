@@ -33,7 +33,7 @@ class _workspaceState extends State<workspace> {
 
     /////////////////////////////////////////////////////////////////////////
 
-    final textTheme = Theme.of(context).textTheme;
+    int width;
     final content = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -45,9 +45,10 @@ class _workspaceState extends State<workspace> {
             margin: EdgeInsets.all(20),
             decoration:
                 const BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
-            child: Row(children: [
-              const leftTextFields(),
-              const RightSideInputs(),
+            child: Row(children: const [
+              SizedBox(width: 10),
+              leftTextFields(),
+              RightSideInputs(),
             ]),
           ),
         ))

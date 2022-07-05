@@ -6,9 +6,11 @@ import 'package:flutter_switch/flutter_switch.dart';
 import "data_provider.dart";
 import 'workspace_widgets/right_side_workspace_widgets.dart';
 import 'workspace_widgets/left_side_workspace_widgets.dart';
+import 'package:win_ble/win_ble.dart';
 
 class workspace extends StatefulWidget {
-  const workspace({Key? key, deviceNumber}) : super(key: key);
+  final BleDevice device;
+  const workspace({Key? key, required this.device}) : super(key: key);
 
   @override
   _workspaceState createState() => _workspaceState();
@@ -21,7 +23,6 @@ class _workspaceState extends State<workspace> {
     var interPhaseDelayTime = Provider.of<Data>(context).getInterPhaseDelay;
     var phase2Time = Provider.of<Data>(context).getPhase2Time;
     var interstimDelayTime = Provider.of<Data>(context).getInterstimDelay;
-    var deviceNumber = Provider.of<Data>(context).getDeviceNumber;
     var start = Provider.of<Data>(context).getstart;
     var endbyduration = Provider.of<Data>(context).endByDuration;
     var endbyburst = Provider.of<Data>(context).endByBurst;
@@ -61,7 +62,7 @@ class _workspaceState extends State<workspace> {
           icon: const Icon(Icons.home, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Workspace for device: $deviceNumber"),
+        title: Text("Workspace for device:" + widget.device.name),
       ),
       body: Center(child: content),
       floatingActionButton: FloatingActionButton(

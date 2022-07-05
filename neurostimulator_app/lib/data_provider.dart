@@ -14,7 +14,7 @@ class Data extends ChangeNotifier {
   // listed below are the values stored as integers and booleans
 
   var defaultValue = 0;
-  var _deviceNumber = 0;
+  //var _deviceNumber = 0;
   // the following are int variables for the left side of the workspace
   var _phase1TimeMicrosec = 0;
   var _interPhaseDelayMicrosec = 0;
@@ -138,10 +138,10 @@ class Data extends ChangeNotifier {
     }
   }
 
-  void changeDeviceNumber(int newDeviceNumber) {
-    _deviceNumber = newDeviceNumber;
-    notifyListeners();
-  }
+  // void changeDeviceNumber(int newDeviceNumber) {
+  //   _deviceNumber = newDeviceNumber;
+  //   notifyListeners();
+  // }
 
 
   // the methods below are for retrieving the values in data
@@ -191,9 +191,9 @@ class Data extends ChangeNotifier {
     return _dcMode;
   }
 
-  int get getDeviceNumber {
-    return _deviceNumber;
-  }
+  // int get getDeviceNumber {
+  //   return _deviceNumber;
+  // }
 
   int get getPhase1Time {
     return _phase1TimeMicrosec;

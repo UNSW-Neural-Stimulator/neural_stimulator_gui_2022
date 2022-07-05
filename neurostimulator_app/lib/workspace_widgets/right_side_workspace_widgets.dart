@@ -1,4 +1,3 @@
-
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -95,21 +94,59 @@ class _RightSideInputsState extends State<RightSideInputs> {
               SizedBox(
                 width: 50,
               ),
-              FlutterSwitch(
-                activeColor: Colors.green,
-                inactiveColor: Colors.red,
-                activeText: "stimulation on",
-                inactiveText: "stimulation off",
-                width: 170,
-                height: 40,
-                activeTextColor: Colors.white,
-                showOnOff: true,
-                onToggle: (bool start) {
-                  Provider.of<Data>(context, listen: false).togglestart(start);
+
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.green,
+                  minimumSize: Size(150, 50),
+                ),
+
+                onPressed: () {
+                  //send ble
                 },
-                value: Provider.of<Data>(context)
-                    .getstart, // remove `listen: false`
+                icon: const Icon(
+                  Icons.bolt,
+                  size: 24.0,
+                ),
+                label: Text('start',
+                    style: TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600)), // <-- Text
               ),
+              SizedBox(
+                width: 50,
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red,
+                  minimumSize: Size(150, 50),
+                ),
+
+                onPressed: () {
+                  //send ble
+                },
+                icon: const Icon(
+                  Icons.stop_outlined,
+                  size: 24.0,
+                ),
+                label: Text('stop',
+                    style: TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600)), // <-- Text
+              ),
+              // FlutterSwitch(
+              //   activeColor: Colors.green,
+              //   inactiveColor: Colors.red,
+              //   activeText: "stimulation on",
+              //   inactiveText: "stimulation off",
+              //   width: 170,
+              //   height: 40,
+              //   activeTextColor: Colors.white,
+              //   showOnOff: true,
+              //   onToggle: (bool start) {
+              //     Provider.of<Data>(context, listen: false).togglestart(start);
+              //   },
+              //   value: Provider.of<Data>(context)
+              //       .getstart, // remove `listen: false`
+              // ),
             ],
           ),
           Row(

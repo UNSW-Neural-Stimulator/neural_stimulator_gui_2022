@@ -22,6 +22,9 @@ class Data extends ChangeNotifier {
   var _interStimDelayMicrosec = 0;
   var _burstPeriodMs = 0;
   var _dutyCyclePercentage = 0;
+  var _rampUpTime = 0;
+  var _frequency = 0;
+
   //ints for right side of workspace
   var _phase1CurrentMicroAmp = 0;
   var _vref0 = 0;
@@ -32,7 +35,7 @@ class Data extends ChangeNotifier {
   var _endByBurstValue = 0;
 
   //buttons from right side of workspace
-  bool _start = false;
+  //bool _start = false;
   bool _dcMode = false;
 
   //end simulation toggle button
@@ -52,10 +55,10 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-  void togglestart(bool start) {
-    _start = start;
-    notifyListeners();
-  }
+  // void togglestart(bool start) {
+  //   _start = start;
+  //   notifyListeners();
+  // }
 
   void toggleDC(bool dcmode) {
     _dcMode = dcmode;
@@ -77,6 +80,15 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
+  setrampUpTime(String rampUpTime) {
+    _rampUpTime = int.tryParse(rampUpTime) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setfrequency(String frequencyinput) {
+    _frequency = int.tryParse(frequencyinput) ?? defaultValue;
+    notifyListeners();
+  }
 
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? defaultValue;
@@ -184,9 +196,9 @@ class Data extends ChangeNotifier {
     return _cathodicFirst;
   }
 
-  bool get getstart {
-    return _start;
-  }
+  // bool get getstart {
+  //   return _start;
+  // }
   bool get getDcMode {
     return _dcMode;
   }
@@ -216,6 +228,12 @@ class Data extends ChangeNotifier {
     return _dutyCyclePercentage;
   }
 
+  int get getrampUpTime {
+    return _rampUpTime;
+  }
+  int get getfrequency {
+    return _frequency;
+  }
 //
   int get getPhase1Current {
     return _phase1CurrentMicroAmp;
@@ -231,6 +249,13 @@ class Data extends ChangeNotifier {
     return _vref65535;
   }
 
+  String get getRampUpTimeString {
+    return _rampUpTime.toString();
+  }
+
+  String get getFrequencyString {
+    return _frequency.toString();
+  }
   String get getPhase1TimeString {
     return _phase1TimeMicrosec.toString();
   }

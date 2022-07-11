@@ -1,6 +1,6 @@
-
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:ns_2022/helper_and_const.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import "data_provider.dart";
@@ -27,7 +27,8 @@ class _workspaceState extends State<workspace> {
     var endbyduration = Provider.of<Data>(context).endByDuration;
     var endbyburst = Provider.of<Data>(context).endByBurst;
     var stimforever = Provider.of<Data>(context).stimilateForever;
-
+    //debug
+    var anodic_cathodic = Provider.of<Data>(context).getCathodicFirst;
     /////////////////////////////////////////////////////////////////////////
 
     //must change all values to 0 when not in screen
@@ -35,26 +36,20 @@ class _workspaceState extends State<workspace> {
     /////////////////////////////////////////////////////////////////////////
 
     int width;
-    final content = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(
-            child: Container(
-          alignment: Alignment.topLeft,
-          child: Container(
-            alignment: Alignment.topCenter,
-            margin: EdgeInsets.all(20),
-            decoration:
-                const BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
-            child: Row(children: const [
-              SizedBox(width: 10),
-              leftTextFields(),
-              RightSideInputs(),
-            ]),
+    final content = Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        direction: Axis.horizontal,
+        children: const [
+          SizedBox(width: 600, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:leftTextFields())),
+          SizedBox(
+            width: 10,
           ),
-        ))
-      ],
-    );
+          SizedBox(
+            width: 600,
+            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs()),
+          )
+        ]);
 
     return Scaffold(
       appBar: AppBar(
@@ -64,7 +59,9 @@ class _workspaceState extends State<workspace> {
         ),
         title: Text("Device Name: " + widget.device.name),
       ),
-      body: Center(child: content),
+      body:  ListView(children:[content])
+     ,
+     // this is a debug feature, must be removed before compilation
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog<String>(
           context: context,
@@ -73,7 +70,7 @@ class _workspaceState extends State<workspace> {
             content: Text(
                 "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
                 "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"
-                // "start: $start"
+                "anodic_cathodic: $anodic_cathodic\n"
                 "endbyduration: $endbyduration\n"
                 "endbyburst: $endbyburst\n"
                 "stimforever: $stimforever\n"),
@@ -93,8 +90,6 @@ class _workspaceState extends State<workspace> {
     );
   }
 }
-
-
 
 ////////////////////////////////////////////////////////////////////
 

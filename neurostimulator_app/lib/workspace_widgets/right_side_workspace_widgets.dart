@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import "../data_provider.dart";
+import '../helper_and_const.dart';
 
 class RightSideInputs extends StatefulWidget {
   const RightSideInputs({Key? key}) : super(key: key);
@@ -28,12 +29,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
     super.initState();
     _phase1CurrentTextfield =
-        TextEditingController(text: myProvider.getPhase1CurrentString);
+        TextEditingController(text: myProvider.getPhase1Current.toString());
     _phase2CurrentTextfield =
-        TextEditingController(text: myProvider.getPhase2CurrentString);
-    _vref0Textfield = TextEditingController(text: myProvider.getVref0String);
+        TextEditingController(text: myProvider.getPhase2Current.toString());
+    _vref0Textfield = TextEditingController(text: myProvider.getVref0.toString());
     _vref65535Texfield =
-        TextEditingController(text: myProvider.getVref65535String);
+        TextEditingController(text: myProvider.getVref65535.toString());
     _endStimulationTextField =
         TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
@@ -66,8 +67,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
 
-    return Expanded(
-      child: Column(
+    return Column(
         children: [
           const SizedBox(height: 20),
           Row(
@@ -132,21 +132,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     style: TextStyle(
                         fontSize: 20, fontWeight: FontWeight.w600)), // <-- Text
               ),
-              // FlutterSwitch(
-              //   activeColor: Colors.green,
-              //   inactiveColor: Colors.red,
-              //   activeText: "stimulation on",
-              //   inactiveText: "stimulation off",
-              //   width: 170,
-              //   height: 40,
-              //   activeTextColor: Colors.white,
-              //   showOnOff: true,
-              //   onToggle: (bool start) {
-              //     Provider.of<Data>(context, listen: false).togglestart(start);
-              //   },
-              //   value: Provider.of<Data>(context)
-              //       .getstart, // remove `listen: false`
-              // ),
+              
             ],
           ),
           Row(
@@ -160,7 +146,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: _phase1CurrentTextfield,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, num_range_formatter(min: 0,max: 3000)],
                       onChanged: (value) {
                         myProvider.setphase1current(value);
                       },
@@ -177,9 +163,9 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: _phase2CurrentTextfield,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, num_range_formatter(min: 0,max: 3000)],
                       onChanged: (value) {
-                        myProvider.setinterphasedelay(value);
+                        myProvider.setphase2current(value);
                       },
                       decoration: const InputDecoration(
                         labelText: 'Phase 2 Current (µA)',
@@ -199,7 +185,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: _vref0Textfield,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, num_range_formatter(min: 0,max: UINT32MAX)],
                       onChanged: (value) {
                         myProvider.setvref0(value);
                       },
@@ -216,7 +202,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     child: TextField(
                       keyboardType: TextInputType.number,
                       controller: _vref65535Texfield,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly, num_range_formatter(min: 0,max: UINT32MAX)],
                       onChanged: (value) {
                         myProvider.setvref65535(value);
                       },
@@ -303,7 +289,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               enabled: !Provider.of<Data>(context).stimilateForever,
               keyboardType: TextInputType.number,
               controller: _endStimulationTextField,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, num_range_formatter(min: 0,max: UINT32MAX)],
               onChanged: (value) {
                 myProvider.setendbyvalue(value);
               },
@@ -313,7 +299,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }

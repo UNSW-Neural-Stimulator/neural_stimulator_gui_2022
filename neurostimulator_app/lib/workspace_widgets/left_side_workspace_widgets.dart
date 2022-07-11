@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import "../data_provider.dart";
+import '../helper_and_const.dart';
 
 class leftTextFields extends StatefulWidget {
   const leftTextFields({Key? key}) : super(key: key);
@@ -24,30 +25,27 @@ class _leftTextFieldsState extends State<leftTextFields> {
   TextEditingController? _rampUpTimeTextfield;
   TextEditingController? _frequencyTextfield;
 
-  //bool values for page
-  bool continuous_stim = false;
-
   @override
   void initState() {
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
     super.initState();
     _phase1Textfield =
-        TextEditingController(text: myProvider.getPhase1TimeString);
+        TextEditingController(text: myProvider.getPhase1Time.toString());
     _interPhaseDelayTextfield =
-        TextEditingController(text: myProvider.getInterPhaseDelayString);
+        TextEditingController(text: myProvider.getInterPhaseDelay.toString());
     _phase2Textfield =
-        TextEditingController(text: myProvider.getPhase2TimeString);
+        TextEditingController(text: myProvider.getPhase2Time.toString());
     _interStimDelayTexfield =
-        TextEditingController(text: myProvider.getInterstimDelayString);
+        TextEditingController(text: myProvider.getInterstimDelay.toString());
     _burstPeriodTextfield =
-        TextEditingController(text: myProvider.getBurstPeriodMsString);
+        TextEditingController(text: myProvider.getBurstPeriod.toString());
     _dutyCycleTextfield =
-        TextEditingController(text: myProvider.getDutyCycleString);
+        TextEditingController(text: myProvider.getDutyCycle.toString());
     _rampUpTimeTextfield =
-        TextEditingController(text: myProvider.getRampUpTimeString);
+        TextEditingController(text: myProvider.getRampUpTime.toString());
     _frequencyTextfield =
-        TextEditingController(text: myProvider.getFrequencyString);
+        TextEditingController(text: myProvider.getFrequency.toString());
   }
 
   @override
@@ -61,7 +59,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
     _dutyCycleTextfield?.dispose();
     _rampUpTimeTextfield?.dispose();
     _frequencyTextfield?.dispose();
-
 
     super.dispose();
   }
@@ -90,7 +87,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   controller: _phase1Textfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
                     myProvider.setphase1(value);
                   },
@@ -107,7 +107,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   controller: _interPhaseDelayTextfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
                     myProvider.setinterphasedelay(value);
                   },
@@ -123,14 +126,16 @@ class _leftTextFieldsState extends State<leftTextFields> {
           const SizedBox(width: 10),
           Column(
             children: [
-
               const SizedBox(height: 60),
               SizedBox(
                 width: 250,
                 child: TextField(
                   keyboardType: TextInputType.number,
                   controller: _phase2Textfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
                     myProvider.setphase2(value);
                   },
@@ -147,7 +152,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 child: TextField(
                   keyboardType: TextInputType.number,
                   controller: _interStimDelayTexfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
                     myProvider.setinterstimdelay(value);
                   },
@@ -162,8 +170,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
           ),
         ],
       ),
-      Row(mainAxisAlignment: MainAxisAlignment.center,
-      children: [Column(
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
             children: [
               const SizedBox(height: 10),
               const Text(
@@ -177,10 +187,13 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: !continuous_stim,
+                  enabled: Provider.of<Data>(context).getBurstMode,
                   keyboardType: TextInputType.number,
                   controller: _frequencyTextfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
                     myProvider.setfrequency(value);
                   },
@@ -192,11 +205,11 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 ),
               ),
             ],
-          
-      
-        
-      ), SizedBox(width: 250,)],
-      
+          ),
+          SizedBox(
+            width: 250,
+          )
+        ],
       ),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -215,15 +228,18 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: !continuous_stim,
+                  enabled: Provider.of<Data>(context).getBurstMode,
                   keyboardType: TextInputType.number,
                   controller: _burstPeriodTextfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: UINT32MAX)
+                  ],
                   onChanged: (value) {
-                    myProvider.setburstcycle(value);
+                    myProvider.setburstperiod(value);
                   },
                   decoration: const InputDecoration(
-                    labelText: 'Burst Cycle (ms)',
+                    labelText: 'Burst Period (ms)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
                   ),
@@ -235,44 +251,48 @@ class _leftTextFieldsState extends State<leftTextFields> {
           Column(
             children: [
               const SizedBox(height: 10),
-                        Row(
-            children: [
-              const SizedBox(
-                height: 10,
+              Row(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Text(
+                    "Continous Stimulation",
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 0, 60, 109),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  FlutterSwitch(
+                      activeColor: Colors.blue,
+                      inactiveColor: Colors.grey,
+                      activeText: "on",
+                      inactiveText: "off",
+                      width: 75,
+                      height: 40,
+                      activeTextColor: Colors.white,
+                      showOnOff: true,
+                      onToggle: (bool value) {
+                        setState(() {
+                          Provider.of<Data>(context, listen: false)
+                              .toggleburstcont(value);
+                        });
+                      },
+                      value: !Provider.of<Data>(context).getBurstMode)
+                ],
               ),
-              const Text(
-                "Continous Stimulation",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20),
-              ),
-              const SizedBox(width: 10),
-              FlutterSwitch(
-                  activeColor: Colors.blue,
-                  inactiveColor: Colors.grey,
-                  activeText: "on",
-                  inactiveText: "off",
-                  width: 75,
-                  height: 40,
-                  activeTextColor: Colors.white,
-                  showOnOff: true,
-                  onToggle: (bool value) {
-                    setState(() {
-                      continuous_stim = !continuous_stim;
-                    });
-                  },
-                  value: continuous_stim),
-            ],
-          ),
               const SizedBox(height: 10),
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: !continuous_stim,
+                  enabled: Provider.of<Data>(context).getBurstMode,
                   keyboardType: TextInputType.number,
                   controller: _dutyCycleTextfield,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: 100)
+                  ],
                   onChanged: (value) {
                     myProvider.setdutycycle(value);
                   },
@@ -307,7 +327,9 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   keyboardType: TextInputType.number,
                   controller: _rampUpTimeTextfield,
                   inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,3}'))
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,3}')),
+                    num_range_formatter(min: 0, max: UINT32MAX)
                   ],
                   onChanged: (value) {
                     value = value * 1000;
@@ -322,8 +344,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
               ),
             ],
           ),
-
-
         ],
       )
     ]);

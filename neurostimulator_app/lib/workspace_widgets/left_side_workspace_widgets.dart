@@ -89,7 +89,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase1Textfield,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 0, max: UINT32MAX)
+                    num_range_formatter(min: 10, max: UINT32MAX)
                   ],
                   onChanged: (value) {
                     myProvider.setphase1(value);
@@ -134,7 +134,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase2Textfield,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 0, max: UINT32MAX)
+                    num_range_formatter(min: 10, max: UINT32MAX)
                   ],
                   onChanged: (value) {
                     myProvider.setphase2(value);
@@ -228,7 +228,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: Provider.of<Data>(context).getBurstMode,
+                  enabled: !Provider.of<Data>(context).getBurstMode,
                   keyboardType: TextInputType.number,
                   controller: _burstPeriodTextfield,
                   inputFormatters: [
@@ -273,20 +273,20 @@ class _leftTextFieldsState extends State<leftTextFields> {
                       height: 40,
                       activeTextColor: Colors.white,
                       showOnOff: true,
-                      onToggle: (bool value) {
+                      onToggle: (bool continuous) {
                         setState(() {
                           Provider.of<Data>(context, listen: false)
-                              .toggleburstcont(value);
+                              .toggleburstcont(!continuous);
                         });
                       },
-                      value: !Provider.of<Data>(context).getBurstMode)
+                      value: Provider.of<Data>(context).getBurstMode)
                 ],
               ),
               const SizedBox(height: 10),
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: Provider.of<Data>(context).getBurstMode,
+                  enabled: !Provider.of<Data>(context).getBurstMode,
                   keyboardType: TextInputType.number,
                   controller: _dutyCycleTextfield,
                   inputFormatters: [

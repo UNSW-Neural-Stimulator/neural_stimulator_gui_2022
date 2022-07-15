@@ -17,6 +17,7 @@ class workspace extends StatefulWidget {
 }
 
 class _workspaceState extends State<workspace> {
+  late BleDevice device;
   @override
   Widget build(BuildContext context) {
     var phase1Time = Provider.of<Data>(context).getPhase1Time;
@@ -40,14 +41,14 @@ class _workspaceState extends State<workspace> {
         alignment: WrapAlignment.center,
         crossAxisAlignment: WrapCrossAlignment.center,
         direction: Axis.horizontal,
-        children: const [
+        children: [
           SizedBox(width: 600, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:leftTextFields())),
           SizedBox(
             width: 10,
           ),
           SizedBox(
             width: 600,
-            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs()),
+            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs(device: widget.device,)),
           )
         ]);
 

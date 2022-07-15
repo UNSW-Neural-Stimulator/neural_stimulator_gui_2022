@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'dart:math';
 
 const UINT32MAX = 4294967295;
-Uint8List stop_bytearray = Uint8List.fromList([1, 0, 0, 0, 0]);
-Uint8List start_bytearray = Uint8List.fromList([2, 0, 0, 0, 0]);
+Uint8List stop_bytearray = Uint8List.fromList([2, 0, 0, 0, 0]);
+Uint8List start_bytearray = Uint8List.fromList([1, 0, 0, 0, 0]);
 const stim_type = 0x03;
 const anodic_cathodic = 0x04;
 const dac_phase_one = 0x05;
@@ -54,9 +54,13 @@ class num_range_formatter extends TextInputFormatter {
   }
 }
 
-Uint8List int32toBigEndianBytes(int value) =>
-    Uint8List(4)..buffer.asByteData().setInt32(0, value, Endian.big);
+Uint8List bytearray_maker(var code, int value) {
+  Uint8List array =
+      Uint8List(5)..buffer.asByteData().setInt32(1, value, Endian.big);
+  array[0] = code;
+  return array;
 
+}
 
 ///////////////////////////////////////////////////////////////////////
 /// functions from old UI

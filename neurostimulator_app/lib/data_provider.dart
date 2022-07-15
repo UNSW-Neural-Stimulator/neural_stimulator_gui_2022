@@ -72,15 +72,6 @@ class Data extends ChangeNotifier {
     "dac_phase_one": Uint8List.fromList([dac_phase_one, 0, 0, 5, 220]),
     "dac_phase_two": Uint8List.fromList([dac_phase_two, 0, 0, 11, 184]),
     "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
-    
-
-    //"ramp_up": Uint8List.fromList([ramp_up, 0, 0, 0, 0]),
-    //"short_electrode": Uint8List.fromList([short_electrode, 0, 0, 0, 0]),
-
-    // "pulse_num_in_one_burst":
-    //     Uint8List.fromList([pulse_num_in_one_burst, 0, 0, 0, 0]),
-
-
     "start": start_bytearray,
   };
 
@@ -291,7 +282,7 @@ class Data extends ChangeNotifier {
     int temporary_bool_to_int = 0;
     temporary_bool_to_int = _cathodicFirst ? 1 : 0;
     serial_command_input_char["anodic_cathodic"] =
-        Uint8List.fromList([anodic_cathodic, 0, 0, 0, temporary_bool_to_int]);
+        Uint8List.fromList([anodic_cathodic, temporary_bool_to_int, 0, 0, 0]);
 
     // DEPRECATED AS FOR NSTIM FIRMWARE
     // temporary_bool_to_int = !_dcMode ? 1 : 0;
@@ -300,7 +291,7 @@ class Data extends ChangeNotifier {
 
     temporary_bool_to_int = !_dcMode ? 1 : 0;
     serial_command_input_char["stim_type"] =
-        Uint8List.fromList([stim_type, 0, 0, 0, temporary_bool_to_int]);
+        Uint8List.fromList([stim_type, temporary_bool_to_int, 0, 0, 0]);
 
     serial_command_input_char["ramp_up_time"] =
         bytearray_maker(ramp_up_time, _rampUpTime);
@@ -361,8 +352,8 @@ class Data extends ChangeNotifier {
         serial_command_input_char["burst_num"] = bytearray_maker(burst_num, 0);
       } else {
         serial_command_input_char["pulse_num"] = bytearray_maker(pulse_num, 0);
-        serial_command_input_char["pulse_num_in_one_burst"] =
-            bytearray_maker(pulse_num_in_one_burst, 0);
+        // serial_command_input_char["pulse_num_in_one_burst"] =
+        //     bytearray_maker(pulse_num_in_one_burst, 0);
       }
     }
     // if ending by duration, calculate the number of bursts that are needed for the specified duration time
@@ -419,8 +410,8 @@ class Data extends ChangeNotifier {
   serial_command_input_char["pulse_num"] =
            bytearray_maker(pulse_num, pulsenumber);
   
-  serial_command_input_char["pulse_num_in_one_burst"] =
-           bytearray_maker(pulse_num_in_one_burst, pulsenumber);
+  // serial_command_input_char["pulse_num_in_one_burst"] =
+  //          bytearray_maker(pulse_num_in_one_burst, pulsenumber);
 
   }
 }

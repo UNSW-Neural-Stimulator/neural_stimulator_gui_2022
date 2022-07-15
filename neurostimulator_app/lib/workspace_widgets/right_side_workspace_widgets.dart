@@ -58,7 +58,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
           characteristic: charID,
           data: data,
           writeWithResponse: true);
-        print("i Have just written $data");
+        //print("i Have just written in writeCharacteristics $data");
     } catch (e) {
       showError("writeCharError : $e");
       setState(() {
@@ -220,16 +220,17 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 Provider.of<Data>(context, listen: false).prepare_stimulation_values();
                 var serial_command_inputs =
                     Provider.of<Data>(context, listen: false)
-                        .get_serial_command_input_char;                
+                        .get_serial_command_input_char;          
+                print(serial_command_inputs);      
                 for (var value in serial_command_inputs.values) {
-
                   writeCharacteristic(
                       device.address,
                       SERVICE_UUID,
                       SERIAL_COMMAND_INPUT_CHAR_UUID,
-                                        value,
+                      value,
                       true);
-                  await Future.delayed(const Duration(milliseconds: 1), () {});
+                  await Future.delayed(const Duration(milliseconds: 1
+                  ), () {});
                 
                 }
 

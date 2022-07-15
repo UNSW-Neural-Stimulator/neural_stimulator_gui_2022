@@ -77,7 +77,7 @@ class num_range_formatter extends TextInputFormatter {
 
 Uint8List bytearray_maker(var code, int value) {
   Uint8List array =
-      Uint8List(5)..buffer.asByteData().setInt32(1, value, Endian.big);
+      Uint8List(5)..buffer.asByteData().setInt32(1, value, Endian.little);
   array[0] = code;
   return array;
 

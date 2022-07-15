@@ -11,7 +11,7 @@ import 'dart:typed_data';
 
 class RightSideInputs extends StatefulWidget {
   final BleDevice device;
-  const RightSideInputs({Key? key, required this.device}) : super(key: key);
+  const RightSideInputs({Key? key, required this.device, connection}) : super(key: key);
 
   @override
   State<RightSideInputs> createState() => _RightSideInputsState();
@@ -35,6 +35,22 @@ class _RightSideInputsState extends State<RightSideInputs> {
   //the below may be unneccesary
   List<BleCharacteristic> characteristics = [];
   List<String> services = [];
+//////////////////////////////////////////////////
+/// this shouldn't be here, this is to fix an error where the device disconnects upon
+/// navigating to the workspace. this should be fixed soon with the BLE code being moved to provider
+  connect(BleDevice device) async {
+    final address = device.address;
+    try {
+      await WinBle.connect(address);
+      ;
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        showError(error);
+      });
+    }
+  }
+///////////////////////////////////////////////////
 
   void showSuccess(String value) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -128,21 +144,20 @@ class _RightSideInputsState extends State<RightSideInputs> {
   @override
   void initState() {
     device = widget.device;
-
     final Data myProvider = Provider.of<Data>(context, listen: false);
     
+
     _connectionStream =
         WinBle.connectionStreamOf(device.address).listen((event) {
-      setState(() {
-        connected = event;
-      });
+          //////////////////////
+          //this is to be removed when the BLE is sorted as an abstraction layer
+            connect(device);
+          //////////////////////
     });
-
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
       print("CharValue : $event");
     });
-
     super.initState();
     _phase1CurrentTextfield =
         TextEditingController(text: myProvider.getPhase1Current.toString());
@@ -182,7 +197,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
     final Data myProvider = Provider.of<Data>(context);
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
-
     return Column(
       children: [
         const SizedBox(height: 20),

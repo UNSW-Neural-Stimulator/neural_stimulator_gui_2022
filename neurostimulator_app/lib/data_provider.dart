@@ -413,6 +413,21 @@ class Data extends ChangeNotifier {
   // serial_command_input_char["pulse_num_in_one_burst"] =
   //          bytearray_maker(pulse_num_in_one_burst, pulsenumber);
 
+  //////////////////////////////////////////////////////////////
+  ///Bluetooth Low Energy
+
+
+
+
+
+
+
+
+
+
+
+
+
   }
 }
 

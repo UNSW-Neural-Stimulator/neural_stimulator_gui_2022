@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:ns_2022/helper_and_const.dart';
@@ -10,7 +12,8 @@ import 'package:win_ble/win_ble.dart';
 
 class workspace extends StatefulWidget {
   final BleDevice device;
-  const workspace({Key? key, required this.device}) : super(key: key);
+  final StreamSubscription? connection;
+  const workspace({Key? key, required this.device, this.connection}) : super(key: key);
 
   @override
   _workspaceState createState() => _workspaceState();
@@ -18,6 +21,7 @@ class workspace extends StatefulWidget {
 
 class _workspaceState extends State<workspace> {
   late BleDevice device;
+  late StreamSubscription? connectionstream;
   @override
   Widget build(BuildContext context) {
     var phase1Time = Provider.of<Data>(context).getPhase1Time;
@@ -48,7 +52,7 @@ class _workspaceState extends State<workspace> {
           ),
           SizedBox(
             width: 600,
-            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs(device: widget.device,)),
+            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs(device: widget.device, )),
           )
         ]);
 

@@ -127,7 +127,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
   @override
   void dispose() {
     scanStream?.cancel();
-    connectionStream?.cancel();
+    // connectionStream?.cancel();
     super.dispose();
   }
 
@@ -172,7 +172,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => workspace(
-                                                  device: device,
+                                                  device: device ,
                                                 )),
                                       );
                                     }

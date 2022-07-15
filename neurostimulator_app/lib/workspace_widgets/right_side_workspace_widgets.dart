@@ -57,7 +57,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
           service: serviceID,
           characteristic: charID,
           data: data,
-          writeWithResponse: false);
+          writeWithResponse: true);
         print("i Have just written $data");
     } catch (e) {
       showError("writeCharError : $e");
@@ -225,10 +225,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
                   writeCharacteristic(
                       device.address,
-                      "0000fe40-cc7a-482a-984a-7f2ed5b3e58f",
-                      "0000fe41-8e22-4541-9d4c-21edae82ed19",
+                      SERVICE_UUID,
+                      SERIAL_COMMAND_INPUT_CHAR_UUID,
                                         value,
-                      false);
+                      true);
                   await Future.delayed(const Duration(milliseconds: 1), () {});
                 
                 }
@@ -254,10 +254,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
               onPressed: () {
                   writeCharacteristic(
                       device.address,
-                      "0000fe40-cc7a-482a-984a-7f2ed5b3e58f",
-                      "0000fe41-8e22-4541-9d4c-21edae82ed19",
+                      SERVICE_UUID,
+                      SERIAL_COMMAND_INPUT_CHAR_UUID,
                       Uint8List.fromList([2,0,0,0,0]),
-                      false);
+                      true);
 
 
               },
@@ -402,6 +402,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               myProvider.setendbyvalue(value);
             },
             decoration: const InputDecoration(
+              hintText: "Enter duration (s) or bursts",
               border: OutlineInputBorder(),
             ),
           ),

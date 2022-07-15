@@ -53,7 +53,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
     // Listen to Scan Stream , we can cancel in onDispose()
     scanStream = WinBle.scanStream.listen((event) {
       setState(() {
-        if (!devices.any((element) => element.address == event.address) && event.name == "Neuro") {
+        if (!devices.any((element) => element.address == event.address)) {
           devices.add(event);
         }
       });

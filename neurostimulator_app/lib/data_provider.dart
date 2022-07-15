@@ -59,23 +59,28 @@ class Data extends ChangeNotifier {
 
   var serial_command_input_char = {
     "stop": stop_bytearray,
-    "dac_phase_one": Uint8List.fromList([dac_phase_one, 0, 0, 5, 220]),
-    "dac_phase_two": Uint8List.fromList([dac_phase_two, 0, 0, 11, 184]),
     "stim_type": Uint8List.fromList([stim_type, 0, 0, 0, 0]),
     "anodic_cathodic": Uint8List.fromList([anodic_cathodic, 0, 0, 0, 1]),
-    "dc_mode": Uint8List.fromList([dc_mode, 0, 0, 0, 1]),
-    "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
+    // "dc_mode": Uint8List.fromList([dc_mode, 0, 0, 0, 1]),
     "phase_one_time": Uint8List.fromList([phase_one_time, 0, 0, 3, 232]),
     "phase_two_time": Uint8List.fromList([phase_two_time, 0, 0, 3, 232]),
     "inter_phase_gap": Uint8List.fromList([inter_phase_gap, 0, 0, 3, 232]),
     "inter_stim_delay": Uint8List.fromList([inter_stim_delay, 0, 0, 3, 232]),
     "inter_burst_delay": Uint8List.fromList([inter_burst_delay, 0, 0, 0, 0]),
-    "pulse_num": Uint8List.fromList([pulse_num, 0, 0, 0, 0]),
-    "pulse_num_in_one_burst":
-        Uint8List.fromList([pulse_num_in_one_burst, 0, 0, 0, 0]),
     "burst_num": Uint8List.fromList([burst_num, 0, 0, 0, 0]),
-    "ramp_up": Uint8List.fromList([ramp_up, 0, 0, 0, 0]),
-    "short_electrode": Uint8List.fromList([short_electrode, 0, 0, 0, 0]),
+    "pulse_num": Uint8List.fromList([pulse_num, 0, 0, 0, 0]),
+    "dac_phase_one": Uint8List.fromList([dac_phase_one, 0, 0, 5, 220]),
+    "dac_phase_two": Uint8List.fromList([dac_phase_two, 0, 0, 11, 184]),
+    "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
+    
+
+    //"ramp_up": Uint8List.fromList([ramp_up, 0, 0, 0, 0]),
+    //"short_electrode": Uint8List.fromList([short_electrode, 0, 0, 0, 0]),
+
+    // "pulse_num_in_one_burst":
+    //     Uint8List.fromList([pulse_num_in_one_burst, 0, 0, 0, 0]),
+
+
     "start": start_bytearray,
   };
 
@@ -282,16 +287,18 @@ class Data extends ChangeNotifier {
 /////////////
   ///Function that updates the serial command input char map before it is sent to the stimulator
   void prepare_stimulation_values() {
+
     int temporary_bool_to_int = 0;
     temporary_bool_to_int = _cathodicFirst ? 1 : 0;
     serial_command_input_char["anodic_cathodic"] =
         Uint8List.fromList([anodic_cathodic, 0, 0, 0, temporary_bool_to_int]);
 
-    temporary_bool_to_int = !_dcMode ? 1 : 0;
-    serial_command_input_char["dc_mode"] =
-        Uint8List.fromList([dc_mode, 0, 0, 0, temporary_bool_to_int]);
+    // DEPRECATED AS FOR NSTIM FIRMWARE
+    // temporary_bool_to_int = !_dcMode ? 1 : 0;
+    // serial_command_input_char["dc_mode"] =
+    //     Uint8List.fromList([dc_mode, 0, 0, 0, temporary_bool_to_int]);
 
-    temporary_bool_to_int = !_continuousStim ? 1 : 0;
+    temporary_bool_to_int = !_dcMode ? 1 : 0;
     serial_command_input_char["stim_type"] =
         Uint8List.fromList([stim_type, 0, 0, 0, temporary_bool_to_int]);
 
@@ -336,6 +343,12 @@ class Data extends ChangeNotifier {
       dutycycle = (_dutyCyclePercentage) / 100;
       burstDuration = dutycycle * burstperiod.round();
       int interburst = (burstperiod - burstDuration.round()).round();
+
+      serial_command_input_char["inter_burst_delay"] =
+          bytearray_maker(inter_burst_delay, interburst);
+    }
+    else {
+       int interburst = 0;
 
       serial_command_input_char["inter_burst_delay"] =
           bytearray_maker(inter_burst_delay, interburst);
@@ -415,20 +428,3 @@ class Data extends ChangeNotifier {
 
 
 
-    // pulsePeriod = calculate_pulse_period(_phase1TimeMicrosec,
-    //     _phase2TimeMicrosec, _interPhaseDelayMicrosec, _interStimDelayMicrosec);
-    // //stimduration is the value entered by the users, it should be in seconds.
-    // var stimduration = _endByDurationValue;
-    // //if burst mode is chosen, we calculate the amount of burst that will be performed
-    // // within the inputed duration.
-    // if (burstDuration != 0) {
-    //   int burstnumber = (stimduration ~/ burstDuration);
-    //   serial_command_input_char["burst_num"] =
-    //       bytearray_maker(burst_num, burstnumber);
-    //   //If the caluclated burst duration is 0, this will result in a case where we do not stimulate
-    //   // TODO: should this raise an error instead? the current logic in the old UI has a mistake
-    //   // where it returns 0 which represents continuous stimulation
-    // } else {
-    //   // TODO: do not stimulate, need to add error handling
-    //   burstDuration = 0;
-    // }

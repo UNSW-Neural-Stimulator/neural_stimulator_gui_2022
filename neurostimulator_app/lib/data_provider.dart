@@ -20,8 +20,13 @@ class Data extends ChangeNotifier {
   var _interStimDelayMicrosec = 1000;
   var _burstPeriodMs = 0;
   var _dutyCyclePercentage = 0;
-  var _rampUpTime = 0;
   var _frequency = 0;
+
+  //dc mode related values
+  var _rampUpTime = 0;
+  var _dcHoldTime = 0;
+  var _dcCurrentTargetMicroAmp = 1000;
+
 
   //ints for right side of workspace
   var _phase1CurrentMicroAmp = 1500;
@@ -125,6 +130,11 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
+  setDCHoldTime(String dcHoldTime) {
+    _dcHoldTime = int.tryParse(dcHoldTime) ?? defaultValue;
+    notifyListeners();
+  }
+
   setfrequency(String frequencyinput) {
     _frequency = int.tryParse(frequencyinput) ?? defaultValue;
     notifyListeners();
@@ -162,11 +172,17 @@ class Data extends ChangeNotifier {
 
   /////////////////////////////////////////////////////////////////////////////////
   /// How the following values are used, need to be sorted
-  //TODO, identify the role of this value
+
   setdutycycle(String dutyCycleFromTextField) {
     _dutyCyclePercentage = int.tryParse(dutyCycleFromTextField) ?? defaultValue;
     notifyListeners();
   }
+
+  setDCCurrentTarget(String dcCurrentTarget) {
+    _dcCurrentTargetMicroAmp = int.tryParse(dcCurrentTarget) ?? 1000;
+    notifyListeners();
+  }
+
 
   setphase1current(String phase1current) {
     _phase1CurrentMicroAmp = int.tryParse(phase1current) ?? 1500;
@@ -255,14 +271,24 @@ class Data extends ChangeNotifier {
     return _rampUpTime;
   }
 
+  int get getDCHoldTime {
+    return _dcHoldTime;
+  }
+
+
   int get getFrequency {
     return _frequency;
+  }
+
+  int get getDCCurrentTarget {
+    return _dcCurrentTargetMicroAmp;
   }
 
 //
   int get getPhase1Current {
     return _phase1CurrentMicroAmp;
   }
+
 
   int get getPhase2Current {
     return _phase2CurrentMicroAmp;

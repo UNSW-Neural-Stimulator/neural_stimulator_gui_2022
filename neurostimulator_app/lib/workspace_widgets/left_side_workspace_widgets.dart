@@ -42,8 +42,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
         TextEditingController(text: myProvider.getBurstPeriod.toString());
     _dutyCycleTextfield =
         TextEditingController(text: myProvider.getDutyCycle.toString());
-    _rampUpTimeTextfield =
-        TextEditingController(text: myProvider.getRampUpTime.toString());
     _frequencyTextfield =
         TextEditingController(text: myProvider.getFrequency.toString());
   }
@@ -57,7 +55,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
     _interStimDelayTexfield?.dispose();
     _burstPeriodTextfield?.dispose();
     _dutyCycleTextfield?.dispose();
-    _rampUpTimeTextfield?.dispose();
     _frequencyTextfield?.dispose();
 
     super.dispose();
@@ -75,10 +72,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
             children: [
               const SizedBox(height: 10),
               const Text(
-                "Phase Time",
+                "Phase Time Settings",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
               const SizedBox(height: 10),
@@ -95,6 +92,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setphase1(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Phase 1 Time (µs)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -115,6 +114,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setinterphasedelay(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Inter-phase delay (µs)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -140,6 +141,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setphase2(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Phase 2 Time (µs)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -160,6 +163,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setinterstimdelay(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Inter-stim delay (µs)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -177,10 +182,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
             children: [
               const SizedBox(height: 10),
               const Text(
-                "Frequency",
+                "Calculate by Frequency",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
               const SizedBox(height: 10),
@@ -198,6 +203,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setfrequency(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Frequency (pps)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -221,7 +228,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 "Burst Stimulation",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
               const SizedBox(height: 10),
@@ -239,6 +246,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setburstperiod(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Burst Period (ms)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -297,6 +306,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setdutycycle(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.amber)),
                     labelText: 'Duty Cycle (%)',
                     labelStyle: TextStyle(fontSize: 20),
                     border: OutlineInputBorder(),
@@ -307,44 +318,42 @@ class _leftTextFieldsState extends State<leftTextFields> {
           ),
         ],
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            children: [
-              const SizedBox(height: 10),
-              const Text(
-                "Ramp Up Time",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: 250,
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: _rampUpTimeTextfield,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,3}')),
-                    num_range_formatter(min: 0, max: UINT32MAX)
-                  ],
-                  onChanged: (value) {
-                    value = value * 1000;
-                    myProvider.setrampUpTime(value);
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Ramp Up Time (s) (DC mode only)',
-                    labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      SizedBox(
+        height: 10,
+      ),
+      const Text(
+        "Toggle anodic or cathodic first:",
+        style: TextStyle(
+          fontSize: 20,
+          color: Color.fromARGB(255, 0, 60, 109),
+        ),
+      ),
+      SizedBox(
+        height: 10,
+      ),
+      FlutterSwitch(
+        activeColor: Colors.green,
+        inactiveColor: Colors.blue,
+        activeText: "cathodic first",
+        inactiveText: "anodic first",
+        width: 150,
+        height: 40,
+        activeTextColor: Colors.white,
+        showOnOff: true,
+        onToggle: (bool cathodic) {
+          Provider.of<Data>(context, listen: false)
+              .toggleCathodicAnodic(cathodic);
+        },
+        value: Provider.of<Data>(context)
+            .getCathodicFirst, // remove `listen: false`
+      ),
+      SizedBox(
+        height: 20,
+      ),
+      Container(
+        width: 500,
+        height: 1, // Thickness
+        color: Colors.grey,
       )
     ]);
   }

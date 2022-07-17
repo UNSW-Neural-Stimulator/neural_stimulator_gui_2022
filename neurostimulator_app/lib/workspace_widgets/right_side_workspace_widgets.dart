@@ -295,6 +295,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
+                    enabled: !myProvider.getDcMode,
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
@@ -305,9 +306,15 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase1current(value);
                     },
                     decoration: const InputDecoration(
+                                          disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 1 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -315,6 +322,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
+                                        enabled: !myProvider.getDcMode,
+
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
@@ -325,9 +334,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase2current(value);
                     },
                     decoration: const InputDecoration(
+                                          disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 2 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -354,10 +368,13 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     enabled: myProvider.getDcMode,
                     decoration: const InputDecoration(
                       disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.amber)),
+                          borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'DC Hold Time (s)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -377,10 +394,13 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     enabled: myProvider.getDcMode,
                     decoration: const InputDecoration(
                       disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.amber)),
+                          borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'DC Current Target (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -419,10 +439,13 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     enabled: myProvider.getDcMode,
                     decoration: const InputDecoration(
                       disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.amber)),
+                          borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Ramp Up Time (s) (DC mode only)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -482,8 +505,11 @@ class _RightSideInputsState extends State<RightSideInputs> {
             decoration: const InputDecoration(
               hintText: "Enter duration (s) or bursts",
               disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.amber)),
-              border: OutlineInputBorder(),
+                  borderSide: BorderSide(color: Colors.grey)),
+                                  focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
             ),
           ),
         ),

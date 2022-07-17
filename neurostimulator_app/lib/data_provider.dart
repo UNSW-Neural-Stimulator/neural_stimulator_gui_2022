@@ -37,6 +37,10 @@ class Data extends ChangeNotifier {
 
   var _endbyvalue = 1;
 
+  // calculate interstim by freq
+  bool _calculate_interstim_by_freq = false;
+
+
   //burst or continuos stimulation
   bool _continuousStim = false;
   //buttons from right side of workspace
@@ -65,18 +69,19 @@ class Data extends ChangeNotifier {
   var serial_command_input_char = {
     "stop": stop_bytearray,
     "stim_type": Uint8List.fromList([stim_type, 0, 0, 0, 0]),
-    "anodic_cathodic": Uint8List.fromList([anodic_cathodic, 0, 0, 0, 1]),
-    // "dc_mode": Uint8List.fromList([dc_mode, 0, 0, 0, 1]),
-    "phase_one_time": Uint8List.fromList([phase_one_time, 0, 0, 3, 232]),
-    "phase_two_time": Uint8List.fromList([phase_two_time, 0, 0, 3, 232]),
-    "inter_phase_gap": Uint8List.fromList([inter_phase_gap, 0, 0, 3, 232]),
-    "inter_stim_delay": Uint8List.fromList([inter_stim_delay, 0, 0, 3, 232]),
+    "anodic_cathodic": Uint8List.fromList([anodic_cathodic, 1, 0, 0, 0]),
+    "phase_one_time": Uint8List.fromList([phase_one_time, 232, 3, 0, 0]),
+    "phase_two_time": Uint8List.fromList([phase_two_time, 232, 3, 0, 0]),
+    "inter_phase_gap": Uint8List.fromList([inter_phase_gap, 232, 3, 0, 0]),
+    "inter_stim_delay": Uint8List.fromList([inter_stim_delay, 232, 3, 0, 0]),
     "inter_burst_delay": Uint8List.fromList([inter_burst_delay, 0, 0, 0, 0]),
     "burst_num": Uint8List.fromList([burst_num, 0, 0, 0, 0]),
     "pulse_num": Uint8List.fromList([pulse_num, 0, 0, 0, 0]),
-    "dac_phase_one": Uint8List.fromList([dac_phase_one, 0, 0, 5, 220]),
-    "dac_phase_two": Uint8List.fromList([dac_phase_two, 0, 0, 11, 184]),
+    "dac_phase_one": Uint8List.fromList([dac_phase_one, 220, 5, 0, 0]),
+    "dac_phase_two": Uint8List.fromList([dac_phase_two, 184, 11, 0, 0]),
     "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
+    "dc_hold_time":  Uint8List.fromList([dc_hold_time, 0, 0, 0, 0]),
+    "dc_curr_target":  Uint8List.fromList([dc_curr_target, 232, 3, 0, 0]),
     "start": start_bytearray,
   };
 
@@ -94,6 +99,12 @@ class Data extends ChangeNotifier {
     _dcMode = dcmode;
     notifyListeners();
   }
+
+  void togglefrequency(bool frequency) {
+    _calculate_interstim_by_freq = frequency;
+    notifyListeners();
+  }
+
 
 // continous stimulation
 
@@ -238,6 +249,11 @@ class Data extends ChangeNotifier {
   bool get getDcMode {
     return _dcMode;
   }
+
+  bool get getCalculateByFrequency {
+    return _calculate_interstim_by_freq;
+  }
+
 
   bool get getBurstMode {
     return _continuousStim;

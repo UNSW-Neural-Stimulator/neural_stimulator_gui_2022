@@ -1,11 +1,18 @@
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:math';
+/////////////////////
+///Constants and other values that are needed for ble
 
-
+///UUIDs
+///Serial Command Input Char UUID is the characteristic which we use to write values into.
 const SERIAL_COMMAND_INPUT_CHAR_UUID = "c4583a38-ef5a-4526-882f-ea5f5d91dbf3";
 const SERVICE_UUID = "13d47a92-3e31-4bde-89b8-77e55b659c76";
+////////////////////////////////////////////////////////////////
+///UINT32MAX is the highest number we can send as a parameter to the firmware
 const UINT32MAX = 4294967295;
+
+//the values below include codes for bytearrays that we send to firmware.
 Uint8List start_bytearray = Uint8List.fromList([1, 0, 0, 0, 0]);
 Uint8List stop_bytearray = Uint8List.fromList([2, 0, 0, 0, 0]);
 const stim_type = 0x03;
@@ -13,38 +20,40 @@ const anodic_cathodic = 0x04;
 const phase_one_time = 0x05;
 const phase_two_time = 0x06;
 
-
-// these two are now burst phase 1 curr and burst phase 2 curr
-const dac_phase_one = 0x0C;
-const dac_phase_two = 0x0D;
-// const dac_gap = ;
-
 //burst phase gap
 const inter_phase_gap = 0x07;
 
 //interpulsegap?
 const inter_stim_delay = 0x08;
 
+
 //interburstgap
 const inter_burst_delay = 0x09;
 //burst pulse num
 const pulse_num = 0x0A;
-//useless?
-const pulse_num_in_one_burst = 0x0e;
-//
+
 const burst_num = 0x0B;
-const ramp_up = 0x10;
-const short_electrode = 0x11;
-const record_freq = 0x12;
-Uint8List start_recording = Uint8List.fromList([0x13, 0, 0, 0, 0]);
-Uint8List stop_recording = Uint8List.fromList([0x14, 0, 0, 0, 0]);
-Uint8List electrode_voltage = Uint8List.fromList([0x15, 0, 0, 0, 0]);
-const elec_offset = 0x16;
-const show_dac = 0x17;
-const return_idle = 0x18;
-Uint8List check_state = Uint8List.fromList([0x19, 0, 0, 0, 0]);
-const dc_mode = 0x20;
+
+// these two are now burst phase 1 curr and burst phase 2 curr
+const dac_phase_one = 0x0C;
+const dac_phase_two = 0x0D;
+
 const ramp_up_time = 0x0E;
+const dc_hold_time = 0x0F;
+const dc_curr_target = 0x10;
+
+
+// const ramp_up = 0x10;
+// const short_electrode = 0x11;
+// const record_freq = 0x12;
+// Uint8List start_recording = Uint8List.fromList([0x13, 0, 0, 0, 0]);
+// Uint8List stop_recording = Uint8List.fromList([0x14, 0, 0, 0, 0]);
+// Uint8List electrode_voltage = Uint8List.fromList([0x15, 0, 0, 0, 0]);
+// const elec_offset = 0x16;
+// const show_dac = 0x17;
+// const return_idle = 0x18;
+// Uint8List check_state = Uint8List.fromList([0x19, 0, 0, 0, 0]);
+// const dc_mode = 0x20;
 
 
 //
@@ -100,3 +109,6 @@ int calculate_adv_to_mv(int adc_value) {
   }
 
 }
+
+int calculate_interstim_from_frequency(int frequency, int phasetime1, int phasetime2, int interphase) =>
+  (1000000 / frequency - phasetime1 - phasetime2 - interphase).round();

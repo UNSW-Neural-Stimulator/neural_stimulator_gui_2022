@@ -42,8 +42,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
         TextEditingController(text: myProvider.getBurstPeriod.toString());
     _dutyCycleTextfield =
         TextEditingController(text: myProvider.getDutyCycle.toString());
-    _rampUpTimeTextfield =
-        TextEditingController(text: myProvider.getRampUpTime.toString());
     _frequencyTextfield =
         TextEditingController(text: myProvider.getFrequency.toString());
   }
@@ -57,7 +55,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
     _interStimDelayTexfield?.dispose();
     _burstPeriodTextfield?.dispose();
     _dutyCycleTextfield?.dispose();
-    _rampUpTimeTextfield?.dispose();
     _frequencyTextfield?.dispose();
 
     super.dispose();
@@ -66,7 +63,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
   @override
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);
-
+    var interstim_from_freq = "";
+    Provider.of<Data>(context).getCalculateByFrequency ? interstim_from_freq = "Inter-stim delay (µs) = $interstim_from_freq":" " ;
+    
+    
     return Column(children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -75,16 +75,17 @@ class _leftTextFieldsState extends State<leftTextFields> {
             children: [
               const SizedBox(height: 10),
               const Text(
-                "Phase Time",
+                "Phase Time Settings",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
               const SizedBox(height: 10),
               SizedBox(
                 width: 250,
                 child: TextField(
+                  enabled: !myProvider.getDcMode,
                   keyboardType: TextInputType.number,
                   controller: _phase1Textfield,
                   inputFormatters: [
@@ -95,9 +96,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setphase1(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Phase 1 Time (µs)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -105,6 +111,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
+                  enabled: !myProvider.getDcMode,
                   keyboardType: TextInputType.number,
                   controller: _interPhaseDelayTextfield,
                   inputFormatters: [
@@ -115,9 +122,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setinterphasedelay(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Inter-phase delay (µs)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -130,6 +142,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
+                  enabled: !myProvider.getDcMode,
                   keyboardType: TextInputType.number,
                   controller: _phase2Textfield,
                   inputFormatters: [
@@ -140,9 +153,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setphase2(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Phase 2 Time (µs)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -150,6 +168,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
+                  enabled: (!myProvider.getDcMode &
+                      !myProvider.getCalculateByFrequency),
                   keyboardType: TextInputType.number,
                   controller: _interStimDelayTexfield,
                   inputFormatters: [
@@ -160,9 +180,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setinterstimdelay(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Inter-stim delay (µs)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -177,38 +202,69 @@ class _leftTextFieldsState extends State<leftTextFields> {
             children: [
               const SizedBox(height: 10),
               const Text(
-                "Frequency",
+                "Calculate inter-stim delay by frequency:",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 15),
               ),
               const SizedBox(height: 10),
-              SizedBox(
-                width: 250,
-                child: TextField(
-                  enabled: Provider.of<Data>(context).getBurstMode,
-                  keyboardType: TextInputType.number,
-                  controller: _frequencyTextfield,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 0, max: UINT32MAX)
-                  ],
-                  onChanged: (value) {
-                    myProvider.setfrequency(value);
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Frequency (pps)',
-                    labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
+          
+                                            FlutterSwitch(
+                                              activeColor: Colors.blue,
+                                              inactiveColor: Colors.grey,
+                                              activeText: "on",
+                                              inactiveText: "off",
+                                              width: 75,
+                                              height: 40,
+                                              activeTextColor: Colors.white,
+                                              showOnOff: true,
+                                              onToggle: (bool frequency) {
+                                                Provider.of<Data>(context, listen: false)
+                                                    .togglefrequency(frequency);
+                                              },
+                                              value: Provider.of<Data>(context)
+                                                  .getCalculateByFrequency, // remove `listen: false`
+                                            ),
+
             ],
           ),
           SizedBox(
-            width: 250,
-          )
+            width: 15,
+          ),
+          Column(children: [
+            SizedBox(
+              height: 50,
+              child: Text("$interstim_from_freq"),
+            ),
+            SizedBox(
+              width: 250,
+              child: TextField(
+                //todo: implement frequency calculations
+                enabled: (false & myProvider.getCalculateByFrequency & !myProvider.getDcMode),
+                keyboardType: TextInputType.number,
+                controller: _frequencyTextfield,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  num_range_formatter(min: 0, max: UINT32MAX)
+                ],
+                onChanged: (value) {
+                  myProvider.setfrequency(value);
+
+                },
+                decoration: const InputDecoration(
+                  disabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey)),
+                  labelText: 'Frequency (pps)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue)),
+                ),
+              ),
+            ),
+          ])
         ],
       ),
       Row(
@@ -221,14 +277,15 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 "Burst Stimulation",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
               const SizedBox(height: 10),
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: !Provider.of<Data>(context).getBurstMode,
+                  enabled: (!Provider.of<Data>(context).getBurstMode &
+                      !myProvider.getDcMode),
                   keyboardType: TextInputType.number,
                   controller: _burstPeriodTextfield,
                   inputFormatters: [
@@ -239,9 +296,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setburstperiod(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Burst Period (ms)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -286,7 +348,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: TextField(
-                  enabled: !Provider.of<Data>(context).getBurstMode,
+                  enabled: (!Provider.of<Data>(context).getBurstMode &
+                      !myProvider.getDcMode),
                   keyboardType: TextInputType.number,
                   controller: _dutyCycleTextfield,
                   inputFormatters: [
@@ -297,9 +360,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setdutycycle(value);
                   },
                   decoration: const InputDecoration(
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Duty Cycle (%)',
                     labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               ),
@@ -307,44 +375,42 @@ class _leftTextFieldsState extends State<leftTextFields> {
           ),
         ],
       ),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
-            children: [
-              const SizedBox(height: 10),
-              const Text(
-                "Ramp Up Time",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30),
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: 250,
-                child: TextField(
-                  keyboardType: TextInputType.number,
-                  controller: _rampUpTimeTextfield,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,3}')),
-                    num_range_formatter(min: 0, max: UINT32MAX)
-                  ],
-                  onChanged: (value) {
-                    value = value * 1000;
-                    myProvider.setrampUpTime(value);
-                  },
-                  decoration: const InputDecoration(
-                    labelText: 'Ramp Up Time (s) (DC mode only)',
-                    labelStyle: TextStyle(fontSize: 20),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
+      SizedBox(
+        height: 10,
+      ),
+      const Text(
+        "Toggle anodic or cathodic first:",
+        style: TextStyle(
+          fontSize: 20,
+          color: Color.fromARGB(255, 0, 60, 109),
+        ),
+      ),
+      SizedBox(
+        height: 10,
+      ),
+      FlutterSwitch(
+        activeColor: Colors.green,
+        inactiveColor: Colors.blue,
+        activeText: "cathodic first",
+        inactiveText: "anodic first",
+        width: 150,
+        height: 40,
+        activeTextColor: Colors.white,
+        showOnOff: true,
+        onToggle: (bool cathodic) {
+          Provider.of<Data>(context, listen: false)
+              .toggleCathodicAnodic(cathodic);
+        },
+        value: Provider.of<Data>(context)
+            .getCathodicFirst, // remove `listen: false`
+      ),
+      SizedBox(
+        height: 20,
+      ),
+      Container(
+        width: 500,
+        height: 1, // Thickness
+        color: Colors.grey,
       )
     ]);
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:ns_2022/helper_and_const.dart';
@@ -7,10 +9,12 @@ import "data_provider.dart";
 import 'workspace_widgets/right_side_workspace_widgets.dart';
 import 'workspace_widgets/left_side_workspace_widgets.dart';
 import 'package:win_ble/win_ble.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class workspace extends StatefulWidget {
   final BleDevice device;
-  const workspace({Key? key, required this.device}) : super(key: key);
+  final StreamSubscription? connection;
+  const workspace({Key? key, required this.device, this.connection}) : super(key: key);
 
   @override
   _workspaceState createState() => _workspaceState();
@@ -18,6 +22,7 @@ class workspace extends StatefulWidget {
 
 class _workspaceState extends State<workspace> {
   late BleDevice device;
+  late StreamSubscription? connectionstream;
   @override
   Widget build(BuildContext context) {
     var phase1Time = Provider.of<Data>(context).getPhase1Time;
@@ -48,7 +53,7 @@ class _workspaceState extends State<workspace> {
           ),
           SizedBox(
             width: 600,
-            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs(device: widget.device,)),
+            child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:RightSideInputs(device: widget.device, )),
           )
         ]);
 
@@ -64,17 +69,20 @@ class _workspaceState extends State<workspace> {
      ,
      // this is a debug feature, must be removed before compilation
       floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.question_mark_sharp),
         onPressed: () => showDialog<String>(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('AlertDialog Title'),
+            title: const Text('Help'),
             content: Text(
-                "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
-                "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"
-                "anodic_cathodic: $anodic_cathodic\n"
-                "endbyduration: $endbyduration\n"
-                "endbyburst: $endbyburst\n"
-                "stimforever: $stimforever\n"),
+                "hints to be written here"
+                // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
+                // "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"
+                // "anodic_cathodic: $anodic_cathodic\n"
+                // "endbyduration: $endbyduration\n"
+                // "endbyburst: $endbyburst\n"
+                // "stimforever: $stimforever\n"
+                ),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.pop(context, 'Cancel'),
@@ -105,40 +113,64 @@ class workspaceHome extends StatelessWidget {
       children: [
         Expanded(
             child: Container(
-          alignment: Alignment.topRight,
-          child: Container(
-              height: 300,
-              width: 300,
-              alignment: Alignment.topCenter,
-              margin: EdgeInsets.all(20),
-              decoration: const BoxDecoration(color: Colors.grey),
-              child: Container(
-                height: 50,
-                decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 102, 102, 102)),
-                child: Row(
-                  children: const <Widget>[
-                    Expanded(
-                      child: Text(
-                        'Beginners Tutorial',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 30,
-                          fontFamily: 'Raleway',
-                          fontWeight: FontWeight.w300,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  ],
-                ),
-              )),
-        ))
+          alignment: Alignment.topCenter,
+          child: Column(
+            children: [
+              SizedBox(height: 70,),
+              Text("Stimpact", style:  GoogleFonts.orbitron(fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),),
+              Text("Miniture Neuro Stimulator | 2022 v1.0", style:GoogleFonts.montserrat(fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)) ,)
+,                  SizedBox(
+        height: 20,
+      ),
+      Container(
+        width: 500,
+        height: 1, // Thickness
+        color: Colors.grey,
+      )
+       
+       
+            ],
+
+          )
+         ))
       ],
     );
 
     return Scaffold(
       body: Center(child: content),
+      floatingActionButton: FloatingActionButton.extended(
+         label: Text('Need help connecting?'),
+
+        icon: Icon(Icons.question_mark_sharp),
+        onPressed: () => showDialog<String>(
+          context: context,
+          
+          builder: (BuildContext context) => AlertDialog(
+            
+            title: const Text('Connecting your Stimpact device:',
+            style: TextStyle(
+          fontSize: 20,
+          color: Color.fromARGB(255, 0, 60, 109),),),
+            content: Text(
+                "- To connect a device, click the \"Scan for 10 seconds\" button \n  and select a device from the list generated to connect with it."
+                "\n\nIf you still can't connect to your device:"
+                "\n\n- Check if bluetooth is enabled on your computer's settings."
+                "\n- Try turning the neurostimulator off and on."
+                "\n\n\n* The current version of this application is compatible for  Windows version 10.0.15014 and above."
+                ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -53,7 +53,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
     // Listen to Scan Stream , we can cancel in onDispose()
     scanStream = WinBle.scanStream.listen((event) {
       setState(() {
-        if (!devices.any((element) => element.address == event.address) && event.name == "Neuro") {
+        if (!devices.any((element) => element.address == event.address) && event.name == "nstim") {
           devices.add(event);
         }
       });
@@ -127,7 +127,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
   @override
   void dispose() {
     scanStream?.cancel();
-    connectionStream?.cancel();
+    // connectionStream?.cancel();
     super.dispose();
   }
 
@@ -172,7 +172,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => workspace(
-                                                  device: device,
+                                                  device: device ,
                                                 )),
                                       );
                                     }

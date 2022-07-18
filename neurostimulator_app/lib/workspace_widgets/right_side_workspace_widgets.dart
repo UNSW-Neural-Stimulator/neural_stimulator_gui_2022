@@ -11,7 +11,8 @@ import 'dart:typed_data';
 
 class RightSideInputs extends StatefulWidget {
   final BleDevice device;
-  const RightSideInputs({Key? key, required this.device}) : super(key: key);
+  const RightSideInputs({Key? key, required this.device, connection})
+      : super(key: key);
 
   @override
   State<RightSideInputs> createState() => _RightSideInputsState();
@@ -26,6 +27,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
   // of the TextField.
   TextEditingController? _phase1CurrentTextfield;
   TextEditingController? _phase2CurrentTextfield;
+  TextEditingController? _dcCurrentTargetTextfield;
+  TextEditingController? _dcHoldTimeTextfield;
+  TextEditingController? _rampUpTimeTextfield;
+
   TextEditingController? _endStimulationTextField;
   List<bool> fixedLengthList = [true, false, false];
   String error = "none";
@@ -35,13 +40,28 @@ class _RightSideInputsState extends State<RightSideInputs> {
   //the below may be unneccesary
   List<BleCharacteristic> characteristics = [];
   List<String> services = [];
+//////////////////////////////////////////////////
+  /// this shouldn't be here, this is to fix an error where the device disconnects upon
+  /// navigating to the workspace. this should be fixed soon with the BLE code being moved to provider
+  connect(BleDevice device) async {
+    final address = device.address;
+    try {
+      await WinBle.connect(address);
+      ;
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        showError(error);
+      });
+    }
+  }
+///////////////////////////////////////////////////
 
   void showSuccess(String value) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(value),
           backgroundColor: Colors.green,
           duration: const Duration(milliseconds: 700)));
-
 
   void showError(String value) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -57,8 +77,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
           service: serviceID,
           characteristic: charID,
           data: data,
-          writeWithResponse: false);
-        print("i Have just written $data");
+          writeWithResponse: true);
+      //print("i Have just written in writeCharacteristics $data");
     } catch (e) {
       showError("writeCharError : $e");
       setState(() {
@@ -80,7 +100,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
     }
   }
 
-  
   unSubscribeToCharacteristic(address, serviceID, charID) async {
     try {
       await WinBle.unSubscribeFromCharacteristic(
@@ -94,7 +113,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     }
   }
 
-    disconnect(address) async {
+  disconnect(address) async {
     try {
       await WinBle.disconnect(address);
       showSuccess("Disconnected");
@@ -104,7 +123,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     }
   }
 
-    readCharacteristic(address, serviceID, charID) async {
+  readCharacteristic(address, serviceID, charID) async {
     try {
       List<int> data = await WinBle.read(
           address: address, serviceId: serviceID, characteristicId: charID);
@@ -124,30 +143,33 @@ class _RightSideInputsState extends State<RightSideInputs> {
   StreamSubscription? _connectionStream;
   StreamSubscription? _characteristicValueStream;
 
-
   @override
   void initState() {
     device = widget.device;
-
     final Data myProvider = Provider.of<Data>(context, listen: false);
-    
+
     _connectionStream =
         WinBle.connectionStreamOf(device.address).listen((event) {
-      setState(() {
-        connected = event;
-      });
+      //////////////////////
+      //this is to be removed when the BLE is sorted as an abstraction layer
+      connect(device);
+      //////////////////////
     });
-
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
       print("CharValue : $event");
     });
-
     super.initState();
     _phase1CurrentTextfield =
         TextEditingController(text: myProvider.getPhase1Current.toString());
     _phase2CurrentTextfield =
         TextEditingController(text: myProvider.getPhase2Current.toString());
+    _dcCurrentTargetTextfield =
+        TextEditingController(text: myProvider.getDCCurrentTarget.toString());
+    _dcHoldTimeTextfield =
+        TextEditingController(text: myProvider.getDCHoldTime.toString());
+    _rampUpTimeTextfield =
+        TextEditingController(text: myProvider.getRampUpTime.toString());
     TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
@@ -167,22 +189,22 @@ class _RightSideInputsState extends State<RightSideInputs> {
     // Clean up the controller when the widget is disposed.
     _phase1CurrentTextfield?.dispose();
     _phase2CurrentTextfield?.dispose();
+    _dcCurrentTargetTextfield?.dispose();
+    _dcHoldTimeTextfield?.dispose();
+    _rampUpTimeTextfield?.dispose();
     _endStimulationTextField?.dispose();
-
     _connectionStream?.cancel();
     _characteristicValueStream?.cancel();
     disconnect(device.address);
-    
+
     super.dispose();
   }
-
 
   @override
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
-
     return Column(
       children: [
         const SizedBox(height: 20),
@@ -217,22 +239,17 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
 
               onPressed: () async {
-                Provider.of<Data>(context, listen: false).prepare_stimulation_values();
+                Provider.of<Data>(context, listen: false)
+                    .prepare_stimulation_values();
                 var serial_command_inputs =
                     Provider.of<Data>(context, listen: false)
-                        .get_serial_command_input_char;                
+                        .get_serial_command_input_char;
+                print(serial_command_inputs);
                 for (var value in serial_command_inputs.values) {
-
-                  writeCharacteristic(
-                      device.address,
-                      "0000fe40-cc7a-482a-984a-7f2ed5b3e58f",
-                      "0000fe41-8e22-4541-9d4c-21edae82ed19",
-                                        value,
-                      false);
+                  writeCharacteristic(device.address, SERVICE_UUID,
+                      SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
                   await Future.delayed(const Duration(milliseconds: 1), () {});
-                
                 }
-
               },
               icon: const Icon(
                 Icons.bolt,
@@ -240,7 +257,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
               label: Text('start',
                   style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w600)), // <-- Text
+                      fontSize: 20, fontWeight: FontWeight.w400)), // <-- Text
             ),
             SizedBox(
               width: 50,
@@ -252,14 +269,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
 
               onPressed: () {
-                  writeCharacteristic(
-                      device.address,
-                      "0000fe40-cc7a-482a-984a-7f2ed5b3e58f",
-                      "0000fe41-8e22-4541-9d4c-21edae82ed19",
-                      Uint8List.fromList([2,0,0,0,0]),
-                      false);
-
-
+                writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    Uint8List.fromList([2, 0, 0, 0, 0]),
+                    true);
               },
               icon: const Icon(
                 Icons.stop_outlined,
@@ -267,7 +282,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
               label: Text('stop',
                   style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w600)), // <-- Text
+                      fontSize: 20, fontWeight: FontWeight.w400)), // <-- Text
             ),
           ],
         ),
@@ -280,6 +295,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
+                    enabled: !myProvider.getDcMode,
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
@@ -290,9 +306,15 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase1current(value);
                     },
                     decoration: const InputDecoration(
+                                          disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 1 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -300,6 +322,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
+                                        enabled: !myProvider.getDcMode,
+
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
@@ -310,9 +334,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase2current(value);
                     },
                     decoration: const InputDecoration(
+                                          disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 2 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                      border: OutlineInputBorder(),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -322,35 +351,103 @@ class _RightSideInputsState extends State<RightSideInputs> {
             Column(
               children: [
                 const SizedBox(height: 20),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _dcHoldTimeTextfield,
+                    inputFormatters: [
+                      num_range_formatter(min: 0, max: UINT32MAX)
+                    ],
+                    onChanged: (value) {
+                      myProvider.setDCHoldTime(value);
+                    },
+                    enabled: myProvider.getDcMode,
+                    decoration: const InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'DC Hold Time (µs)',
+                      labelStyle: TextStyle(fontSize: 20),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _dcCurrentTargetTextfield,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      num_range_formatter(min: 0, max: 3000)
+                    ],
+                    onChanged: (value) {
+                      myProvider.setDCCurrentTarget(value);
+                    },
+                    enabled: myProvider.getDcMode,
+                    decoration: const InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'DC Current Target (µA)',
+                      labelStyle: TextStyle(fontSize: 20),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    ),
+                  ),
+                ),
               ],
             ),
           ],
         ),
-        SizedBox(
-          height: 10,
-        ),
-        Text("Toggle anodic or cathodic first:"),
-        SizedBox(
-          height: 10,
-        ),
-        FlutterSwitch(
-          activeColor: Colors.green,
-          inactiveColor: Colors.blue,
-          activeText: "cathodic first",
-          inactiveText: "anodic first",
-          width: 150,
-          height: 40,
-          activeTextColor: Colors.white,
-          showOnOff: true,
-          onToggle: (bool cathodic) {
-            Provider.of<Data>(context, listen: false)
-                .toggleCathodicAnodic(cathodic);
-          },
-          value: Provider.of<Data>(context)
-              .getCathodicFirst, // remove `listen: false`
-        ),
-        SizedBox(
-          height: 10,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                const SizedBox(height: 10),
+                const Text(
+                  "Ramp Up Time",
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 0, 60, 109),
+                      fontWeight: FontWeight.normal,
+                      fontSize: 30),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _rampUpTimeTextfield,
+                    inputFormatters: [
+
+                      num_range_formatter(min: 0, max: UINT32MAX)
+                    ],
+                    onChanged: (value) {
+                      print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
+                      myProvider.setrampUpTime(value);
+                    },
+                    enabled: myProvider.getDcMode,
+                    decoration: const InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'Ramp Up Time (µs)',
+                      labelStyle: TextStyle(fontSize: 20),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         Text("End stimulation by:"),
         SizedBox(
@@ -402,18 +499,25 @@ class _RightSideInputsState extends State<RightSideInputs> {
               myProvider.setendbyvalue(value);
             },
             decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+              hintText: "Enter duration (s) or bursts",
+              disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+                                  focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
             ),
           ),
         ),
+        SizedBox(
+          height: 20,
+        ),
+        Container(
+          width: 500,
+          height: 1, // Thickness
+          color: Colors.grey,
+        )
       ],
     );
   }
 }
-
-////
-///
-///
-///
-
-

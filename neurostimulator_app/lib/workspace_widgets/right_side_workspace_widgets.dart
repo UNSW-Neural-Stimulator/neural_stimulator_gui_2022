@@ -357,19 +357,16 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     keyboardType: TextInputType.number,
                     controller: _dcHoldTimeTextfield,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,3}')),
                       num_range_formatter(min: 0, max: UINT32MAX)
                     ],
                     onChanged: (value) {
-                      value = value * 1000;
                       myProvider.setDCHoldTime(value);
                     },
                     enabled: myProvider.getDcMode,
                     decoration: const InputDecoration(
                       disabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'DC Hold Time (s)',
+                      labelText: 'DC Hold Time (µs)',
                       labelStyle: TextStyle(fontSize: 20),
                                           focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.blue)),
@@ -428,19 +425,18 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     keyboardType: TextInputType.number,
                     controller: _rampUpTimeTextfield,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d+\.?\d{0,3}')),
+
                       num_range_formatter(min: 0, max: UINT32MAX)
                     ],
                     onChanged: (value) {
-                      value = value * 1000;
+                      print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
                       myProvider.setrampUpTime(value);
                     },
                     enabled: myProvider.getDcMode,
                     decoration: const InputDecoration(
                       disabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'Ramp Up Time (s) (DC mode only)',
+                      labelText: 'Ramp Up Time (µs)',
                       labelStyle: TextStyle(fontSize: 20),
                                           focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.blue)),

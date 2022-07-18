@@ -110,5 +110,8 @@ int calculate_adv_to_mv(int adc_value) {
 
 }
 
-int calculate_interstim_from_frequency(int frequency, int phasetime1, int phasetime2, int interphase) =>
-  (1000000 / frequency - phasetime1 - phasetime2 - interphase).round();
+int calculate_interstim_from_frequency(int frequency, int phasetime1, int phasetime2, int interphase) {
+  var answer = (1000000 / frequency - phasetime1 - phasetime2 - interphase);
+  return answer != 0 ? 0:answer.round();
+
+  }

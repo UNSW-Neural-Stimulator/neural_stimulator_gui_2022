@@ -127,7 +127,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     try {
       List<int> data = await WinBle.read(
           address: address, serviceId: serviceID, characteristicId: charID);
-      print(String.fromCharCodes(data));
+      // print(String.fromCharCodes(data));
       setState(() {
         result =
             "Read => List<int> : $data    ,    ToString :  ${String.fromCharCodes(data)}   , Time : ${DateTime.now()}";
@@ -157,7 +157,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     });
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
-      print("CharValue : $event");
+      // print("CharValue : $event");
     });
     super.initState();
     _phase1CurrentTextfield =
@@ -244,7 +244,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 var serial_command_inputs =
                     Provider.of<Data>(context, listen: false)
                         .get_serial_command_input_char;
-                print(serial_command_inputs);
+                // print(serial_command_inputs);
                 for (var value in serial_command_inputs.values) {
                   writeCharacteristic(device.address, SERVICE_UUID,
                       SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
@@ -429,7 +429,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       num_range_formatter(min: 0, max: UINT32MAX)
                     ],
                     onChanged: (value) {
-                      print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
+                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
                       myProvider.setrampUpTime(value);
                     },
                     enabled: myProvider.getDcMode,

@@ -77,7 +77,7 @@ class _workspaceState extends State<workspace> {
             content: Text(
                 "hints to be written here"
                 // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
-                // "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"
+                 "Inter-stim Delay (μs): $interstimDelayTime\n"
                 // "anodic_cathodic: $anodic_cathodic\n"
                 // "endbyduration: $endbyduration\n"
                 // "endbyburst: $endbyburst\n"

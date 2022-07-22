@@ -22,6 +22,9 @@ class Data extends ChangeNotifier {
   var _dutyCyclePercentage = 0;
   var _frequency = 0;
 
+  //
+  var _interStimDelayStringForDisplay_frequency = "";
+
   //dc mode related values
   var _rampUpTime = 0;
   var _dcHoldTime = 0;
@@ -102,6 +105,9 @@ class Data extends ChangeNotifier {
 
   void togglefrequency(bool frequency) {
     _calculate_interstim_by_freq = frequency;
+    if (frequency == false) {
+      _interStimDelayStringForDisplay_frequency == "";
+    }
     notifyListeners();
   }
 
@@ -110,7 +116,7 @@ class Data extends ChangeNotifier {
 
   void toggleburstcont(bool continuous) {
     _continuousStim = !continuous;
-    print("burstmode is equal to $_continuousStim");
+    // //print("burstmode is equal to $_continuousStim");
     notifyListeners();
   }
 
@@ -149,6 +155,7 @@ class Data extends ChangeNotifier {
   setfrequency(String frequencyinput) {
     _frequency = int.tryParse(frequencyinput) ?? defaultValue;
     _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+    _interStimDelayStringForDisplay_frequency = _interStimDelayMicrosec.toString();
     notifyListeners();
   }
 
@@ -203,6 +210,12 @@ class Data extends ChangeNotifier {
 
   setphase2current(String phase2current) {
     _phase2CurrentMicroAmp = int.tryParse(phase2current) ?? 3000;
+    notifyListeners();
+  }
+
+
+  setinterstimsting(String interstim_value_from_frequency) {
+    _interStimDelayStringForDisplay_frequency = interstim_value_from_frequency;
     notifyListeners();
   }
 
@@ -315,6 +328,10 @@ class Data extends ChangeNotifier {
     return serial_command_input_char;
   }
 
+  String get getinterstimstring {
+    return _interStimDelayStringForDisplay_frequency;
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////
   ///end of get functions
 
@@ -324,7 +341,7 @@ class Data extends ChangeNotifier {
 
     int temporary_bool_to_int = 0;
     temporary_bool_to_int = _cathodicFirst ? 1 : 0;
-    print("anodic cathodic is $temporary_bool_to_int");
+    //print("anodic cathodic is $temporary_bool_to_int");
     serial_command_input_char["anodic_cathodic"] =
         Uint8List.fromList([anodic_cathodic, temporary_bool_to_int, 0, 0, 0]);
 
@@ -337,9 +354,9 @@ class Data extends ChangeNotifier {
     serial_command_input_char["stim_type"] =
         Uint8List.fromList([stim_type, temporary_bool_to_int, 0, 0, 0]);
 
-    print("hold time : $_dcHoldTime");
-    print("dc curr targ: $_dcCurrentTargetMicroAmp");
-    print("ramp_up = $_rampUpTime");
+    //print("hold time : $_dcHoldTime");
+    //print("dc curr targ: $_dcCurrentTargetMicroAmp");
+    //print("ramp_up = $_rampUpTime");
     serial_command_input_char["ramp_up_time"] =
         bytearray_maker(ramp_up_time, _rampUpTime);
 
@@ -390,9 +407,9 @@ class Data extends ChangeNotifier {
 
 
 
-    print("cathodic_first = $_cathodicFirst");
-    print(_phase1CurrentMicroAmp);
-    print(_phase2CurrentMicroAmp);
+    //print("cathodic_first = $_cathodicFirst");
+    //print(_phase1CurrentMicroAmp);
+    //print(_phase2CurrentMicroAmp);
 
     serial_command_input_char["dac_phase_one"] =
         bytearray_maker(dac_phase_one, _phase1CurrentMicroAmp);
@@ -442,7 +459,6 @@ class Data extends ChangeNotifier {
         //     bytearray_maker(pulse_num_in_one_burst, 0);
       }
     }
-    if(!_stimForever) {
         // if ending by duration, calculate the number of bursts that are needed for the specified duration time
         if (_endByDuration) {
           stimduration = _endbyvalue;
@@ -490,8 +506,7 @@ class Data extends ChangeNotifier {
           }
         }
     
-    }
-
+    
 
     //put all new values in serial command input char map
 

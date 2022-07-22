@@ -63,10 +63,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
   @override
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);
-    var interstim_from_freq = "";
-    Provider.of<Data>(context).getCalculateByFrequency ? interstim_from_freq = "Inter-stim delay (µs) = $interstim_from_freq":" " ;
-    
-    
+    var interstim_from_freq = Provider.of<Data>(context).getinterstimstring;
+    bool show_interstim_tab =
+        !Provider.of<Data>(context).getCalculateByFrequency;
+
     return Column(children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -165,32 +165,54 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 ),
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: 250,
-                child: TextField(
-                  enabled: (!myProvider.getDcMode &
-                      !myProvider.getCalculateByFrequency),
-                  keyboardType: TextInputType.number,
-                  controller: _interStimDelayTexfield,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 0, max: UINT32MAX)
-                  ],
-                  onChanged: (value) {
-                    myProvider.setinterstimdelay(value);
-                  },
-                  decoration: const InputDecoration(
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey)),
-                    labelText: 'Inter-stim delay (µs)',
-                    labelStyle: TextStyle(fontSize: 20),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                  ),
-                ),
-              ),
+              show_interstim_tab
+                  ? SizedBox(
+                      width: 250,
+                      child: TextField(
+                        enabled: (!myProvider.getDcMode &
+                            !myProvider.getCalculateByFrequency),
+                        keyboardType: TextInputType.number,
+                        controller: _interStimDelayTexfield,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          num_range_formatter(min: 0, max: UINT32MAX)
+                        ],
+                        onChanged: (value) {
+                          myProvider.setinterstimdelay(value);
+                        },
+                        decoration: InputDecoration(
+                          disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey)),
+                          labelText: 'Inter-stim delay (µs)',
+                          labelStyle: TextStyle(fontSize: 20),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue)),
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue)),
+                        ),
+                      ),
+                    )
+                  : Column(
+                      children: [
+                        Text("Inter-stim delay from frequency:",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 150, 150, 150),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 15)),
+                        SizedBox(height: 6),
+                        Container(
+                          width: 250,
+                          height: 1, // Thickness
+                          color: Colors.blue,
+                        ),
+                        SizedBox(height: 6),
+                        Text("$interstim_from_freq µs",
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontWeight: FontWeight.normal,
+                                fontSize: 15)),
+                      ],
+                    )
             ],
           ),
         ],
@@ -209,24 +231,31 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     fontSize: 15),
               ),
               const SizedBox(height: 10),
-          
-                                            FlutterSwitch(
-                                              activeColor: Colors.blue,
-                                              inactiveColor: Colors.grey,
-                                              activeText: "on",
-                                              inactiveText: "off",
-                                              width: 75,
-                                              height: 40,
-                                              activeTextColor: Colors.white,
-                                              showOnOff: true,
-                                              onToggle: (bool frequency) {
-                                                Provider.of<Data>(context, listen: false)
-                                                    .togglefrequency(frequency);
-                                              },
-                                              value: Provider.of<Data>(context)
-                                                  .getCalculateByFrequency, // remove `listen: false`
-                                            ),
-
+              FlutterSwitch(
+                activeColor: Colors.blue,
+                inactiveColor: Colors.grey,
+                activeText: "on",
+                inactiveText: "off",
+                width: 75,
+                height: 40,
+                activeTextColor: Colors.white,
+                showOnOff: true,
+                onToggle: (bool frequency) {
+                  Provider.of<Data>(context, listen: false)
+                      .togglefrequency(frequency);
+                  if (frequency == false) {
+                    Provider.of<Data>(context, listen: false)
+                        .setinterstimsting("");
+                  } else {
+                    myProvider.setfrequency(
+                        Provider.of<Data>(context, listen: false)
+                            .getFrequency
+                            .toString());
+                  }
+                },
+                value: Provider.of<Data>(context)
+                    .getCalculateByFrequency, // remove `listen: false`
+              ),
             ],
           ),
           SizedBox(
@@ -234,14 +263,14 @@ class _leftTextFieldsState extends State<leftTextFields> {
           ),
           Column(children: [
             SizedBox(
-              height: 50,
-              child: Text("$interstim_from_freq"),
+              height: 20,
             ),
             SizedBox(
               width: 250,
               child: TextField(
                 //todo: implement frequency calculations
-                enabled: (false & myProvider.getCalculateByFrequency & !myProvider.getDcMode),
+                enabled: (myProvider.getCalculateByFrequency &
+                    !myProvider.getDcMode),
                 keyboardType: TextInputType.number,
                 controller: _frequencyTextfield,
                 inputFormatters: [
@@ -250,7 +279,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 ],
                 onChanged: (value) {
                   myProvider.setfrequency(value);
-
                 },
                 decoration: const InputDecoration(
                   disabledBorder: OutlineInputBorder(

@@ -18,7 +18,7 @@ class Data extends ChangeNotifier {
   var _interPhaseDelayMicrosec = 1000;
   var _phase2TimeMicrosec = 1000;
   var _interStimDelayMicrosec = 1000;
-  var _burstPeriodMs = 0;
+  var _burstDurationMs = 0;
   var _dutyCyclePercentage = 0;
   var _frequency = 0;
 
@@ -176,9 +176,9 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-//TODO, what is burst period, and what does it do
-  setburstperiod(String burstPeriodFromTextField) {
-    _burstPeriodMs = int.tryParse(burstPeriodFromTextField) ?? defaultValue;
+//TODO, what is burst Duration, and what does it do
+  setburstduration(String burstDurationFromTextField) {
+    _burstDurationMs = int.tryParse(burstDurationFromTextField) ?? defaultValue;
     notifyListeners();
   }
 
@@ -276,8 +276,8 @@ class Data extends ChangeNotifier {
     return _interStimDelayMicrosec;
   }
 
-  int get getBurstPeriod {
-    return _burstPeriodMs;
+  int get getBurstDuration {
+    return _burstDurationMs;
   }
 
   int get getDutyCycle {
@@ -401,11 +401,11 @@ class Data extends ChangeNotifier {
 
     /// Calculating amount of bursts and pulses based on stimulation ending method
 
-    ///I burstmode is on, calculate burstperiod, duty cycle, burst duration and interburst delay
-    var burstDuration = 0.0;
+    ///I burstmode is on, calculate burstduration, duty cycle, burst duration and interburst delay
+    var burstperiod = 0.0;
     var pulsePeriod = 0;
     var dutycycle = 0.0;
-    var burstperiod = 0;
+    var burstDuration = 0.0;
     var stimduration = 0;
     var burstnumber = 0;
     var pulsenumber = 0;
@@ -416,9 +416,9 @@ class Data extends ChangeNotifier {
 
 
     if (!_continuousStim) {
-      burstperiod = (_burstPeriodMs) * 1000;
+      burstDuration = (_burstDurationMs) * 1000;
       dutycycle = (_dutyCyclePercentage) / 100;
-      burstDuration = dutycycle * burstperiod.round();
+      burstperiod = (burstDuration) / (dutycycle);
       int interburst = (burstperiod - burstDuration.round()).round();
 
       serial_command_input_char["inter_burst_delay"] =
@@ -443,14 +443,16 @@ class Data extends ChangeNotifier {
       }
     }
     if(!_stimForever) {
+        // change stimduration units from minutes to micros
+		stimduration = _endbyvalue;
+		stimduration = stimduration * 1000000 * 60;
+
         // if ending by duration, calculate the number of bursts that are needed for the specified duration time
         if (_endByDuration) {
-          stimduration = _endbyvalue;
-
           if (burstDuration != 0) {
             //burst number is calculated as time divided by duration of each burst
             // returns an interger
-            burstnumber = stimduration ~/ burstDuration;
+            burstnumber = stimduration ~/ burstperiod;
           } else {
             //in adherrance to old ui, returns zero, but I want to add an
             // error case
@@ -483,8 +485,6 @@ class Data extends ChangeNotifier {
       
         else {
           if (stimduration != 0 && pulsePeriod != 0) {
-            stimduration = stimduration * 1000000;
-
 
             pulsenumber = stimduration ~/pulsePeriod;
           }

@@ -499,7 +499,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               myProvider.setendbyvalue(value);
             },
             decoration: const InputDecoration(
-              hintText: "Enter duration (s) or bursts",
+              hintText: "Enter duration (min) or bursts",
               disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey)),
                                   focusedBorder: OutlineInputBorder(

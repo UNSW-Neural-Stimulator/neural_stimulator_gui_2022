@@ -18,7 +18,7 @@ class Data extends ChangeNotifier {
   var _interPhaseDelayMicrosec = 1000;
   var _phase2TimeMicrosec = 1000;
   var _interStimDelayMicrosec = 1000;
-  var _burstPeriodMs = 0;
+  var _burstDurationMicrosec = 0;
   var _dutyCyclePercentage = 0;
   var _frequency = 0;
 
@@ -30,19 +30,18 @@ class Data extends ChangeNotifier {
   var _dcHoldTime = 0;
   var _dcCurrentTargetMicroAmp = 1000;
 
-
   //ints for right side of workspace
   var _phase1CurrentMicroAmp = 1500;
   var _phase2CurrentMicroAmp = 3000;
-  //end stimulation
-  // var _endByDurationValue = 1;
-  // var _endByBurstValue = 1;
+  
+  //end stimulation by duration, minute and seconds
+  var _endStimulationMinute = 0;
+  var _endStimulationSeconds = 0;
 
   var _endbyvalue = 1;
 
   // calculate interstim by freq
   bool _calculate_interstim_by_freq = false;
-
 
   //burst or continuos stimulation
   bool _continuousStim = false;
@@ -60,7 +59,6 @@ class Data extends ChangeNotifier {
   bool _anodicFirst = false;
 
   //variables used for burst calculations
-
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   ///Map for of all values that are sent to the firmware as parameters for stimulation
@@ -83,8 +81,8 @@ class Data extends ChangeNotifier {
     "dac_phase_one": Uint8List.fromList([dac_phase_one, 220, 5, 0, 0]),
     "dac_phase_two": Uint8List.fromList([dac_phase_two, 184, 11, 0, 0]),
     "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
-    "dc_hold_time":  Uint8List.fromList([dc_hold_time, 0, 0, 0, 0]),
-    "dc_curr_target":  Uint8List.fromList([dc_curr_target, 232, 3, 0, 0]),
+    "dc_hold_time": Uint8List.fromList([dc_hold_time, 0, 0, 0, 0]),
+    "dc_curr_target": Uint8List.fromList([dc_curr_target, 232, 3, 0, 0]),
     "start": start_bytearray,
   };
 
@@ -110,7 +108,6 @@ class Data extends ChangeNotifier {
     }
     notifyListeners();
   }
-
 
 // continous stimulation
 
@@ -154,8 +151,10 @@ class Data extends ChangeNotifier {
 
   setfrequency(String frequencyinput) {
     _frequency = int.tryParse(frequencyinput) ?? defaultValue;
-    _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
-    _interStimDelayStringForDisplay_frequency = _interStimDelayMicrosec.toString();
+    _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency,
+        _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+    _interStimDelayStringForDisplay_frequency =
+        _interStimDelayMicrosec.toString();
     notifyListeners();
   }
 
@@ -183,9 +182,9 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-//TODO, what is burst period, and what does it do
-  setburstperiod(String burstPeriodFromTextField) {
-    _burstPeriodMs = int.tryParse(burstPeriodFromTextField) ?? defaultValue;
+  setburstduration(String burstDurationFromTextField) {
+    _burstDurationMicrosec =
+        int.tryParse(burstDurationFromTextField) ?? defaultValue;
     notifyListeners();
   }
 
@@ -202,7 +201,6 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-
   setphase1current(String phase1current) {
     _phase1CurrentMicroAmp = int.tryParse(phase1current) ?? 1500;
     notifyListeners();
@@ -212,7 +210,6 @@ class Data extends ChangeNotifier {
     _phase2CurrentMicroAmp = int.tryParse(phase2current) ?? 3000;
     notifyListeners();
   }
-
 
   setinterstimsting(String interstim_value_from_frequency) {
     _interStimDelayStringForDisplay_frequency = interstim_value_from_frequency;
@@ -224,6 +221,17 @@ class Data extends ChangeNotifier {
     _endbyvalue = int.tryParse(endby) ?? 1;
     notifyListeners();
   }
+
+  setendbystimulationminute(String endbyminutes) {
+    _endStimulationMinute = int.tryParse(endbyminutes) ?? 0;
+    notifyListeners();
+  }
+
+  setendbystimulationseconds(String endbyseconds) {
+    _endStimulationSeconds = int.tryParse(endbyseconds) ?? 0;
+    notifyListeners();
+  }
+
 
   /// end of set functions
   ///////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +276,6 @@ class Data extends ChangeNotifier {
     return _calculate_interstim_by_freq;
   }
 
-
   bool get getBurstMode {
     return _continuousStim;
   }
@@ -289,8 +296,8 @@ class Data extends ChangeNotifier {
     return _interStimDelayMicrosec;
   }
 
-  int get getBurstPeriod {
-    return _burstPeriodMs;
+  int get getBurstDuration {
+    return _burstDurationMicrosec;
   }
 
   int get getDutyCycle {
@@ -305,7 +312,6 @@ class Data extends ChangeNotifier {
     return _dcHoldTime;
   }
 
-
   int get getFrequency {
     return _frequency;
   }
@@ -313,12 +319,20 @@ class Data extends ChangeNotifier {
   int get getDCCurrentTarget {
     return _dcCurrentTargetMicroAmp;
   }
+//
+
+  int get getendbyminutes {
+    return _endStimulationMinute;
+  }
+
+  int get getendbyseconds {
+    return _endStimulationSeconds;
+  }
 
 //
   int get getPhase1Current {
     return _phase1CurrentMicroAmp;
   }
-
 
   int get getPhase2Current {
     return _phase2CurrentMicroAmp;
@@ -338,7 +352,6 @@ class Data extends ChangeNotifier {
 /////////////
   ///Function that updates the serial command input char map before it is sent to the stimulator
   void prepare_stimulation_values() {
-
     int temporary_bool_to_int = 0;
     temporary_bool_to_int = _cathodicFirst ? 1 : 0;
     //print("anodic cathodic is $temporary_bool_to_int");
@@ -363,11 +376,8 @@ class Data extends ChangeNotifier {
     serial_command_input_char["dc_curr_target"] =
         bytearray_maker(dc_curr_target, _dcCurrentTargetMicroAmp);
 
-
-            serial_command_input_char["dc_hold_time"] =
+    serial_command_input_char["dc_hold_time"] =
         bytearray_maker(dc_hold_time, _dcHoldTime);
-
-
 
     serial_command_input_char["phase_one_time"] =
         bytearray_maker(phase_one_time, _phase1TimeMicrosec);
@@ -381,11 +391,9 @@ class Data extends ChangeNotifier {
     serial_command_input_char["inter_stim_delay"] =
         bytearray_maker(inter_stim_delay, _interStimDelayMicrosec);
 
-
     //check which curr value should be negative based off cathodic and anodic
 
     if (!_cathodicFirst) {
-
       if (_phase1CurrentMicroAmp < 1) {
         _phase1CurrentMicroAmp = _phase1CurrentMicroAmp * -1;
       }
@@ -393,9 +401,7 @@ class Data extends ChangeNotifier {
       if (_phase2CurrentMicroAmp > 1) {
         _phase2CurrentMicroAmp = _phase2CurrentMicroAmp * -1;
       }
-    }
-    else {
-
+    } else {
       if (_phase2CurrentMicroAmp < 1) {
         _phase2CurrentMicroAmp = _phase2CurrentMicroAmp * -1;
       }
@@ -404,8 +410,6 @@ class Data extends ChangeNotifier {
         _phase1CurrentMicroAmp = _phase1CurrentMicroAmp * -1;
       }
     }
-
-
 
     //print("cathodic_first = $_cathodicFirst");
     //print(_phase1CurrentMicroAmp);
@@ -418,124 +422,119 @@ class Data extends ChangeNotifier {
 
     /// Calculating amount of bursts and pulses based on stimulation ending method
 
-    ///I burstmode is on, calculate burstperiod, duty cycle, burst duration and interburst delay
-    var burstDuration = 0.0;
+    /// The following values are used for calculation of burst number
+    /// and pulse number
+    /// the reason we are not using the values stored into provider
+    /// is to prevent any values on the user interface changing
+    /// as a result of these calculations.
+
+    // BurstPeriod is the burstduration + interburst delay
+    var burstPeriod = 0.0;
+    // Pulse Period is the total length of each pulse
     var pulsePeriod = 0;
-    var dutycycle = 0.0;
-    var burstperiod = 0;
+    // Stim duration is the _endby value convereted to seconds
     var stimduration = 0;
+    //
     var burstnumber = 0;
     var pulsenumber = 0;
     var burstfrequency = 0.0;
 
-    pulsePeriod = _phase1TimeMicrosec + _phase2TimeMicrosec + _interPhaseDelayMicrosec + _interStimDelayMicrosec;
+    pulsePeriod = _phase1TimeMicrosec +
+        _phase2TimeMicrosec +
+        _interPhaseDelayMicrosec +
+        _interStimDelayMicrosec;
 
-
+/////////////////////////////////
+    // if it is burst mode calculate interburst delay
 
     if (!_continuousStim) {
-      burstperiod = (_burstPeriodMs) * 1000;
-      dutycycle = (_dutyCyclePercentage) / 100;
-      burstDuration = dutycycle * burstperiod.round();
-      int interburst = (burstperiod - burstDuration.round()).round();
+      print(_dutyCyclePercentage);
+
+      print("burstDuration = $_burstDurationMicrosec");
+      burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
+
+      int interburst = (burstPeriod - _burstDurationMicrosec).round();
 
       serial_command_input_char["inter_burst_delay"] =
           bytearray_maker(inter_burst_delay, interburst);
     }
+
+    ///= if continuos stimulation is selected there is no interburst delay
     else {
-       int interburst = 0;
+      int interburst = 0;
 
       serial_command_input_char["inter_burst_delay"] =
           bytearray_maker(inter_burst_delay, interburst);
     }
 
-    //must implment frequency here TODO
+/////////////////////////////////////////////////////////////////////
 
+    /// if stimulating forever burst number and pulse number should be zero
     if (_stimForever) {
       if (_continuousStim) {
         serial_command_input_char["burst_num"] = bytearray_maker(burst_num, 0);
       } else {
         serial_command_input_char["pulse_num"] = bytearray_maker(pulse_num, 0);
-        // serial_command_input_char["pulse_num_in_one_burst"] =
-        //     bytearray_maker(pulse_num_in_one_burst, 0);
       }
     }
-        // if ending by duration, calculate the number of bursts that are needed for the specified duration time
-        if (_endByDuration) {
-          stimduration = _endbyvalue;
 
-          if (burstDuration != 0) {
-            //burst number is calculated as time divided by duration of each burst
-            // returns an interger
-            burstnumber = stimduration ~/ burstDuration;
-          } else {
-            //in adherrance to old ui, returns zero, but I want to add an
-            // error case
-            burstnumber = 0;
-          }
-        }
-        // if ending by number of bursts, the user inputs the number of bursts
-        if (_endByBurst) {
-          burstnumber = _endbyvalue;
-        } else {
-          //in adherrance to old ui, returns zero, but I want to add an
-          // error case
-          burstnumber = 0;
-        }
-      
-      /// not too sure whats going on in the logic below, but it is in adherrance to 
-      /// the old ui
+    ///////////////////////////////////////////////////////////////////
+    // if ending by duration, calculate the number of bursts that are needed for the specified duration time
+    if (_endByDuration) {
+      stimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
 
-        // if burst mode is slected the pulse number and is calculated
-        // based on us
-        if (!_continuousStim && pulsePeriod != 0) {
+      if (burstPeriod != 0) {
+        //burst number is calculated as time divided by duration of each burst
+        // returns an interger
+        burstnumber = (stimduration * 1000000) ~/ burstPeriod;
 
-            if (burstDuration != 0 && burstperiod != 0) {
-              pulsenumber = burstDuration ~/ pulsePeriod;
-            }
-            if (burstDuration != 0) {
-              burstfrequency = 10000000 / burstDuration;
-            }
-        }
-      
-        else {
-          if (stimduration != 0 && pulsePeriod != 0) {
-            stimduration = stimduration * 1000000;
+      } else {
+        //in adherrance to old ui, returns zero, but I want to add an
+        // error case
+        burstnumber = 0;
+      }
+    }
+    // if ending by number of bursts, the user inputs the number of bursts
 
+    //////////////////////////////////////////////////
 
-            pulsenumber = stimduration ~/pulsePeriod;
-          }
-        }
-    
-    
+    if (_endByBurst) {
+//           if(_endbyvalue != 0) {
+      print("ending by burst");
+      print("endbyvalue: $_endbyvalue");
+      burstnumber = _endbyvalue;
+      print("burstnumber = $burstnumber");
 
+//           } else {
+//             //in adherrance to old ui, returns zero, but I want to add an
+//             // error case
+//             burstnumber = 0;
+//           }
+    }
+
+    // if burst mode is sdlected the pulse number is calculated
+
+    if (!_continuousStim && pulsePeriod != 0) {
+      if (_burstDurationMicrosec != 0) {
+        pulsenumber = _burstDurationMicrosec ~/ pulsePeriod;
+      }
+      if (_burstDurationMicrosec != 0) {
+        burstfrequency = 10000000 / _burstDurationMicrosec;
+      }
+    }
+    // if continuous stimulation is selected the pulse number
+    // is calculated
+    else {
+      if (stimduration != 0 && pulsePeriod != 0) {
+        stimduration = stimduration * 1000000;
+        pulsenumber = stimduration ~/ pulsePeriod;
+      }
+    }
     //put all new values in serial command input char map
 
-  serial_command_input_char["burst_num"] =
-           bytearray_maker(burst_num, burstnumber);
-  serial_command_input_char["pulse_num"] =
-           bytearray_maker(pulse_num, pulsenumber);
-  
-  // serial_command_input_char["pulse_num_in_one_burst"] =
-  //          bytearray_maker(pulse_num_in_one_burst, pulsenumber);
-
-  //////////////////////////////////////////////////////////////
-  ///Bluetooth Low Energy
-
-
-
-
-
-
-
-
-
-
-
-
-
+    serial_command_input_char["burst_num"] =
+        bytearray_maker(burst_num, burstnumber);
+    serial_command_input_char["pulse_num"] =
+        bytearray_maker(pulse_num, pulsenumber);
   }
 }
-
-
-
-

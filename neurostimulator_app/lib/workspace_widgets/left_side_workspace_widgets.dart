@@ -20,7 +20,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
   TextEditingController? _interPhaseDelayTextfield;
   TextEditingController? _phase2Textfield;
   TextEditingController? _interStimDelayTexfield;
-  TextEditingController? _burstPeriodTextfield;
+  TextEditingController? _burstDurationTextfield;
   TextEditingController? _dutyCycleTextfield;
   TextEditingController? _rampUpTimeTextfield;
   TextEditingController? _frequencyTextfield;
@@ -38,8 +38,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
         TextEditingController(text: myProvider.getPhase2Time.toString());
     _interStimDelayTexfield =
         TextEditingController(text: myProvider.getInterstimDelay.toString());
-    _burstPeriodTextfield =
-        TextEditingController(text: myProvider.getBurstPeriod.toString());
+    _burstDurationTextfield =
+        TextEditingController(text: myProvider.getBurstDuration.toString());
     _dutyCycleTextfield =
         TextEditingController(text: myProvider.getDutyCycle.toString());
     _frequencyTextfield =
@@ -53,7 +53,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
     _interPhaseDelayTextfield?.dispose();
     _phase2Textfield?.dispose();
     _interStimDelayTexfield?.dispose();
-    _burstPeriodTextfield?.dispose();
+    _burstDurationTextfield?.dispose();
     _dutyCycleTextfield?.dispose();
     _frequencyTextfield?.dispose();
 
@@ -315,18 +315,18 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   enabled: (!Provider.of<Data>(context).getBurstMode &
                       !myProvider.getDcMode),
                   keyboardType: TextInputType.number,
-                  controller: _burstPeriodTextfield,
+                  controller: _burstDurationTextfield,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     num_range_formatter(min: 0, max: UINT32MAX)
                   ],
                   onChanged: (value) {
-                    myProvider.setburstperiod(value);
+                    myProvider.setburstduration(value);
                   },
                   decoration: const InputDecoration(
                     disabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey)),
-                    labelText: 'Burst Period (ms)',
+                    labelText: 'Burst Duration (µs)',
                     labelStyle: TextStyle(fontSize: 20),
                     focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.blue)),

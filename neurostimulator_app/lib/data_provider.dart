@@ -159,7 +159,7 @@ class Data extends ChangeNotifier {
   }
 
   setphase1(String phase1TimeStringFromTextfield) {
-    _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 1000;
+    _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
     notifyListeners();
   }
 
@@ -388,6 +388,9 @@ class Data extends ChangeNotifier {
     serial_command_input_char["phase_two_time"] =
         bytearray_maker(phase_two_time, _phase2TimeMicrosec);
 
+    print("iterstim is ");
+    print(_interStimDelayMicrosec);
+
     serial_command_input_char["inter_stim_delay"] =
         bytearray_maker(inter_stim_delay, _interStimDelayMicrosec);
 
@@ -452,8 +455,11 @@ class Data extends ChangeNotifier {
 
       print("burstDuration = $_burstDurationMicrosec");
       burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
-
-      int interburst = (burstPeriod - _burstDurationMicrosec).round();
+      int interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
+      print("burstPeriod");
+      print(burstPeriod);
+      print("inter_burst_delay");
+      print(interburst);
 
       serial_command_input_char["inter_burst_delay"] =
           bytearray_maker(inter_burst_delay, interburst);

@@ -90,7 +90,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase1Textfield,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 10, max: UINT32MAX)
+                    num_range_formatter(min: 0, max: UINT32MAX)
                   ],
                   onChanged: (value) {
                     myProvider.setphase1(value);
@@ -147,7 +147,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase2Textfield,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    num_range_formatter(min: 10, max: UINT32MAX)
+                    num_range_formatter(min: 0, max: UINT32MAX)
                   ],
                   onChanged: (value) {
                     myProvider.setphase2(value);

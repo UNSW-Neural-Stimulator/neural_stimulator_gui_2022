@@ -517,11 +517,15 @@ class Data extends ChangeNotifier {
     if (!_continuousStim && !_dcMode && _burstDurationMicrosec != 0) {
       
       burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
-      int interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
+    
+      int interburst = 0;
+		  if ((burstPeriod - _burstDurationMicrosec).round() > _interStimDelayMicrosec) {
+			  interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
+		  }
 
 
-      serial_command_input_char["inter_burst_delay"] =
-          bytearray_maker(inter_burst_delay, interburst);
+		  serial_command_input_char["inter_burst_delay"] =
+			  bytearray_maker(inter_burst_delay, interburst);
     }
 
     ///= if continuos stimulation is selected there is no interburst delay
@@ -565,16 +569,10 @@ class Data extends ChangeNotifier {
 
     if (_endByBurst) {
 //           if(_endbyvalue != 0) {
-      print("ending by burst");
-      print("endbyvalue: $_endbyvalue");
-      burstnumber = _endbyvalue;
-      print("burstnumber = $burstnumber");
 
-//           } else {
-//             //in adherrance to old ui, returns zero, but I want to add an
-//             // error case
-//             burstnumber = 0;
-//           }
+      burstnumber = _endbyvalue;
+
+
     }
 
     // if burst mode is sdlected the pulse number is calculated
@@ -603,8 +601,9 @@ class Data extends ChangeNotifier {
         bytearray_maker(pulse_num, pulsenumber);
   }
   ///////////////////////////////////////////////////////////////
-  ///BLE Section
-  ///
+  ///BLE Section 
+  /// the following values are use for BLE connection
+  /// values calculated in the UI is stored here so navigation between pages can occur smoothly
   
   StreamSubscription? scanStream;
   StreamSubscription? connectionStream;

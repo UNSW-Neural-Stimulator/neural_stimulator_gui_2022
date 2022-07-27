@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import "dart:typed_data";
-
+import 'package:win_ble/win_ble.dart';
 import 'package:ns_2022/helper_and_const.dart';
+import 'dart:async';
 
 /*
 The Data class is a from the provider package. It is used for state management
@@ -601,4 +602,34 @@ class Data extends ChangeNotifier {
     serial_command_input_char["pulse_num"] =
         bytearray_maker(pulse_num, pulsenumber);
   }
+  ///////////////////////////////////////////////////////////////
+  ///BLE Section
+  ///
+  
+  StreamSubscription? scanStream;
+  StreamSubscription? connectionStream;
+  List<BleDevice> devices = <BleDevice>[];
+
+  bool isScanning = false;
+  bool notloading = false;
+
+  StreamSubscription? get getScanStream {
+    return scanStream;
+  }
+
+  StreamSubscription? get getConnnectionStream {
+    return connectionStream;
+  }
+
+  setScanStream(StreamSubscription stream) {
+    scanStream = stream;
+    notifyListeners();
+  }
+
+  setConnectionStream(StreamSubscription stream) {
+    connectionStream = stream;
+    notifyListeners();
+  }
+
+
 }

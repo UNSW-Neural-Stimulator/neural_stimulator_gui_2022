@@ -1,4 +1,6 @@
 import 'dart:async';
+import "../data_provider.dart";
+import 'package:provider/provider.dart';
 
 import 'workspace.dart';
 import 'package:flutter/material.dart';
@@ -135,6 +137,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
 //////////////////////////////////
 
   Widget _buildFullPageLayout() {
+    final Data myProvider = Provider.of<Data>(context, listen: false);
     return Row(
       children: <Widget>[
         Flexible(
@@ -166,9 +169,10 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                                   stopScanning();
                                   await connect(device);
                                   WinBle.connectionStreamOf(device.address)
-                                      .listen((event) {
+                                      .listen((event) async {
+                                        myProvider.setConnectionStream(connectionStream!);
                                     if (event) {
-                                      Navigator.push(
+                                      await Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => workspace(

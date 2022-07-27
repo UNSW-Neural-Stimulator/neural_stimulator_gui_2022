@@ -179,13 +179,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
     device = widget.device;
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
-    _connectionStream =
-        WinBle.connectionStreamOf(device.address).listen((event) {
-      //////////////////////
-      //this is to be removed when the BLE is sorted as an abstraction layer
-      connect(device);
-      //////////////////////
-    });
+    _connectionStream = myProvider.getConnnectionStream;
+
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
       // print("CharValue : $event");
@@ -224,6 +219,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
+    disconnect(device.address);
     _phase1CurrentTextfield?.dispose();
     _phase2CurrentTextfield?.dispose();
     _dcCurrentTargetTextfield?.dispose();
@@ -235,7 +231,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
     _endBySecondsTextfield?.dispose();
     _connectionStream?.cancel();
     _characteristicValueStream?.cancel();
-    disconnect(device.address);
 
     super.dispose();
   }

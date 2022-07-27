@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import "dart:typed_data";
-
+import 'package:win_ble/win_ble.dart';
 import 'package:ns_2022/helper_and_const.dart';
+import 'dart:async';
 
 /*
 The Data class is a from the provider package. It is used for state management
@@ -568,16 +569,10 @@ class Data extends ChangeNotifier {
 
     if (_endByBurst) {
 //           if(_endbyvalue != 0) {
-      print("ending by burst");
-      print("endbyvalue: $_endbyvalue");
-      burstnumber = _endbyvalue;
-      print("burstnumber = $burstnumber");
 
-//           } else {
-//             //in adherrance to old ui, returns zero, but I want to add an
-//             // error case
-//             burstnumber = 0;
-//           }
+      burstnumber = _endbyvalue;
+
+
     }
 
     // if burst mode is sdlected the pulse number is calculated
@@ -605,4 +600,35 @@ class Data extends ChangeNotifier {
     serial_command_input_char["pulse_num"] =
         bytearray_maker(pulse_num, pulsenumber);
   }
+  ///////////////////////////////////////////////////////////////
+  ///BLE Section 
+  /// the following values are use for BLE connection
+  /// values calculated in the UI is stored here so navigation between pages can occur smoothly
+  
+  StreamSubscription? scanStream;
+  StreamSubscription? connectionStream;
+  List<BleDevice> devices = <BleDevice>[];
+
+  bool isScanning = false;
+  bool notloading = false;
+
+  StreamSubscription? get getScanStream {
+    return scanStream;
+  }
+
+  StreamSubscription? get getConnnectionStream {
+    return connectionStream;
+  }
+
+  setScanStream(StreamSubscription stream) {
+    scanStream = stream;
+    notifyListeners();
+  }
+
+  setConnectionStream(StreamSubscription stream) {
+    connectionStream = stream;
+    notifyListeners();
+  }
+
+
 }

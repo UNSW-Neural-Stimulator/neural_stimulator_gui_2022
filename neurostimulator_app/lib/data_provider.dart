@@ -515,12 +515,16 @@ class Data extends ChangeNotifier {
 
     if (!_continuousStim && !_dcMode && _burstDurationMicrosec != 0) {
       
-      burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
-      int interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
+		burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
+		
+		int interburst = 0;
+		if ((burstPeriod - _burstDurationMicrosec).round() > _interStimDelayMicrosec) {
+			interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
+		}
 
 
-      serial_command_input_char["inter_burst_delay"] =
-          bytearray_maker(inter_burst_delay, interburst);
+		serial_command_input_char["inter_burst_delay"] =
+			bytearray_maker(inter_burst_delay, interburst);
     }
 
     ///= if continuos stimulation is selected there is no interburst delay

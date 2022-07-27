@@ -30,6 +30,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
   TextEditingController? _dcCurrentTargetTextfield;
   TextEditingController? _dcHoldTimeTextfield;
   TextEditingController? _rampUpTimeTextfield;
+  TextEditingController? _dcBurstGapTextfield;
 
   TextEditingController? _endByMinutesTextfield;
   TextEditingController? _endBySecondsTextfield;
@@ -66,7 +67,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     // Move this logic this outside the widget for more testable code
 
     if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
-      return 'Duration must be greater than 0';
+      return 'Must be > 0';
     }
     // return null if the text is valid
     return null;
@@ -78,7 +79,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     // Move this logic this outside the widget for more testable code
 
     if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
-      return 'Invalid';
+      return 'Invalid Duration';
     }
     // return null if the text is valid
     return null;
@@ -198,6 +199,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
         TextEditingController(text: myProvider.getDCCurrentTarget.toString());
     _dcHoldTimeTextfield =
         TextEditingController(text: myProvider.getDCHoldTime.toString());
+    _dcBurstGapTextfield =
+        TextEditingController(text: myProvider.getDCBurstGap.toString());
     _rampUpTimeTextfield =
         TextEditingController(text: myProvider.getRampUpTime.toString());
     _endByMinutesTextfield =
@@ -225,6 +228,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     _phase2CurrentTextfield?.dispose();
     _dcCurrentTargetTextfield?.dispose();
     _dcHoldTimeTextfield?.dispose();
+    _dcBurstGapTextfield?.dispose();
     _rampUpTimeTextfield?.dispose();
     _endStimulationTextField?.dispose();
     _endByMinutesTextfield?.dispose();
@@ -446,15 +450,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
           children: [
             Column(
               children: [
-                const SizedBox(height: 10),
-                const Text(
-                  "Ramp Up Time",
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 0, 60, 109),
-                      fontWeight: FontWeight.normal,
-                      fontSize: 30),
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: 250,
                   child: TextField(
@@ -483,6 +479,43 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 ),
               ],
             ),
+
+
+  SizedBox(width: 10,),
+
+
+Column(
+              children: [
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _dcBurstGapTextfield,
+                    inputFormatters: [
+
+                      num_range_formatter(min: 0, max: UINT32MAX)
+                    ],
+                    onChanged: (value) {
+                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
+                      myProvider.setDCBurstGap(value);
+                    },
+                    enabled: myProvider.getDcMode,
+                    decoration: const InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'DC burst gap (µs)',
+                      labelStyle: TextStyle(fontSize: 20),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
           ],
         ),
         Text("End stimulation by:"),
@@ -492,7 +525,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
         ToggleButtons(
           constraints: BoxConstraints(minWidth: 160, minHeight: 50),
           children: <Widget>[
-            Text("Stimulation Duration (s)"),
+            Text("Stimulation Duration"),
             Text("Number of Bursts"),
             Text("Stimulate Forever"),
           ],
@@ -598,7 +631,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
              myProvider.setendbystimulationseconds(value);
             },
             decoration: InputDecoration(
-              labelText: "seconds",
+              labelText: "Seconds",
               errorText: _durationErrorText,
               disabledBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey)),

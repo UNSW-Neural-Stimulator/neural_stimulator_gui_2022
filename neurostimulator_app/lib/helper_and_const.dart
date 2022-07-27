@@ -42,6 +42,8 @@ const ramp_up_time = 0x0E;
 const dc_hold_time = 0x0F;
 const dc_curr_target = 0x10;
 
+const dc_burst_gap = 0x11;
+const dc_burst_num = 0x12;
 
 
 ///////////////////////////////////////////////////////

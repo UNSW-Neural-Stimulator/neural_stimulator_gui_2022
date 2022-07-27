@@ -29,6 +29,10 @@ class Data extends ChangeNotifier {
   var _rampUpTime = 0;
   var _dcHoldTime = 0;
   var _dcCurrentTargetMicroAmp = 1000;
+  var _dcBurstGap = 0;
+  var _dcBurstNum = 0;
+
+
 
   //ints for right side of workspace
   var _phase1CurrentMicroAmp = 1500;
@@ -83,6 +87,8 @@ class Data extends ChangeNotifier {
     "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
     "dc_hold_time": Uint8List.fromList([dc_hold_time, 0, 0, 0, 0]),
     "dc_curr_target": Uint8List.fromList([dc_curr_target, 232, 3, 0, 0]),
+    "dc_burst_gap": Uint8List.fromList([dc_burst_gap, 0, 0, 0, 0]),
+    "dc_burst_num": Uint8List.fromList([dc_burst_num, 0, 0, 0, 0]),
     "start": start_bytearray,
   };
 
@@ -148,6 +154,17 @@ class Data extends ChangeNotifier {
     _dcHoldTime = int.tryParse(dcHoldTime) ?? defaultValue;
     notifyListeners();
   }
+
+  setDCBurstGap(String dcburstgap) {
+    _dcBurstGap = int.tryParse(dcburstgap) ?? defaultValue;
+    notifyListeners();
+  }
+
+  setDCBurstNum(String dcburstnum) {
+    _dcBurstNum = int.tryParse(dcburstnum) ?? defaultValue;
+    notifyListeners();
+  }
+
 
   setfrequency(String frequencyinput) {
     _frequency = int.tryParse(frequencyinput) ?? defaultValue;
@@ -312,6 +329,16 @@ class Data extends ChangeNotifier {
     return _dcHoldTime;
   }
 
+  int get getDCBurstGap {
+    return _dcBurstGap;
+  }
+
+  int get getDCBurstNum {
+    return _dcBurstNum;
+  }
+
+
+
   int get getFrequency {
     return _frequency;
   }
@@ -379,6 +406,10 @@ class Data extends ChangeNotifier {
     serial_command_input_char["dc_hold_time"] =
         bytearray_maker(dc_hold_time, _dcHoldTime);
 
+    print(_dcBurstGap);
+    serial_command_input_char["dc_burst_gap"] =
+        bytearray_maker(dc_burst_gap, _dcBurstGap);
+
     serial_command_input_char["phase_one_time"] =
         bytearray_maker(phase_one_time, _phase1TimeMicrosec);
 
@@ -387,9 +418,6 @@ class Data extends ChangeNotifier {
 
     serial_command_input_char["phase_two_time"] =
         bytearray_maker(phase_two_time, _phase2TimeMicrosec);
-
-    print("iterstim is ");
-    print(_interStimDelayMicrosec);
 
     serial_command_input_char["inter_stim_delay"] =
         bytearray_maker(inter_stim_delay, _interStimDelayMicrosec);
@@ -423,6 +451,37 @@ class Data extends ChangeNotifier {
     serial_command_input_char["dac_phase_two"] =
         bytearray_maker(dac_phase_two, _phase2CurrentMicroAmp);
 
+
+    var dc_burst = 0;
+
+    if (_dcMode) {
+
+      if (_endByDuration && _dcHoldTime != 0 && _dcBurstGap != 0 && _rampUpTime != 0) {
+        var dcstimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
+        print("dcstimduration");
+        print(dcstimduration);
+        dc_burst = ((dcstimduration*1000000)/(_dcHoldTime + _dcBurstGap + _rampUpTime)).round();
+        print(dc_burst);        
+
+      }
+
+      if (_endByBurst) {
+        dc_burst = _endbyvalue;
+      }
+
+      if (_stimForever) {
+        dc_burst = 0;
+      }
+
+      serial_command_input_char["dc_burst_num"] =
+          bytearray_maker(dc_burst_num, dc_burst);
+
+    }
+
+
+
+
+
     /// Calculating amount of bursts and pulses based on stimulation ending method
 
     /// The following values are used for calculation of burst number
@@ -447,19 +506,18 @@ class Data extends ChangeNotifier {
         _interPhaseDelayMicrosec +
         _interStimDelayMicrosec;
 
+
+
+
+
 /////////////////////////////////
     // if it is burst mode calculate interburst delay
 
-    if (!_continuousStim) {
-      print(_dutyCyclePercentage);
-
-      print("burstDuration = $_burstDurationMicrosec");
+    if (!_continuousStim && !_dcMode && _burstDurationMicrosec != 0) {
+      
       burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
       int interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
-      print("burstPeriod");
-      print(burstPeriod);
-      print("inter_burst_delay");
-      print(interburst);
+
 
       serial_command_input_char["inter_burst_delay"] =
           bytearray_maker(inter_burst_delay, interburst);

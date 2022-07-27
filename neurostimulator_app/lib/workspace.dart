@@ -77,7 +77,7 @@ class _workspaceState extends State<workspace> {
             content: Text(
                 "hints to be written here"
                 // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
-                // "Phase 2 Time (μs): $phase2Time\nInter-stim Delay (μs): $interstimDelayTime\n"
+                 "Inter-stim Delay (μs): $interstimDelayTime\n"
                 // "anodic_cathodic: $anodic_cathodic\n"
                 // "endbyduration: $endbyduration\n"
                 // "endbyburst: $endbyburst\n"
@@ -118,7 +118,7 @@ class workspaceHome extends StatelessWidget {
             children: [
               SizedBox(height: 70,),
               Text("Stimpact", style:  GoogleFonts.orbitron(fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),),
-              Text("Miniture Neuro Stimulator | 2022 v1.0", style:GoogleFonts.montserrat(fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)) ,)
+              Text("Miniature Neuro Stimulator | 2022 v1.0", style:GoogleFonts.montserrat(fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)) ,)
 ,                  SizedBox(
         height: 20,
       ),

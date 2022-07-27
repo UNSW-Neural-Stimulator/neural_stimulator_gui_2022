@@ -30,6 +30,11 @@ class _RightSideInputsState extends State<RightSideInputs> {
   TextEditingController? _dcCurrentTargetTextfield;
   TextEditingController? _dcHoldTimeTextfield;
   TextEditingController? _rampUpTimeTextfield;
+  TextEditingController? _dcBurstGapTextfield;
+
+  TextEditingController? _endByMinutesTextfield;
+  TextEditingController? _endBySecondsTextfield;
+
 
   TextEditingController? _endStimulationTextField;
   List<bool> fixedLengthList = [true, false, false];
@@ -56,6 +61,30 @@ class _RightSideInputsState extends State<RightSideInputs> {
     }
   }
 ///////////////////////////////////////////////////
+  String? get _durationErrorText {
+    // at any time, we can get the text from _controller.value.text
+    // Note: you can do your own custom validation here
+    // Move this logic this outside the widget for more testable code
+
+    if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
+      return 'Must be > 0';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
+  String? get _durationMinutesErrorText {
+    // at any time, we can get the text from _controller.value.text
+    // Note: you can do your own custom validation here
+    // Move this logic this outside the widget for more testable code
+
+    if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
+      return 'Invalid Duration';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
 
   void showSuccess(String value) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -127,7 +156,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     try {
       List<int> data = await WinBle.read(
           address: address, serviceId: serviceID, characteristicId: charID);
-      print(String.fromCharCodes(data));
+      // print(String.fromCharCodes(data));
       setState(() {
         result =
             "Read => List<int> : $data    ,    ToString :  ${String.fromCharCodes(data)}   , Time : ${DateTime.now()}";
@@ -139,6 +168,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
       });
     }
   }
+
+
 
   StreamSubscription? _connectionStream;
   StreamSubscription? _characteristicValueStream;
@@ -157,7 +188,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     });
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
-      print("CharValue : $event");
+      // print("CharValue : $event");
     });
     super.initState();
     _phase1CurrentTextfield =
@@ -168,8 +199,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
         TextEditingController(text: myProvider.getDCCurrentTarget.toString());
     _dcHoldTimeTextfield =
         TextEditingController(text: myProvider.getDCHoldTime.toString());
+    _dcBurstGapTextfield =
+        TextEditingController(text: myProvider.getDCBurstGap.toString());
     _rampUpTimeTextfield =
         TextEditingController(text: myProvider.getRampUpTime.toString());
+    _endByMinutesTextfield =
+        TextEditingController(text: myProvider.getendbyminutes.toString());
+    _endBySecondsTextfield =
+        TextEditingController(text: myProvider.getendbyseconds.toString());
     TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
@@ -191,8 +228,11 @@ class _RightSideInputsState extends State<RightSideInputs> {
     _phase2CurrentTextfield?.dispose();
     _dcCurrentTargetTextfield?.dispose();
     _dcHoldTimeTextfield?.dispose();
+    _dcBurstGapTextfield?.dispose();
     _rampUpTimeTextfield?.dispose();
     _endStimulationTextField?.dispose();
+    _endByMinutesTextfield?.dispose();
+    _endBySecondsTextfield?.dispose();
     _connectionStream?.cancel();
     _characteristicValueStream?.cancel();
     disconnect(device.address);
@@ -244,7 +284,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 var serial_command_inputs =
                     Provider.of<Data>(context, listen: false)
                         .get_serial_command_input_char;
-                print(serial_command_inputs);
+                // print(serial_command_inputs);
                 for (var value in serial_command_inputs.values) {
                   writeCharacteristic(device.address, SERVICE_UUID,
                       SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
@@ -410,15 +450,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
           children: [
             Column(
               children: [
-                const SizedBox(height: 10),
-                const Text(
-                  "Ramp Up Time",
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 0, 60, 109),
-                      fontWeight: FontWeight.normal,
-                      fontSize: 30),
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 SizedBox(
                   width: 250,
                   child: TextField(
@@ -429,7 +461,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       num_range_formatter(min: 0, max: UINT32MAX)
                     ],
                     onChanged: (value) {
-                      print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
+                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
                       myProvider.setrampUpTime(value);
                     },
                     enabled: myProvider.getDcMode,
@@ -447,6 +479,43 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 ),
               ],
             ),
+
+
+  SizedBox(width: 10,),
+
+
+Column(
+              children: [
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 250,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    controller: _dcBurstGapTextfield,
+                    inputFormatters: [
+
+                      num_range_formatter(min: 0, max: UINT32MAX)
+                    ],
+                    onChanged: (value) {
+                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
+                      myProvider.setDCBurstGap(value);
+                    },
+                    enabled: myProvider.getDcMode,
+                    decoration: const InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'DC burst gap (µs)',
+                      labelStyle: TextStyle(fontSize: 20),
+                                          focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
           ],
         ),
         Text("End stimulation by:"),
@@ -456,12 +525,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
         ToggleButtons(
           constraints: BoxConstraints(minWidth: 160, minHeight: 50),
           children: <Widget>[
-            Text("Stimulation Duration (s)"),
+            Text("Stimulation Duration"),
             Text("Number of Bursts"),
             Text("Stimulate Forever"),
           ],
           onPressed: (int index) {
             if (index == 0) {
+              //Basically what's happening here is that we are toggling the selected value as chosen
+              // in data provider and making all the other ones false
               Provider.of<Data>(context, listen: false)
                   .toggleEndByDuration(true);
               Provider.of<Data>(context, listen: false).toggleEndByBurst(false);
@@ -485,10 +556,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
         SizedBox(height: 10),
         Text("$endStimulationTitle"),
         SizedBox(height: 10),
+        
+        if (Provider.of<Data>(context).endByBurst) 
         SizedBox(
           width: 250,
+          height: 50,
           child: TextField(
-            enabled: !Provider.of<Data>(context).stimilateForever,
             keyboardType: TextInputType.number,
             controller: _endStimulationTextField,
             inputFormatters: [
@@ -509,6 +582,70 @@ class _RightSideInputsState extends State<RightSideInputs> {
             ),
           ),
         ),
+
+
+        if (Provider.of<Data>(context).stimilateForever) 
+        SizedBox(width: 250, height: 50),
+        
+        if (Provider.of<Data>(context).endByDuration) 
+        SizedBox(width: 250, height: 70,
+        
+        child:      
+        Row(children: [
+                Flexible(
+                
+                  child: TextField(
+            keyboardType: TextInputType.number,
+            controller: _endByMinutesTextfield,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              num_range_formatter(min: 0, max: 1091)
+            ],
+            onChanged: (value) {
+             myProvider.setendbystimulationminute(value);
+            },
+            decoration: InputDecoration(
+              labelText: "Minutes",
+              errorText: _durationMinutesErrorText,
+              disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+                                  focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+            ),
+          ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Flexible(
+                  child: TextField(
+            keyboardType: TextInputType.number,
+            controller: _endBySecondsTextfield,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              num_range_formatter(min: 0, max: 60)
+            ],
+            onChanged: (value) {
+             myProvider.setendbystimulationseconds(value);
+            },
+            decoration: InputDecoration(
+              labelText: "Seconds",
+              errorText: _durationErrorText,
+              disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey)),
+                                  focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+            ),
+          ),
+                )
+              ])
+        
+        ,
+        ),
         SizedBox(
           height: 20,
         ),
@@ -521,3 +658,5 @@ class _RightSideInputsState extends State<RightSideInputs> {
     );
   }
 }
+
+

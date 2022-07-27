@@ -42,27 +42,12 @@ const ramp_up_time = 0x0E;
 const dc_hold_time = 0x0F;
 const dc_curr_target = 0x10;
 
+const dc_burst_gap = 0x11;
+const dc_burst_num = 0x12;
 
-// const ramp_up = 0x10;
-// const short_electrode = 0x11;
-// const record_freq = 0x12;
-// Uint8List start_recording = Uint8List.fromList([0x13, 0, 0, 0, 0]);
-// Uint8List stop_recording = Uint8List.fromList([0x14, 0, 0, 0, 0]);
-// Uint8List electrode_voltage = Uint8List.fromList([0x15, 0, 0, 0, 0]);
-// const elec_offset = 0x16;
-// const show_dac = 0x17;
-// const return_idle = 0x18;
-// Uint8List check_state = Uint8List.fromList([0x19, 0, 0, 0, 0]);
-// const dc_mode = 0x20;
-
-
-//
-//need to add hold time
-
-//need to add dc curr target
 
 ///////////////////////////////////////////////////////
-/// The
+/// 
 class num_range_formatter extends TextInputFormatter {
   final int min;
   final int max;
@@ -110,8 +95,12 @@ int calculate_adv_to_mv(int adc_value) {
 
 }
 
-int calculate_interstim_from_frequency(int frequency, int phasetime1, int phasetime2, int interphase) {
+int calculate_interstim_from_frequency(var frequency, var phasetime1, var phasetime2, var interphase) {
+  if (frequency == 0){
+    return 0;
+  }
   var answer = (1000000 / frequency - phasetime1 - phasetime2 - interphase);
-  return answer != 0 ? 0:answer.round();
+
+  return answer == 0 ? 0:answer.round();
 
   }

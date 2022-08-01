@@ -37,7 +37,9 @@ class _workspaceState extends State<workspace> {
     var anodic_cathodic = Provider.of<Data>(context).getCathodicFirst;
     /////////////////////////////////////////////////////////////////////////
 
-    //must change all values to 0 when not in screen
+    //debug map, to be removed before prod
+
+    var debugmap = Provider.of<Data>(context, listen: false).getdebugmap;
 
     /////////////////////////////////////////////////////////////////////////
 
@@ -59,43 +61,49 @@ class _workspaceState extends State<workspace> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        shadowColor: Colors.white,
+
         leading: IconButton(
-          icon: const Icon(Icons.home, color: Colors.white),
+          icon: const Icon(Icons.home, color: Color.fromARGB(255, 116, 116, 116)),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text("Device Name: " + widget.device.name),
+        title: Text("Workspace for " + widget.device.name, style: TextStyle(color: Color.fromARGB(255, 61, 61, 61)),),
       ),
       body:  ListView(children:[content])
      ,
      // this is a debug feature, must be removed before compilation
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.question_mark_sharp),
-        onPressed: () => showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: const Text('Help'),
-            content: Text(
-                "hints to be written here"
-                // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
-                 "Inter-stim Delay (μs): $interstimDelayTime\n"
-                // "anodic_cathodic: $anodic_cathodic\n"
-                // "endbyduration: $endbyduration\n"
-                // "endbyburst: $endbyburst\n"
-                // "stimforever: $stimforever\n"
-                ),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'Cancel'),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(Icons.question_mark_sharp),
+      //   onPressed: () { showDialog<String>(
+      //     context: context,
+      //     builder: (BuildContext context) => AlertDialog(
+      //       title: const Text('Help'),
+      //       content: Text(
+      //           "sowwy"
+      //           // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
+      //           //  "debugmap: $debugmap\n"
+      //           // "anodic_cathodic: $anodic_cathodic\n"
+      //           // "endbyduration: $endbyduration\n"
+      //           // "endbyburst: $endbyburst\n"
+      //           // "stimforever: $stimforever\n"
+      //           ),
+      //       actions: <Widget>[
+      //         TextButton(
+      //           onPressed: () => Navigator.pop(context, 'Cancel'),
+      //           child: const Text('Cancel'),
+      //         ),
+      //         TextButton(
+      //           onPressed: () => Navigator.pop(context, 'OK'),
+      //           child: const Text('OK'),
+      //         ),
+      //       ],
+      //     )
+      //   );  
+      //   print(Provider.of<Data>(context, listen: false).getdebugmap);
+      //         }
+
+      // ),
     );
   }
 }

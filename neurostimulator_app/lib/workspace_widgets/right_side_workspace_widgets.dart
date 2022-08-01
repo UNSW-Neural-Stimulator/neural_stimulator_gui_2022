@@ -35,7 +35,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
   TextEditingController? _endByMinutesTextfield;
   TextEditingController? _endBySecondsTextfield;
 
-
   TextEditingController? _endStimulationTextField;
   List<bool> fixedLengthList = [true, false, false];
   String error = "none";
@@ -48,25 +47,16 @@ class _RightSideInputsState extends State<RightSideInputs> {
 //////////////////////////////////////////////////
   /// this shouldn't be here, this is to fix an error where the device disconnects upon
   /// navigating to the workspace. this should be fixed soon with the BLE code being moved to provider
-  connect(BleDevice device) async {
-    final address = device.address;
-    try {
-      await WinBle.connect(address);
-      ;
-    } catch (e) {
-      setState(() {
-        error = e.toString();
-        showError(error);
-      });
-    }
-  }
+
 ///////////////////////////////////////////////////
   String? get _durationErrorText {
     // at any time, we can get the text from _controller.value.text
     // Note: you can do your own custom validation here
     // Move this logic this outside the widget for more testable code
 
-    if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
+    if (Provider.of<Data>(context).getendbyseconds +
+            Provider.of<Data>(context).getendbyminutes ==
+        0) {
       return 'Must be > 0';
     }
     // return null if the text is valid
@@ -78,13 +68,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
     // Note: you can do your own custom validation here
     // Move this logic this outside the widget for more testable code
 
-    if (Provider.of<Data>(context).getendbyseconds + Provider.of<Data>(context).getendbyminutes== 0) {
+    if (Provider.of<Data>(context).getendbyseconds +
+            Provider.of<Data>(context).getendbyminutes ==
+        0) {
       return 'Invalid Duration';
     }
     // return null if the text is valid
     return null;
   }
-
 
   void showSuccess(String value) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -171,6 +162,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
 
 
+
   StreamSubscription? _connectionStream;
   StreamSubscription? _characteristicValueStream;
 
@@ -181,6 +173,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
     _connectionStream = myProvider.getConnnectionStream;
 
+    
     _characteristicValueStream =
         WinBle.characteristicValueStream.listen((event) {
       // print("CharValue : $event");
@@ -246,17 +239,18 @@ class _RightSideInputsState extends State<RightSideInputs> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 50,
-            ),
+
             FlutterSwitch(
-              activeColor: Colors.green,
-              inactiveColor: Colors.red,
+              activeColor: Colors.blue,
+              inactiveColor: Colors.grey,
+              activeTextColor: Colors.white,
+              inactiveTextColor: Colors.white,
+                      activeTextFontWeight: FontWeight.w400,
+        inactiveTextFontWeight: FontWeight.w400,
               activeText: "DC mode on",
               inactiveText: "DC mode off",
               width: 150,
               height: 40,
-              activeTextColor: Colors.white,
               showOnOff: true,
               onToggle: (bool dcmode) {
                 Provider.of<Data>(context, listen: false).toggleDC(dcmode);
@@ -269,7 +263,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
             ),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                primary: Colors.green,
+                primary: Colors.blue,
                 minimumSize: Size(150, 50),
               ),
 
@@ -341,15 +335,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase1current(value);
                     },
                     decoration: const InputDecoration(
-                                          disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey)),
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 1 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
                       focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-
+                          borderSide: BorderSide(color: Colors.blue)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+                          borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -357,8 +350,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
-                                        enabled: !myProvider.getDcMode,
-
+                    enabled: !myProvider.getDcMode,
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
@@ -369,14 +361,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       myProvider.setphase2current(value);
                     },
                     decoration: const InputDecoration(
-                                          disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey)),
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'Phase 2 Current (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                                          focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+                          borderSide: BorderSide(color: Colors.blue)),
                     ),
                   ),
                 ),
@@ -385,31 +377,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
             const SizedBox(width: 10),
             Column(
               children: [
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: 250,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    controller: _dcHoldTimeTextfield,
-                    inputFormatters: [
-                      num_range_formatter(min: 0, max: UINT32MAX)
-                    ],
-                    onChanged: (value) {
-                      myProvider.setDCHoldTime(value);
-                    },
-                    enabled: myProvider.getDcMode,
-                    decoration: const InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'DC Hold Time (µs)',
-                      labelStyle: TextStyle(fontSize: 20),
-                                          focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: 250,
@@ -429,11 +396,25 @@ class _RightSideInputsState extends State<RightSideInputs> {
                           borderSide: BorderSide(color: Colors.grey)),
                       labelText: 'DC Current Target (µA)',
                       labelStyle: TextStyle(fontSize: 20),
-                                          focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
                       enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+                          borderSide: BorderSide(color: Colors.blue)),
                     ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 250,
+                  child: CustomTextField(
+                    enabled: myProvider.getDcMode,
+                    controller: _dcHoldTimeTextfield,
+                    onChanged: (value) {
+                      myProvider.setDCHoldTime(value);
+                    },
+                    labelText: 'DC Hold Time',
+                    minValue: 0,
+                    maxValue: UINT32MAX,
                   ),
                 ),
               ],
@@ -448,71 +429,43 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: 250,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
+                  child: CustomTextField(
+                    enabled: myProvider.getDcMode,
                     controller: _rampUpTimeTextfield,
-                    inputFormatters: [
-
-                      num_range_formatter(min: 0, max: UINT32MAX)
-                    ],
                     onChanged: (value) {
-                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
                       myProvider.setrampUpTime(value);
                     },
-                    enabled: myProvider.getDcMode,
-                    decoration: const InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'Ramp Up Time (µs)',
-                      labelStyle: TextStyle(fontSize: 20),
-                                          focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    ),
+                    labelText: 'Ramp Up Time ',
+                    minValue: 0,
+                    maxValue: UINT32MAX,
                   ),
                 ),
               ],
             ),
-
-
-  SizedBox(width: 10,),
-
-
-Column(
+            SizedBox(
+              width: 10,
+            ),
+            Column(
               children: [
                 const SizedBox(height: 20),
                 SizedBox(
                   width: 250,
-                  child: TextField(
-                    keyboardType: TextInputType.number,
+                  child: CustomTextField(
+                    enabled: myProvider.getDcMode,
                     controller: _dcBurstGapTextfield,
-                    inputFormatters: [
-
-                      num_range_formatter(min: 0, max: UINT32MAX)
-                    ],
                     onChanged: (value) {
-                      // print("\n\n\n\n\n\n\n\n\\nmr value is: $value");
                       myProvider.setDCBurstGap(value);
                     },
-                    enabled: myProvider.getDcMode,
-                    decoration: const InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'DC burst gap (µs)',
-                      labelStyle: TextStyle(fontSize: 20),
-                                          focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    ),
+                    labelText: 'DC Burst Gap',
+                    minValue: 0,
+                    maxValue: UINT32MAX,
                   ),
                 ),
               ],
             ),
-
           ],
         ),
+        Container(height: 250, child: Column(children: [
         Text("End stimulation by:"),
         SizedBox(
           height: 10,
@@ -551,99 +504,93 @@ Column(
         SizedBox(height: 10),
         Text("$endStimulationTitle"),
         SizedBox(height: 10),
-        
-        if (Provider.of<Data>(context).endByBurst) 
-        SizedBox(
-          width: 250,
-          height: 50,
-          child: TextField(
-            keyboardType: TextInputType.number,
-            controller: _endStimulationTextField,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              num_range_formatter(min: 1, max: UINT32MAX)
-            ],
-            onChanged: (value) {
-              myProvider.setendbyvalue(value);
-            },
-            decoration: const InputDecoration(
-              hintText: "Enter duration (s) or bursts",
-              disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey)),
-                                  focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
+        if (Provider.of<Data>(context).endByBurst)
+          SizedBox(
+            width: 250,
+            height: 50,
+            child: TextField(
+              keyboardType: TextInputType.number,
+              controller: _endStimulationTextField,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                num_range_formatter(min: 1, max: UINT32MAX)
+              ],
+              onChanged: (value) {
+                myProvider.setendbyvalue(value);
+              },
+              decoration: const InputDecoration(
+                hintText: "1",
+                disabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue)),
+                enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue)),
+              ),
             ),
           ),
-        ),
+        if (Provider.of<Data>(context).stimilateForever)
+          SizedBox(width: 250, height: 50),
+        if (Provider.of<Data>(context).endByDuration)
+          SizedBox(
+            width: 250,
+            height: 70,
+            child: Row(children: [
+              Flexible(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  controller: _endByMinutesTextfield,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: 1091)
+                  ],
+                  onChanged: (value) {
+                    myProvider.setendbystimulationminute(value);
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Minutes",
+                    errorText: _durationMinutesErrorText,
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                  ),
+                ),
+              ),
+            
+              SizedBox(
+                width: 20,
+              ),
+              Flexible(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  controller: _endBySecondsTextfield,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    num_range_formatter(min: 0, max: 60)
+                  ],
+                  onChanged: (value) {
+                    myProvider.setendbystimulationseconds(value);
+                  },
+                  decoration: InputDecoration(
+                    labelText: "Seconds",
+                    errorText: _durationErrorText,
+                    disabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)),
+                  ),
+                ),
+              )
+            ]),
+          ),
 
 
-        if (Provider.of<Data>(context).stimilateForever) 
-        SizedBox(width: 250, height: 50),
-        
-        if (Provider.of<Data>(context).endByDuration) 
-        SizedBox(width: 250, height: 70,
-        
-        child:      
-        Row(children: [
-                Flexible(
-                
-                  child: TextField(
-            keyboardType: TextInputType.number,
-            controller: _endByMinutesTextfield,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              num_range_formatter(min: 0, max: 1091)
-            ],
-            onChanged: (value) {
-             myProvider.setendbystimulationminute(value);
-            },
-            decoration: InputDecoration(
-              labelText: "Minutes",
-              errorText: _durationMinutesErrorText,
-              disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey)),
-                                  focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-            ),
-          ),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-                Flexible(
-                  child: TextField(
-            keyboardType: TextInputType.number,
-            controller: _endBySecondsTextfield,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              num_range_formatter(min: 0, max: 60)
-            ],
-            onChanged: (value) {
-             myProvider.setendbystimulationseconds(value);
-            },
-            decoration: InputDecoration(
-              labelText: "Seconds",
-              errorText: _durationErrorText,
-              disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey)),
-                                  focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-            ),
-          ),
-                )
-              ])
-        
-        ,
-        ),
-        SizedBox(
-          height: 20,
-        ),
+        ],),),
         Container(
           width: 500,
           height: 1, // Thickness
@@ -653,5 +600,3 @@ Column(
     );
   }
 }
-
-

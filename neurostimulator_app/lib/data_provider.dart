@@ -65,6 +65,52 @@ class Data extends ChangeNotifier {
 
   //variables used for burst calculations
 
+  ////////////////////////////////
+  ///DEBUG MAP, delete this before prod, this is a map that is used to print all the values 
+  ///stored in this provider class
+  
+   late var debug_map = {
+
+
+  "phase 1 time": getPhase1Time,
+    "_interPhaseDelayMicrosec":getInterPhaseDelay,
+    "_phase2TimeMicrosec":getPhase2Time,
+    "_interStimDelayMicrosec":getInterstimDelay,
+
+
+  "_burstDurationMicrosec":_burstDurationMicrosec,
+    "_dutyCyclePercentage":_dutyCyclePercentage,
+    "_frequency":_frequency,
+    "_interStimDelayStringForDisplay_frequency":_interStimDelayStringForDisplay_frequency,
+
+
+  "_rampUpTime":_rampUpTime,
+    "_dcHoldTime":_dcHoldTime,
+    "_dcCurrentTargetMicroAmp":_dcCurrentTargetMicroAmp,
+    "_dcBurstGap":_dcBurstGap,
+  
+  "_dcBurstNum":_dcBurstNum,
+    "_phase1CurrentMicroAmp":_phase1CurrentMicroAmp,
+    "_phase2CurrentMicroAmp":_phase2CurrentMicroAmp,
+    "_endStimulationMinute":_endStimulationMinute,
+
+  "_endbyvalue":_endbyvalue,
+    "_calculate_interstim_by_freq":_calculate_interstim_by_freq,
+    "_continuousStim":_continuousStim,
+    "_dcMode":_dcMode,
+
+  "_endByDuration":_endByDuration,
+    "_endByBurst":_endByBurst,
+    "_stimForever":_stimForever,
+    "_cathodicFirst":_cathodicFirst,
+
+    "_anodicFirst":_anodicFirst,
+
+  };
+
+
+  ////////////////////////////////
+  
   ///////////////////////////////////////////////////////////////////////////////////////////////
   ///Map for of all values that are sent to the firmware as parameters for stimulation
   ///each value is stored as an Uint8list
@@ -92,6 +138,12 @@ class Data extends ChangeNotifier {
     "dc_burst_num": Uint8List.fromList([dc_burst_num, 0, 0, 0, 0]),
     "start": start_bytearray,
   };
+
+  Map get getdebugmap{
+    print("hi");
+    print("phase one time is = $_phase1TimeMicrosec");
+    return debug_map;
+    }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // the below are methods used for "notifying" and changing the values stored in the Data class
@@ -178,6 +230,7 @@ class Data extends ChangeNotifier {
 
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
+    print("helloooo");
     notifyListeners();
   }
 
@@ -382,22 +435,15 @@ class Data extends ChangeNotifier {
   void prepare_stimulation_values() {
     int temporary_bool_to_int = 0;
     temporary_bool_to_int = _cathodicFirst ? 1 : 0;
-    //print("anodic cathodic is $temporary_bool_to_int");
     serial_command_input_char["anodic_cathodic"] =
         Uint8List.fromList([anodic_cathodic, temporary_bool_to_int, 0, 0, 0]);
 
-    // DEPRECATED AS FOR NSTIM FIRMWARE
-    // temporary_bool_to_int = !_dcMode ? 1 : 0;
-    // serial_command_input_char["dc_mode"] =
-    //     Uint8List.fromList([dc_mode, 0, 0, 0, temporary_bool_to_int]);
 
     temporary_bool_to_int = _dcMode ? 1 : 0;
     serial_command_input_char["stim_type"] =
         Uint8List.fromList([stim_type, temporary_bool_to_int, 0, 0, 0]);
 
-    //print("hold time : $_dcHoldTime");
-    //print("dc curr targ: $_dcCurrentTargetMicroAmp");
-    //print("ramp_up = $_rampUpTime");
+
     serial_command_input_char["ramp_up_time"] =
         bytearray_maker(ramp_up_time, _rampUpTime);
 
@@ -424,6 +470,11 @@ class Data extends ChangeNotifier {
         bytearray_maker(inter_stim_delay, _interStimDelayMicrosec);
 
     //check which curr value should be negative based off cathodic and anodic
+
+
+    // the following variables are used to prevent the textfield value becomming negtive 
+    var _phase1CurrentMicroAmpToSendToBle = _phase1CurrentMicroAmp;
+    var _phase2CurrentMicroAmpToSendToBle = _phase2CurrentMicroAmp;
 
     if (!_cathodicFirst) {
       if (_phase1CurrentMicroAmp < 1) {
@@ -459,10 +510,7 @@ class Data extends ChangeNotifier {
 
       if (_endByDuration && _dcHoldTime != 0 && _dcBurstGap != 0 && _rampUpTime != 0) {
         var dcstimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
-        print("dcstimduration");
-        print(dcstimduration);
         dc_burst = ((dcstimduration*1000000)/(_dcHoldTime + _dcBurstGap + _rampUpTime)).round();
-        print(dc_burst);        
 
       }
 

@@ -4,6 +4,7 @@ import "dart:typed_data";
 import 'package:win_ble/win_ble.dart';
 import 'package:ns_2022/helper_and_const.dart';
 import 'dart:async';
+import 'package:win_ble/win_ble.dart';
 
 /*
 The Data class is a from the provider package. It is used for state management
@@ -677,6 +678,95 @@ class Data extends ChangeNotifier {
     connectionStream = stream;
     notifyListeners();
   }
+
+  initialise(){
+      WinBle.initialize(enableLog: false);
+        // call winBLe.dispose() when done
+        connectionStream = WinBle.connectionStream.listen((event) {
+          print("Connection Event : " + event.toString());
+        });
+
+        // Listen to Scan Stream , we can cancel in onDispose()
+        scanStream = WinBle.scanStream.listen((event) {
+            if (!devices.any((element) => element.address == event.address) && event.name == "nstim") {
+              devices.add(event);
+            }
+          
+        });
+  }
+
+  List<BleDevice> get getdevices => devices;
+  
+  startScanning() {
+    WinBle.startScanning();
+    
+  }
+
+  stopScanning() {
+    WinBle.stopScanning();
+
+  }
+
+
+
+  writeCharacteristic(String address, String serviceID, String charID,
+      Uint8List data, bool writeWithResponse) async {
+      await WinBle.write(
+          address: address,
+          service: serviceID,
+          characteristic: charID,
+          data: data,
+          writeWithResponse: true);
+
+    
+  }
+
+  subsCribeToCharacteristic(address, serviceID, charID) async {
+      await WinBle.subscribeToCharacteristic(
+          address: address, serviceId: serviceID, characteristicId: charID);
+
+  }
+
+  unSubscribeToCharacteristic(address, serviceID, charID) async {
+      await WinBle.unSubscribeFromCharacteristic(
+          address: address, serviceId: serviceID, characteristicId: charID);
+
+  }
+
+  disconnect(address) async {
+      await WinBle.disconnect(address);
+
+  }
+
+  connect(address) async {
+    try {
+      await WinBle.connect(address);
+      return true;
+    }
+    catch (e){
+      return false;
+    }
+  }
+
+
+  // readCharacteristic(address, serviceID, charID) async {
+  //   try {
+  //     List<int> data = await WinBle.read(
+  //         address: address, serviceId: serviceID, characteristicId: charID);
+  //     // print(String.fromCharCodes(data));
+  //     setState(() {
+  //       result =
+  //           "Read => List<int> : $data    ,    ToString :  ${String.fromCharCodes(data)}   , Time : ${DateTime.now()}";
+  //     });
+  //   } catch (e) {
+  //     showError("ReadCharError : $e");
+  //     setState(() {
+  //       error = e.toString();
+  //     });
+  //   }
+  // }
+
+
 
 
 }

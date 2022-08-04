@@ -18,48 +18,13 @@ The full page layout holds the list of devices and the homepage on the right
 */
 
 class _FullPageLayoutState extends State<FullPageLayout> {
-//////////////////////////////////
-// ##Start##
-// the following code was sourced from:
-
-// Copyright (c) 2021 Rohit Sangwan
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
-  StreamSubscription? scanStream;
-  StreamSubscription? connectionStream;
-
   bool isScanning = false;
 
   @override
   void initState() {
-    WinBle.initialize(enableLog: true);
-    // call winBLe.dispose() when done
-    connectionStream = WinBle.connectionStream.listen((event) {
-      print("Connection Event : " + event.toString());
-    });
+    final Data myProvider = Provider.of<Data>(context, listen: false);
+    myProvider.initialise();
 
-    // Listen to Scan Stream , we can cancel in onDispose()
-    scanStream = WinBle.scanStream.listen((event) {
-      setState(() {
-        if (!devices.any((element) => element.address == event.address) && event.name == "nstim") {
-          devices.add(event);
-        }
-      });
-    });
     super.initState();
   }
 
@@ -69,67 +34,63 @@ class _FullPageLayoutState extends State<FullPageLayout> {
   bool connected = false;
   bool notloading = true;
 
-  List<BleDevice> devices = <BleDevice>[];
-
   /// Main Methods
   ///
-  void showSuccess(String value) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(value),
-          backgroundColor: Colors.green,
-          duration: Duration(milliseconds: 300)));
+  // void showSuccess(String value) =>
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  //         content: Text(value),
+  //         backgroundColor: Colors.green,
+  //         duration: Duration(milliseconds: 300)));
 
-  void showError(String value) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(value),
-          backgroundColor: Colors.red,
-          duration: Duration(milliseconds: 300)));
+  // void showError(String value) =>
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+  //         content: Text(value),
+  //         backgroundColor: Colors.red,
+  //         duration: Duration(milliseconds: 300)));
 
-  connect(BleDevice device) async {
-    final address = device.address;
-    setState(() {
-      notloading = false;
-    });
-    try {
-      await WinBle.connect(address);
-      showSuccess("Connected");
-      notloading = true;
+  // connect(BleDevice device) async {
+  //   final address = device.address;
+  //   setState(() {
+  //     notloading = false;
+  //   });
+  //   try {
+  //     await WinBle.connect(address);
+  //     showSuccess("Connected");
+  //     notloading = true;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => workspace(
-                  device: device,
-                )),
-      );
-    } catch (e) {
-      setState(() {
-        notloading = true;
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //           builder: (context) => workspace(
+  //                 device: device,
+  //               )),
+  //     );
+  //   } catch (e) {
+  //     setState(() {
+  //       notloading = true;
 
-        error = e.toString();
-        showError(error);
-      });
-    }
-  }
+  //       error = e.toString();
+  //       showError(error);
+  //     });
+  //   }
+  // }
 
-  startScanning() {
-    WinBle.startScanning();
-    setState(() {
-      isScanning = true;
-    });
-  }
+  // startScanning() {
+  //   WinBle.startScanning();
+  //   setState(() {
+  //     isScanning = true;
+  //   });
+  // }
 
-  stopScanning() {
-    WinBle.stopScanning();
-    setState(() {
-      isScanning = false;
-    });
-  }
+  // stopScanning() {
+  //   WinBle.stopScanning();
+  //   setState(() {
+  //     isScanning = false;
+  //   });
+  // }
 
   @override
   void dispose() {
-    scanStream?.cancel();
-    // connectionStream?.cancel();
     super.dispose();
   }
 
@@ -137,7 +98,9 @@ class _FullPageLayoutState extends State<FullPageLayout> {
 //////////////////////////////////
 
   Widget _buildFullPageLayout() {
-    final Data myProvider = Provider.of<Data>(context, listen: false);
+    final Data myProvider = Provider.of<Data>(context, listen: true);
+    List<BleDevice> devices = myProvider.getdevices;
+
     return Row(
       children: <Widget>[
         Flexible(
@@ -166,21 +129,14 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                         return notloading
                             ? InkWell(
                                 onTap: () async {
-                                  stopScanning();
-                                  await connect(device);
-                                  WinBle.connectionStreamOf(device.address)
-                                      .listen((event) async {
-                                        myProvider.setConnectionStream(connectionStream!);
-                                    if (event) {
-                                      await Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => workspace(
-                                                  device: device ,
-                                                )),
-                                      );
-                                    }
-                                  });
+                                  myProvider.stopScanning();
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => workspace(
+                                              device: device,
+                                            )),
+                                  );
                                 },
                                 child: Card(
                                   child: ListTile(
@@ -202,10 +158,16 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                         minimumSize: Size.fromHeight(50)),
 
                     onPressed: () {
-                      startScanning();
-                      Timer(Duration(seconds: 10), () {
-                        stopScanning();
-                      });
+                      print(devices);
+                      for (int i = 1; i <= 4; i += 1) {
+                        myProvider.startScanning();
+                        Timer(Duration(seconds: i), () {
+                          myProvider.stopScanning();
+                          if (devices != []) {
+                            setState(() {});
+                          }
+                        });
+                      }
                     },
                     icon: const Icon(
                       Icons.bluetooth,
@@ -261,25 +223,3 @@ class _FullPageLayoutState extends State<FullPageLayout> {
     );
   }
 }
-
-/*
-this is an item from the list, representing a device
-*/
-// class Item extends StatelessWidget {
-//   Item({
-//     required this.index,
-//   });
-
-//   final int index;
-//   @override
-//   Widget build(BuildContext context) {
-//     return ListTile(
-//         title: Text("Device " + index.toString()),
-//         onTap: () =>
-//             Navigator.push(context, MaterialPageRoute(builder: (context) {
-//               return StatefulBuilder(builder: ((context, setState) {
-//                 return const workspace();
-//               }));
-//             })));
-//   }
-// }

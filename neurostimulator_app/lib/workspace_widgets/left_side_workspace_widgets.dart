@@ -2,11 +2,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:win_ble/win_ble.dart';
 import "../data_provider.dart";
 import '../helper_and_const.dart';
 
 class leftTextFields extends StatefulWidget {
-  const leftTextFields({Key? key}) : super(key: key);
+  final BleDevice device;
+  const leftTextFields({Key? key, required this.device}) : super(key: key);
   @override
   _leftTextFieldsState createState() => _leftTextFieldsState();
 }
@@ -68,20 +70,72 @@ class _leftTextFieldsState extends State<leftTextFields> {
         !Provider.of<Data>(context).getCalculateByFrequency;
 
     return Column(children: [
+      SizedBox(
+        height: 20,
+      ),
+      Row(
+        children: [
+          SizedBox(
+            width: 150,
+            height: 40,
+            child: ElevatedButton.icon(
+              onPressed: () async{
+                if (await myProvider.connect(widget.device.address) == true) {
+                  print('ready');
+                }
+                else {
+                  print("Situation fucked");
+                }
+              },
+              icon: const Icon(
+                Icons.bluetooth,
+                size: 15.0,
+              ),
+              label: Text('Connect'), // <-- Text
+            ),
+          ),
+          SizedBox(width: 20),
+          FlutterSwitch(
+              activeColor: Colors.blue,
+              inactiveColor: Colors.grey,
+              activeTextColor: Colors.white,
+              inactiveTextColor: Colors.white,
+              activeTextFontWeight: FontWeight.w400,
+              inactiveTextFontWeight: FontWeight.w400,
+              activeText: "Continuous stimulation on",
+              inactiveText: "Continuous stimulation off",
+              width: 240,
+              height: 40,
+              showOnOff: true,
+              onToggle: (bool continuous) {
+                setState(() {
+                  Provider.of<Data>(context, listen: false)
+                      .toggleburstcont(!continuous);
+                });
+              },
+              value: Provider.of<Data>(context).getBurstMode),
+          SizedBox(
+            width: 110,
+          )
+        ],
+        mainAxisAlignment: MainAxisAlignment.start,
+      ),
+      SizedBox(
+        height: 10,
+      ),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
             children: [
-              const SizedBox(height: 10),
               const Text(
-                "Phase Time Settings",
+                "    Phase Time Settings",
                 style: TextStyle(
                     color: Color.fromARGB(255, 0, 60, 109),
                     fontWeight: FontWeight.normal,
                     fontSize: 30),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               SizedBox(
                 width: 250,
                 child: CustomTextField(
@@ -187,8 +241,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 inactiveColor: Colors.grey,
                 activeTextColor: Colors.white,
                 inactiveTextColor: Colors.white,
-                        activeTextFontWeight: FontWeight.w400,
-        inactiveTextFontWeight: FontWeight.w400,
+                activeTextFontWeight: FontWeight.w400,
+                inactiveTextFontWeight: FontWeight.w400,
                 activeText: "on",
                 inactiveText: "off",
                 width: 75,
@@ -234,11 +288,16 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 onChanged: (value) {
                   myProvider.setfrequency(value);
                 },
-                decoration:  InputDecoration(
+                decoration: InputDecoration(
                   disabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.grey)),
                   labelText: 'Frequency (pps)',
-                  errorText: frequency_input_error(myProvider.getFrequency, myProvider.getPhase1Time, myProvider.getPhase2Time, myProvider.getInterPhaseDelay, 0),
+                  errorText: frequency_input_error(
+                      myProvider.getFrequency,
+                      myProvider.getPhase1Time,
+                      myProvider.getPhase2Time,
+                      myProvider.getInterPhaseDelay,
+                      0),
                   labelStyle: TextStyle(fontSize: 20),
                   focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.blue)),
@@ -255,13 +314,16 @@ class _leftTextFieldsState extends State<leftTextFields> {
         children: [
           Column(
             children: [
-              const SizedBox(height: 10),
-              const Text(
-                "Burst Stimulation",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 0, 60, 109),
-                    fontWeight: FontWeight.normal,
-                    fontSize: 30),
+              const SizedBox(
+                height: 50,
+                width: 300,
+                child: Text(
+                  "    Burst Settings",
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 0, 60, 109),
+                      fontWeight: FontWeight.normal,
+                      fontSize: 30),
+                ),
               ),
               const SizedBox(height: 10),
               SizedBox(
@@ -283,42 +345,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
           const SizedBox(width: 10),
           Column(
             children: [
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const Text(
-                    "Continuous Stimulation",
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 0, 60, 109),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  FlutterSwitch(
-                      activeColor: Colors.blue,
-                      inactiveColor: Colors.grey,
-                      activeTextColor: Colors.white,
-                      inactiveTextColor: Colors.white,
-                              activeTextFontWeight: FontWeight.w400,
-        inactiveTextFontWeight: FontWeight.w400,
-                      activeText: "on",
-                      inactiveText: "off",
-                      width: 75,
-                      height: 40,
-                      showOnOff: true,
-                      onToggle: (bool continuous) {
-                        setState(() {
-                          Provider.of<Data>(context, listen: false)
-                              .toggleburstcont(!continuous);
-                        });
-                      },
-                      value: Provider.of<Data>(context).getBurstMode)
-                ],
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 60),
               SizedBox(
                 width: 250,
                 child: TextField(

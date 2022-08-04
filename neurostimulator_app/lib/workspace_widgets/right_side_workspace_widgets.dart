@@ -41,9 +41,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
   String result = "";
   bool connected = false;
 
-  //the below may be unneccesary
-  List<BleCharacteristic> characteristics = [];
-  List<String> services = [];
+
 //////////////////////////////////////////////////
   /// this shouldn't be here, this is to fix an error where the device disconnects upon
   /// navigating to the workspace. this should be fixed soon with the BLE code being moved to provider
@@ -89,78 +87,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
           backgroundColor: Colors.red,
           duration: Duration(milliseconds: 300)));
 
-  writeCharacteristic(String address, String serviceID, String charID,
-      Uint8List data, bool writeWithResponse) async {
-    try {
-      await WinBle.write(
-          address: address,
-          service: serviceID,
-          characteristic: charID,
-          data: data,
-          writeWithResponse: true);
-      //print("i Have just written in writeCharacteristics $data");
-    } catch (e) {
-      showError("writeCharError : $e");
-      setState(() {
-        error = e.toString();
-      });
-    }
-  }
-
-  subsCribeToCharacteristic(address, serviceID, charID) async {
-    try {
-      await WinBle.subscribeToCharacteristic(
-          address: address, serviceId: serviceID, characteristicId: charID);
-      showSuccess("Subscribe Successfully");
-    } catch (e) {
-      showError("SubscribeCharError : $e");
-      setState(() {
-        error = e.toString() + " Date ${DateTime.now()}";
-      });
-    }
-  }
-
-  unSubscribeToCharacteristic(address, serviceID, charID) async {
-    try {
-      await WinBle.unSubscribeFromCharacteristic(
-          address: address, serviceId: serviceID, characteristicId: charID);
-      showSuccess("Unsubscribed Successfully");
-    } catch (e) {
-      showError("UnSubscribeError : $e");
-      setState(() {
-        error = e.toString() + " Date ${DateTime.now()}";
-      });
-    }
-  }
-
-  disconnect(address) async {
-    try {
-      await WinBle.disconnect(address);
-      showSuccess("Disconnected");
-    } catch (e) {
-      if (!mounted) return;
-      showError(e.toString());
-    }
-  }
-
-  readCharacteristic(address, serviceID, charID) async {
-    try {
-      List<int> data = await WinBle.read(
-          address: address, serviceId: serviceID, characteristicId: charID);
-      // print(String.fromCharCodes(data));
-      setState(() {
-        result =
-            "Read => List<int> : $data    ,    ToString :  ${String.fromCharCodes(data)}   , Time : ${DateTime.now()}";
-      });
-    } catch (e) {
-      showError("ReadCharError : $e");
-      setState(() {
-        error = e.toString();
-      });
-    }
-  }
-
-
 
 
   StreamSubscription? _connectionStream;
@@ -169,15 +95,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
   @override
   void initState() {
     device = widget.device;
-    final Data myProvider = Provider.of<Data>(context, listen: false);
-
-    _connectionStream = myProvider.getConnnectionStream;
-
-    
-    _characteristicValueStream =
-        WinBle.characteristicValueStream.listen((event) {
-      // print("CharValue : $event");
-    });
+    final Data myProvider = Provider.of<Data>(context, listen: false);   
+    // _characteristicValueStream =
+    //     WinBle.characteristicValueStream.listen((event) {
+    // });
     super.initState();
     _phase1CurrentTextfield =
         TextEditingController(text: myProvider.getPhase1Current.toString());
@@ -212,7 +133,6 @@ class _RightSideInputsState extends State<RightSideInputs> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
-    disconnect(device.address);
     _phase1CurrentTextfield?.dispose();
     _phase2CurrentTextfield?.dispose();
     _dcCurrentTargetTextfield?.dispose();
@@ -235,7 +155,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
     var value_one = "";
     return Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: 45,),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -273,9 +194,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 var serial_command_inputs =
                     Provider.of<Data>(context, listen: false)
                         .get_serial_command_input_char;
-                // print(serial_command_inputs);
                 for (var value in serial_command_inputs.values) {
-                  writeCharacteristic(device.address, SERVICE_UUID,
+                  myProvider.writeCharacteristic(device.address, SERVICE_UUID,
                       SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
                   await Future.delayed(const Duration(milliseconds: 1), () {});
                 }
@@ -298,7 +218,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
 
               onPressed: () {
-                writeCharacteristic(
+                myProvider.writeCharacteristic(
                     device.address,
                     SERVICE_UUID,
                     SERIAL_COMMAND_INPUT_CHAR_UUID,

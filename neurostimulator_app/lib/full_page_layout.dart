@@ -23,74 +23,20 @@ class _FullPageLayoutState extends State<FullPageLayout> {
   @override
   void initState() {
     final Data myProvider = Provider.of<Data>(context, listen: false);
-    myProvider.initialise();
+    myProvider.initialiseBLE();
 
     super.initState();
   }
 
+//check if the following can be removed
   String bleStatus = "";
   String bleError = "";
   String error = "none";
   bool connected = false;
-  bool notloading = true;
-
-  /// Main Methods
-  ///
-  // void showSuccess(String value) =>
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //         content: Text(value),
-  //         backgroundColor: Colors.green,
-  //         duration: Duration(milliseconds: 300)));
-
-  // void showError(String value) =>
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-  //         content: Text(value),
-  //         backgroundColor: Colors.red,
-  //         duration: Duration(milliseconds: 300)));
-
-  // connect(BleDevice device) async {
-  //   final address = device.address;
-  //   setState(() {
-  //     notloading = false;
-  //   });
-  //   try {
-  //     await WinBle.connect(address);
-  //     showSuccess("Connected");
-  //     notloading = true;
-
-  //     Navigator.push(
-  //       context,
-  //       MaterialPageRoute(
-  //           builder: (context) => workspace(
-  //                 device: device,
-  //               )),
-  //     );
-  //   } catch (e) {
-  //     setState(() {
-  //       notloading = true;
-
-  //       error = e.toString();
-  //       showError(error);
-  //     });
-  //   }
-  // }
-
-  // startScanning() {
-  //   WinBle.startScanning();
-  //   setState(() {
-  //     isScanning = true;
-  //   });
-  // }
-
-  // stopScanning() {
-  //   WinBle.stopScanning();
-  //   setState(() {
-  //     isScanning = false;
-  //   });
-  // }
 
   @override
   void dispose() {
+    Provider.of<Data>(context, listen: false).disposeBLE();
     super.dispose();
   }
 
@@ -126,8 +72,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                       itemCount: devices.length,
                       itemBuilder: (BuildContext context, int index) {
                         BleDevice device = devices[index];
-                        return notloading
-                            ? InkWell(
+                        return InkWell(
                                 onTap: () async {
                                   myProvider.stopScanning();
                                   await Navigator.push(
@@ -148,8 +93,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                                       subtitle: Text(
                                           "rssi : ${device.rssi} | AdvTpe : ${device.advType}")),
                                 ),
-                              )
-                            : CircularProgressIndicator();
+                              );
                       },
                     ),
                   ),
@@ -158,7 +102,8 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                         minimumSize: Size.fromHeight(50)),
 
                     onPressed: () {
-                      print(devices);
+                      // scans for an overall of 10 seconds, with
+                      // "bursts" with durations starting from one seconds and increasing to 4
                       for (int i = 1; i <= 4; i += 1) {
                         myProvider.startScanning();
                         Timer(Duration(seconds: i), () {

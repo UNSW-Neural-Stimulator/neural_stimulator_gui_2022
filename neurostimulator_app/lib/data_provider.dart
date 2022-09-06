@@ -22,7 +22,7 @@ class Data extends ChangeNotifier {
   var _interStimDelayMicrosec = 1000;
   var _burstDurationMicrosec = 0;
   var _dutyCyclePercentage = 0;
-  var _frequency = 0;
+  var _frequency = 0.0;
 
   //
   var _interStimDelayStringForDisplay_frequency = "";
@@ -34,12 +34,10 @@ class Data extends ChangeNotifier {
   var _dcBurstGap = 0;
   var _dcBurstNum = 0;
 
-
-
   //ints for right side of workspace
   var _phase1CurrentMicroAmp = 1500;
   var _phase2CurrentMicroAmp = 3000;
-  
+
   //end stimulation by duration, minute and seconds
   var _endStimulationMinute = 0;
   var _endStimulationSeconds = 0;
@@ -67,51 +65,40 @@ class Data extends ChangeNotifier {
   //variables used for burst calculations
 
   ////////////////////////////////
-  ///DEBUG MAP, delete this before prod, this is a map that is used to print all the values 
+  ///DEBUG MAP, delete this before prod, this is a map that is used to print all the values
   ///stored in this provider class
-  
-   late var debug_map = {
 
-
-  "phase 1 time": getPhase1Time,
-    "_interPhaseDelayMicrosec":getInterPhaseDelay,
-    "_phase2TimeMicrosec":getPhase2Time,
-    "_interStimDelayMicrosec":getInterstimDelay,
-
-
-  "_burstDurationMicrosec":_burstDurationMicrosec,
-    "_dutyCyclePercentage":_dutyCyclePercentage,
-    "_frequency":_frequency,
-    "_interStimDelayStringForDisplay_frequency":_interStimDelayStringForDisplay_frequency,
-
-
-  "_rampUpTime":_rampUpTime,
-    "_dcHoldTime":_dcHoldTime,
-    "_dcCurrentTargetMicroAmp":_dcCurrentTargetMicroAmp,
-    "_dcBurstGap":_dcBurstGap,
-  
-  "_dcBurstNum":_dcBurstNum,
-    "_phase1CurrentMicroAmp":_phase1CurrentMicroAmp,
-    "_phase2CurrentMicroAmp":_phase2CurrentMicroAmp,
-    "_endStimulationMinute":_endStimulationMinute,
-
-  "_endbyvalue":_endbyvalue,
-    "_calculate_interstim_by_freq":_calculate_interstim_by_freq,
-    "_continuousStim":_continuousStim,
-    "_dcMode":_dcMode,
-
-  "_endByDuration":_endByDuration,
-    "_endByBurst":_endByBurst,
-    "_stimForever":_stimForever,
-    "_cathodicFirst":_cathodicFirst,
-
-    "_anodicFirst":_anodicFirst,
-
+  late var debug_map = {
+    "phase 1 time": getPhase1Time,
+    "_interPhaseDelayMicrosec": getInterPhaseDelay,
+    "_phase2TimeMicrosec": getPhase2Time,
+    "_interStimDelayMicrosec": getInterstimDelay,
+    "_burstDurationMicrosec": _burstDurationMicrosec,
+    "_dutyCyclePercentage": _dutyCyclePercentage,
+    "_frequency": _frequency,
+    "_interStimDelayStringForDisplay_frequency":
+        _interStimDelayStringForDisplay_frequency,
+    "_rampUpTime": _rampUpTime,
+    "_dcHoldTime": _dcHoldTime,
+    "_dcCurrentTargetMicroAmp": _dcCurrentTargetMicroAmp,
+    "_dcBurstGap": _dcBurstGap,
+    "_dcBurstNum": _dcBurstNum,
+    "_phase1CurrentMicroAmp": _phase1CurrentMicroAmp,
+    "_phase2CurrentMicroAmp": _phase2CurrentMicroAmp,
+    "_endStimulationMinute": _endStimulationMinute,
+    "_endbyvalue": _endbyvalue,
+    "_calculate_interstim_by_freq": _calculate_interstim_by_freq,
+    "_continuousStim": _continuousStim,
+    "_dcMode": _dcMode,
+    "_endByDuration": _endByDuration,
+    "_endByBurst": _endByBurst,
+    "_stimForever": _stimForever,
+    "_cathodicFirst": _cathodicFirst,
+    "_anodicFirst": _anodicFirst,
   };
 
-
   ////////////////////////////////
-  
+
   ///////////////////////////////////////////////////////////////////////////////////////////////
   ///Map for of all values that are sent to the firmware as parameters for stimulation
   ///each value is stored as an Uint8list
@@ -140,11 +127,11 @@ class Data extends ChangeNotifier {
     "start": start_bytearray,
   };
 
-  Map get getdebugmap{
+  Map get getdebugmap {
     print("hi");
     print("phase one time is = $_phase1TimeMicrosec");
     return debug_map;
-    }
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // the below are methods used for "notifying" and changing the values stored in the Data class
@@ -219,9 +206,8 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-
   setfrequency(String frequencyinput) {
-    _frequency = int.tryParse(frequencyinput) ?? defaultValue;
+    _frequency = double.tryParse(frequencyinput) ?? 0.0;
     _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency,
         _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
     _interStimDelayStringForDisplay_frequency =
@@ -304,7 +290,6 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-
   /// end of set functions
   ///////////////////////////////////////////////////////////////////////////////////
   // All get methods are used to retrieve a value from provider,
@@ -328,7 +313,7 @@ class Data extends ChangeNotifier {
 
   String get endByDurationTitle {
     if (_endByDuration) {
-      return "Stimulation Duration (s)";
+      return "Stimulation Duration";
     } else if (_endByBurst) {
       return "Number of Bursts";
     } else {
@@ -392,9 +377,7 @@ class Data extends ChangeNotifier {
     return _dcBurstNum;
   }
 
-
-
-  int get getFrequency {
+  double get getFrequency {
     return _frequency;
   }
 
@@ -439,11 +422,9 @@ class Data extends ChangeNotifier {
     serial_command_input_char["anodic_cathodic"] =
         Uint8List.fromList([anodic_cathodic, temporary_bool_to_int, 0, 0, 0]);
 
-
     temporary_bool_to_int = _dcMode ? 1 : 0;
     serial_command_input_char["stim_type"] =
         Uint8List.fromList([stim_type, temporary_bool_to_int, 0, 0, 0]);
-
 
     serial_command_input_char["ramp_up_time"] =
         bytearray_maker(ramp_up_time, _rampUpTime);
@@ -472,8 +453,7 @@ class Data extends ChangeNotifier {
 
     //check which curr value should be negative based off cathodic and anodic
 
-
-    // the following variables are used to prevent the textfield value becomming negtive 
+    // the following variables are used to prevent the textfield value becomming negtive
     var _phase1CurrentMicroAmpToSendToBle = _phase1CurrentMicroAmp;
     var _phase2CurrentMicroAmpToSendToBle = _phase2CurrentMicroAmp;
 
@@ -495,24 +475,23 @@ class Data extends ChangeNotifier {
       }
     }
 
-    //print("cathodic_first = $_cathodicFirst");
-    //print(_phase1CurrentMicroAmp);
-    //print(_phase2CurrentMicroAmp);
-
     serial_command_input_char["dac_phase_one"] =
         bytearray_maker(dac_phase_one, _phase1CurrentMicroAmp);
     serial_command_input_char["dac_phase_two"] =
         bytearray_maker(dac_phase_two, _phase2CurrentMicroAmp);
 
-
     var dc_burst = 0;
 
     if (_dcMode) {
-
-      if (_endByDuration && _dcHoldTime != 0 && _dcBurstGap != 0 && _rampUpTime != 0) {
-        var dcstimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
-        dc_burst = ((dcstimduration*1000000)/(_dcHoldTime + _dcBurstGap + _rampUpTime)).round();
-
+      if (_endByDuration &&
+          _dcHoldTime != 0 &&
+          _dcBurstGap != 0 &&
+          _rampUpTime != 0) {
+        var dcstimduration =
+            (_endStimulationMinute * 60) + _endStimulationSeconds;
+        dc_burst = ((dcstimduration * 1000000) /
+                (_dcHoldTime + _dcBurstGap + _rampUpTime))
+            .round();
       }
 
       if (_endByBurst) {
@@ -525,12 +504,7 @@ class Data extends ChangeNotifier {
 
       serial_command_input_char["dc_burst_num"] =
           bytearray_maker(dc_burst_num, dc_burst);
-
     }
-
-
-
-
 
     /// Calculating amount of bursts and pulses based on stimulation ending method
 
@@ -556,25 +530,21 @@ class Data extends ChangeNotifier {
         _interPhaseDelayMicrosec +
         _interStimDelayMicrosec;
 
-
-
-
-
 /////////////////////////////////
     // if it is burst mode calculate interburst delay
 
     if (!_continuousStim && !_dcMode && _burstDurationMicrosec != 0) {
-      
-		burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
-		
-		int interburst = 0;
-		if ((burstPeriod - _burstDurationMicrosec).round() > _interStimDelayMicrosec) {
-			interburst = (burstPeriod - _burstDurationMicrosec).round() - _interStimDelayMicrosec;
-		}
+      burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
 
+      int interburst = 0;
+      if ((burstPeriod - _burstDurationMicrosec).round() >
+          _interStimDelayMicrosec) {
+        interburst = (burstPeriod - _burstDurationMicrosec).round() -
+            _interStimDelayMicrosec;
+      }
 
-		serial_command_input_char["inter_burst_delay"] =
-			bytearray_maker(inter_burst_delay, interburst);
+      serial_command_input_char["inter_burst_delay"] =
+          bytearray_maker(inter_burst_delay, interburst);
     }
 
     ///= if continuos stimulation is selected there is no interburst delay
@@ -605,7 +575,6 @@ class Data extends ChangeNotifier {
         //burst number is calculated as time divided by duration of each burst
         // returns an interger
         burstnumber = (stimduration * 1000000) ~/ burstPeriod;
-
       } else {
         //in adherrance to old ui, returns zero, but I want to add an
         // error case
@@ -620,11 +589,9 @@ class Data extends ChangeNotifier {
 //           if(_endbyvalue != 0) {
 
       burstnumber = _endbyvalue;
-
-
     }
 
-    // if burst mode is sdlected the pulse number is calculated
+    // if burst mode is selected, the pulse number is calculated
 
     if (!_continuousStim && pulsePeriod != 0) {
       if (_burstDurationMicrosec != 0) {
@@ -650,17 +617,22 @@ class Data extends ChangeNotifier {
         bytearray_maker(pulse_num, pulsenumber);
   }
   ///////////////////////////////////////////////////////////////
-  ///BLE Section 
+  ///BLE Section
   /// the following values are use for BLE connection
-  /// values calculated in the UI is stored here so navigation between pages can occur smoothly
-  
+  /// All BLE functions are stored within this data_provider, and is called by the UI through the provider class.
+  /// This allows us to keep BLE things seperated from our presentation layer which means we don't run into
+  /// issues when we do stuff like change pages and routes in the UI
+
+  /// The streams is where the device information from connections and scans are stored
   StreamSubscription? scanStream;
   StreamSubscription? connectionStream;
+
+  /// this is a list of devices that we are connected to, it is a subset of info from our connection stream
+  /// We use this for most of the functions below
   List<BleDevice> devices = <BleDevice>[];
 
-  bool isScanning = false;
-  bool notloading = false;
-
+  /// get  and set functions to retrieve the connection and scan streams these works the same as for the rest of our variables in the
+  /// provider class
   StreamSubscription? get getScanStream {
     return scanStream;
   }
@@ -679,75 +651,76 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-  initialise(){
-      WinBle.initialize(enableLog: false);
-        // call winBLe.dispose() when done
-        connectionStream = WinBle.connectionStream.listen((event) {
-          print("Connection Event : " + event.toString());
-        });
+  // This function is
+  initialiseBLE() {
+    WinBle.initialize(enableLog: false);
+    connectionStream = WinBle.connectionStream.listen((event) {
+      print("Connection Event : " + event.toString());
+    });
 
-        // Listen to Scan Stream , we can cancel in onDispose()
-        scanStream = WinBle.scanStream.listen((event) {
-            if (!devices.any((element) => element.address == event.address) && event.name == "nstim") {
-              devices.add(event);
-            }
-          
-        });
+    // Listen to Scan Stream , we can cancel in onDispose()
+    scanStream = WinBle.scanStream.listen((event) {
+      if (!devices.any((element) => element.address == event.address) &&
+          event.name == "nstim") {
+        devices.add(event);
+      }
+    });
+  }
+
+  disposeBLE() {
+    WinBle.dispose();
+    connectionStream?.cancel();
+    scanStream?.cancel();
   }
 
   List<BleDevice> get getdevices => devices;
-  
+
   startScanning() {
     WinBle.startScanning();
-    
   }
 
   stopScanning() {
     WinBle.stopScanning();
-
   }
-
-
 
   writeCharacteristic(String address, String serviceID, String charID,
       Uint8List data, bool writeWithResponse) async {
-      await WinBle.write(
-          address: address,
-          service: serviceID,
-          characteristic: charID,
-          data: data,
-          writeWithResponse: true);
-
-    
+    await WinBle.write(
+        address: address,
+        service: serviceID,
+        characteristic: charID,
+        data: data,
+        writeWithResponse: true);
   }
 
   subsCribeToCharacteristic(address, serviceID, charID) async {
-      await WinBle.subscribeToCharacteristic(
-          address: address, serviceId: serviceID, characteristicId: charID);
-
+    await WinBle.subscribeToCharacteristic(
+        address: address, serviceId: serviceID, characteristicId: charID);
   }
 
   unSubscribeToCharacteristic(address, serviceID, charID) async {
-      await WinBle.unSubscribeFromCharacteristic(
-          address: address, serviceId: serviceID, characteristicId: charID);
-
+    await WinBle.unSubscribeFromCharacteristic(
+        address: address, serviceId: serviceID, characteristicId: charID);
   }
 
   disconnect(address) async {
+    try {
       await WinBle.disconnect(address);
-
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
+
 
   connect(address) async {
     try {
       await WinBle.connect(address);
       return true;
-    }
-    catch (e){
+    } catch (e) {
       return false;
     }
   }
-
 
   // readCharacteristic(address, serviceID, charID) async {
   //   try {
@@ -765,8 +738,5 @@ class Data extends ChangeNotifier {
   //     });
   //   }
   // }
-
-
-
 
 }

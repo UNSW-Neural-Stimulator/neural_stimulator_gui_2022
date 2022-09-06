@@ -15,6 +15,8 @@ void main() => runApp(MyApp());
 // BleDevice test_device = BleDevice(address: 'address', name: "name", rssi: "idk", manufacturerData: Uint8List(4), serviceUuids: [], advType: 'poo', timestamp: 'like 10 0 clock', );
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

@@ -79,12 +79,11 @@ class _leftTextFieldsState extends State<leftTextFields> {
             width: 150,
             height: 40,
             child: ElevatedButton.icon(
-              onPressed: () async{
+              onPressed: () async {
                 if (await myProvider.connect(widget.device.address) == true) {
                   print('ready');
-                }
-                else {
-                  print("Situation fucked");
+                } else {
+                  print("error on connection");
                 }
               },
               icon: const Icon(
@@ -95,16 +94,39 @@ class _leftTextFieldsState extends State<leftTextFields> {
             ),
           ),
           SizedBox(width: 20),
+          SizedBox(
+            width: 150,
+            height: 40,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(primary: Colors.red),
+              onPressed: () async {
+                if (await myProvider.disconnect(widget.device.address) ==
+                    true) {
+                  print('disconnected');
+                } else {
+                  print("error on disconnection");
+                }
+              },
+              icon: const Icon(
+                Icons.bluetooth,
+                size: 15.0,
+              ),
+              label: Text('Disconnect'), // <-- Text
+            ),
+          ),
+          SizedBox(
+            width: 20,
+          ),
           FlutterSwitch(
-              activeColor: Colors.blue,
-              inactiveColor: Colors.grey,
+              activeColor: Colors.grey,
+              inactiveColor: Colors.blue,
               activeTextColor: Colors.white,
               inactiveTextColor: Colors.white,
               activeTextFontWeight: FontWeight.w400,
               inactiveTextFontWeight: FontWeight.w400,
-              activeText: "Continuous stimulation on",
-              inactiveText: "Continuous stimulation off",
-              width: 240,
+              activeText: "Burst mode off",
+              inactiveText: "Burst mode on",
+              width: 150,
               height: 40,
               showOnOff: true,
               onToggle: (bool continuous) {
@@ -114,9 +136,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 });
               },
               value: Provider.of<Data>(context).getBurstMode),
-          SizedBox(
-            width: 110,
-          )
+
         ],
         mainAxisAlignment: MainAxisAlignment.start,
       ),
@@ -143,6 +163,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase1Textfield,
                   onChanged: (value) {
                     myProvider.setphase1(value);
+                    myProvider.setfrequency(myProvider.getFrequency.toString());
+                    interstim_from_freq = myProvider.getinterstimstring;
                   },
                   labelText: 'Phase 1 Time',
                   minValue: 0,
@@ -156,6 +178,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   enabled: !myProvider.getDcMode,
                   controller: _interPhaseDelayTextfield,
                   onChanged: (value) {
+                    print(value);
                     myProvider.setinterphasedelay(value);
                   },
                   labelText: 'Inter-phase Delay',
@@ -176,6 +199,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase2Textfield,
                   onChanged: (value) {
                     myProvider.setphase2(value);
+                    myProvider.setfrequency(myProvider.getFrequency.toString());
+                    interstim_from_freq = myProvider.getinterstimstring;
                   },
                   labelText: 'Phase 2 Time',
                   minValue: 0,
@@ -255,6 +280,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     Provider.of<Data>(context, listen: false)
                         .setinterstimsting("");
                   } else {
+                    myProvider.setfrequency(myProvider.getFrequency.toString());
+                    interstim_from_freq = myProvider.getinterstimstring;
                     myProvider.setfrequency(
                         Provider.of<Data>(context, listen: false)
                             .getFrequency
@@ -276,14 +303,12 @@ class _leftTextFieldsState extends State<leftTextFields> {
             SizedBox(
               width: 250,
               child: TextField(
-                //todo: implement frequency calculations
                 enabled: (myProvider.getCalculateByFrequency &
                     !myProvider.getDcMode),
-                keyboardType: TextInputType.number,
                 controller: _frequencyTextfield,
                 inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  num_range_formatter(min: 0, max: UINT32MAX)
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r"([0-9]+\.?[0-9]*|\.[0-9]+)")),
                 ],
                 onChanged: (value) {
                   myProvider.setfrequency(value);

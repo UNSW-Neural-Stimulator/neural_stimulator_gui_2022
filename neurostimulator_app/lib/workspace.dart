@@ -21,27 +21,11 @@ class workspace extends StatefulWidget {
 }
 
 class _workspaceState extends State<workspace> {
-  late BleDevice device;
   late StreamSubscription? connectionstream;
   @override
   Widget build(BuildContext context) {
-    var phase1Time = Provider.of<Data>(context).getPhase1Time;
-    var interPhaseDelayTime = Provider.of<Data>(context).getInterPhaseDelay;
-    var phase2Time = Provider.of<Data>(context).getPhase2Time;
-    var interstimDelayTime = Provider.of<Data>(context).getInterstimDelay;
-    // var start = Provider.of<Data>(context).getstart;
-    var endbyduration = Provider.of<Data>(context).endByDuration;
-    var endbyburst = Provider.of<Data>(context).endByBurst;
-    var stimforever = Provider.of<Data>(context).stimilateForever;
-    //debug
-    var anodic_cathodic = Provider.of<Data>(context).getCathodicFirst;
-    /////////////////////////////////////////////////////////////////////////
 
-    //debug map, to be removed before prod
 
-    var debugmap = Provider.of<Data>(context, listen: false).getdebugmap;
-
-    /////////////////////////////////////////////////////////////////////////
 
     int width;
     final content = Wrap(
@@ -49,7 +33,8 @@ class _workspaceState extends State<workspace> {
         crossAxisAlignment: WrapCrossAlignment.center,
         direction: Axis.horizontal,
         children: [
-          SizedBox(width: 600, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:leftTextFields())),
+          
+          SizedBox(width: 600, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child:leftTextFields(device: widget.device))),
           SizedBox(
             width: 10,
           ),
@@ -63,7 +48,8 @@ class _workspaceState extends State<workspace> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         shadowColor: Colors.white,
-
+        
+      
         leading: IconButton(
           icon: const Icon(Icons.home, color: Color.fromARGB(255, 116, 116, 116)),
           onPressed: () => Navigator.of(context).pop(),

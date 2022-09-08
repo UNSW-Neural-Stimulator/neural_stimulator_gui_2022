@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:win_ble/win_ble.dart';
 import "../data_provider.dart";
-import '../helper_and_const.dart';
+import '../util/consts.dart';
+import '../util/helper_functions.dart';
+
 
 class leftTextFields extends StatefulWidget {
   final BleDevice device;
@@ -136,7 +138,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 });
               },
               value: Provider.of<Data>(context).getBurstMode),
-
         ],
         mainAxisAlignment: MainAxisAlignment.start,
       ),
@@ -163,8 +164,11 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase1Textfield,
                   onChanged: (value) {
                     myProvider.setphase1(value);
-                    myProvider.setfrequency(myProvider.getFrequency.toString());
-                    interstim_from_freq = myProvider.getinterstimstring;
+                    if (myProvider.getCalculateByFrequency) {
+                      myProvider
+                          .setfrequency(myProvider.getFrequency.toString());
+                      interstim_from_freq = myProvider.getinterstimstring;
+                    }
                   },
                   labelText: 'Phase 1 Time',
                   minValue: 0,
@@ -199,8 +203,11 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   controller: _phase2Textfield,
                   onChanged: (value) {
                     myProvider.setphase2(value);
-                    myProvider.setfrequency(myProvider.getFrequency.toString());
-                    interstim_from_freq = myProvider.getinterstimstring;
+                    if (myProvider.getCalculateByFrequency) {
+                      myProvider
+                          .setfrequency(myProvider.getFrequency.toString());
+                      interstim_from_freq = myProvider.getinterstimstring;
+                    }
                   },
                   labelText: 'Phase 2 Time',
                   minValue: 0,
@@ -361,7 +368,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     myProvider.setburstduration(value);
                   },
                   labelText: 'Burst Duration',
-                  minValue: 0,
+                  minValue: myProvider.getpulsePeriod,
                   maxValue: UINT32MAX,
                 ),
               ),

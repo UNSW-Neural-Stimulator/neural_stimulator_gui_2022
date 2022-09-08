@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import "dart:typed_data";
 import 'package:win_ble/win_ble.dart';
-import 'package:ns_2022/helper_and_const.dart';
+import 'package:ns_2022/util/consts.dart';
 import 'dart:async';
 import 'package:win_ble/win_ble.dart';
+import '../util/helper_functions.dart';
 
 /*
 The Data class is a from the provider package. It is used for state management
@@ -62,43 +63,6 @@ class Data extends ChangeNotifier {
   bool _cathodicFirst = true;
   bool _anodicFirst = false;
 
-  //variables used for burst calculations
-
-  ////////////////////////////////
-  ///DEBUG MAP, delete this before prod, this is a map that is used to print all the values
-  ///stored in this provider class
-
-  late var debug_map = {
-    "phase 1 time": getPhase1Time,
-    "_interPhaseDelayMicrosec": getInterPhaseDelay,
-    "_phase2TimeMicrosec": getPhase2Time,
-    "_interStimDelayMicrosec": getInterstimDelay,
-    "_burstDurationMicrosec": _burstDurationMicrosec,
-    "_dutyCyclePercentage": _dutyCyclePercentage,
-    "_frequency": _frequency,
-    "_interStimDelayStringForDisplay_frequency":
-        _interStimDelayStringForDisplay_frequency,
-    "_rampUpTime": _rampUpTime,
-    "_dcHoldTime": _dcHoldTime,
-    "_dcCurrentTargetMicroAmp": _dcCurrentTargetMicroAmp,
-    "_dcBurstGap": _dcBurstGap,
-    "_dcBurstNum": _dcBurstNum,
-    "_phase1CurrentMicroAmp": _phase1CurrentMicroAmp,
-    "_phase2CurrentMicroAmp": _phase2CurrentMicroAmp,
-    "_endStimulationMinute": _endStimulationMinute,
-    "_endbyvalue": _endbyvalue,
-    "_calculate_interstim_by_freq": _calculate_interstim_by_freq,
-    "_continuousStim": _continuousStim,
-    "_dcMode": _dcMode,
-    "_endByDuration": _endByDuration,
-    "_endByBurst": _endByBurst,
-    "_stimForever": _stimForever,
-    "_cathodicFirst": _cathodicFirst,
-    "_anodicFirst": _anodicFirst,
-  };
-
-  ////////////////////////////////
-
   ///////////////////////////////////////////////////////////////////////////////////////////////
   ///Map for of all values that are sent to the firmware as parameters for stimulation
   ///each value is stored as an Uint8list
@@ -126,12 +90,6 @@ class Data extends ChangeNotifier {
     "dc_burst_num": Uint8List.fromList([dc_burst_num, 0, 0, 0, 0]),
     "start": start_bytearray,
   };
-
-  Map get getdebugmap {
-    print("hi");
-    print("phase one time is = $_phase1TimeMicrosec");
-    return debug_map;
-  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
   // the below are methods used for "notifying" and changing the values stored in the Data class
@@ -217,7 +175,6 @@ class Data extends ChangeNotifier {
 
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
-    print("helloooo");
     notifyListeners();
   }
 
@@ -237,6 +194,7 @@ class Data extends ChangeNotifier {
   setinterstimdelay(String interStimDelayStringFromTextField) {
     _interStimDelayMicrosec =
         int.tryParse(interStimDelayStringFromTextField) ?? 1000;
+        print(_interStimDelayMicrosec);
     notifyListeners();
   }
 
@@ -384,7 +342,6 @@ class Data extends ChangeNotifier {
   int get getDCCurrentTarget {
     return _dcCurrentTargetMicroAmp;
   }
-//
 
   int get getendbyminutes {
     return _endStimulationMinute;
@@ -394,7 +351,6 @@ class Data extends ChangeNotifier {
     return _endStimulationSeconds;
   }
 
-//
   int get getPhase1Current {
     return _phase1CurrentMicroAmp;
   }
@@ -411,10 +367,17 @@ class Data extends ChangeNotifier {
     return _interStimDelayStringForDisplay_frequency;
   }
 
+  int get getpulsePeriod {
+    return (_phase1TimeMicrosec +
+        _phase2TimeMicrosec +
+        _interPhaseDelayMicrosec +
+        _interStimDelayMicrosec);
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////
   ///end of get functions
 
-/////////////
+  /////////////
   ///Function that updates the serial command input char map before it is sent to the stimulator
   void prepare_stimulation_values() {
     int temporary_bool_to_int = 0;
@@ -452,7 +415,6 @@ class Data extends ChangeNotifier {
         bytearray_maker(inter_stim_delay, _interStimDelayMicrosec);
 
     //check which curr value should be negative based off cathodic and anodic
-
     // the following variables are used to prevent the textfield value becomming negtive
     var _phase1CurrentMicroAmpToSendToBle = _phase1CurrentMicroAmp;
     var _phase2CurrentMicroAmpToSendToBle = _phase2CurrentMicroAmp;
@@ -586,8 +548,6 @@ class Data extends ChangeNotifier {
     //////////////////////////////////////////////////
 
     if (_endByBurst) {
-//           if(_endbyvalue != 0) {
-
       burstnumber = _endbyvalue;
     }
 
@@ -610,7 +570,6 @@ class Data extends ChangeNotifier {
       }
     }
     //put all new values in serial command input char map
-
     serial_command_input_char["burst_num"] =
         bytearray_maker(burst_num, burstnumber);
     serial_command_input_char["pulse_num"] =
@@ -712,7 +671,6 @@ class Data extends ChangeNotifier {
     }
   }
 
-
   connect(address) async {
     try {
       await WinBle.connect(address);
@@ -721,22 +679,4 @@ class Data extends ChangeNotifier {
       return false;
     }
   }
-
-  // readCharacteristic(address, serviceID, charID) async {
-  //   try {
-  //     List<int> data = await WinBle.read(
-  //         address: address, serviceId: serviceID, characteristicId: charID);
-  //     // print(String.fromCharCodes(data));
-  //     setState(() {
-  //       result =
-  //           "Read => List<int> : $data    ,    ToString :  ${String.fromCharCodes(data)}   , Time : ${DateTime.now()}";
-  //     });
-  //   } catch (e) {
-  //     showError("ReadCharError : $e");
-  //     setState(() {
-  //       error = e.toString();
-  //     });
-  //   }
-  // }
-
 }

@@ -1,82 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:math';
-/////////////////////
-///Constants and other values that are needed for ble
-
-///UUIDs
-///Serial Command Input Char UUID is the characteristic which we use to write values into.
-const SERIAL_COMMAND_INPUT_CHAR_UUID = "c4583a38-ef5a-4526-882f-ea5f5d91dbf3";
-const SERVICE_UUID = "13d47a92-3e31-4bde-89b8-77e55b659c76";
-////////////////////////////////////////////////////////////////
-///UINT32MAX is the highest number we can send as a parameter to the firmware
-const UINT32MAX = 4294967295;
-
-//the values below include codes for bytearrays that we send to firmware.
-Uint8List start_bytearray = Uint8List.fromList([1, 0, 0, 0, 0]);
-Uint8List stop_bytearray = Uint8List.fromList([2, 0, 0, 0, 0]);
-const stim_type = 0x03;
-const anodic_cathodic = 0x04;
-const phase_one_time = 0x05;
-const phase_two_time = 0x06;
-
-//burst phase gap
-const inter_phase_gap = 0x07;
-
-//interpulsegap?
-const inter_stim_delay = 0x08;
-
-//interburstgap
-const inter_burst_delay = 0x09;
-//burst pulse num
-const pulse_num = 0x0A;
-
-const burst_num = 0x0B;
-
-// these two are now burst phase 1 curr and burst phase 2 curr
-const dac_phase_one = 0x0C;
-const dac_phase_two = 0x0D;
-
-const ramp_up_time = 0x0E;
-const dc_hold_time = 0x0F;
-const dc_curr_target = 0x10;
-
-const dc_burst_gap = 0x11;
-const dc_burst_num = 0x12;
-
-///////////////////////////////////////////////////////
-///
-class num_range_formatter extends TextInputFormatter {
-  final int min;
-  final int max;
-
-  num_range_formatter({required this.min, required this.max});
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue pre_val,
-    TextEditingValue curr_value,
-  ) {
-    if (curr_value.text == '') {
-      return curr_value;
-    }
-    int? success = int.tryParse(curr_value.text);
-    if (success == null) {
-      return curr_value;
-    }
-
-    if (int.parse(curr_value.text) < min) {
-      return TextEditingValue().copyWith(text: min.toStringAsFixed(2));
-    } else if (int.parse(curr_value.text) > max) {
-      return pre_val;
-    } else {
-      return curr_value;
-    }
-  }
-}
 
 ///////////////////////////////////////////
 /// Custom textfields with selectable units from microsec to minutes
@@ -124,6 +49,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(
                 RegExp(r"([0-9]+\.?[0-9]*|\.[0-9]+)")),
+            LengthLimitingTextInputFormatter(20),
           ],
           onChanged: (value) {
             if (value != '') {
@@ -196,7 +122,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
                                 dropDownExponents[newValue])))
                     .toString();
                 break;
-
             }
             dropdownValue = newValue;
           });
@@ -243,7 +168,7 @@ String? input_error_text(int min, int max, String unit, String input) {
   }
 
   if (inputtedNumberAsInt < min) {
-    return "Input must be greater then $min";
+    return "Input must be greater then \n$min µs";
   } else if (inputtedNumberAsInt > max) {
     return "Cannot exceed $max";
   } else {
@@ -262,14 +187,14 @@ String? frequency_input_error(var frequency, var phasetime1, var phasetime2,
   }
 }
 
-String? generic_error_string(int value_to_check ,int upperbound, int lowerbound, String error_string) {
+String? generic_error_string(
+    int value_to_check, int upperbound, int lowerbound, String error_string) {
   if (value_to_check > upperbound || value_to_check < lowerbound) {
     return error_string;
   } else {
     return null;
   }
 }
-
 
 /// this is used to convert an integer value to a 32 bit byte array so that it can
 /// be sent to the firmware via bluetooth low energy
@@ -309,4 +234,22 @@ int calculate_interstim_from_frequency(
 
   // if answer == 0 then return 0, else give the answer rounded to an integer
   return answer == 0 ? 0 : answer.round();
+}
+
+
+/// stim Duration error check
+/// returns true if stim duration is larger than or equal to  burst duration
+/// else returns false
+bool stimulation_duration_minimum(stimduration_minutes, stimduration_seconds, burstduration) {
+
+  var stimduration = (stimduration_minutes * 60) + stimduration_seconds;
+  // conversion into microseconds
+  stimduration = stimduration * 1000000;
+
+  // If stimulation duration is less than burst duration,returns true as the
+  // stim duration is invalid, else returns false
+  if (stimduration < burstduration) {
+    return true;
+  }
+  return false;
 }

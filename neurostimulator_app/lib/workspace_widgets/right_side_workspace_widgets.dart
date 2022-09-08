@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import "../data_provider.dart";
-import '../helper_and_const.dart';
+import '../util/consts.dart';
 import 'package:win_ble/win_ble.dart';
 import 'dart:typed_data';
+import '../util/helper_functions.dart';
 
 class RightSideInputs extends StatefulWidget {
   final BleDevice device;
@@ -19,81 +20,67 @@ class RightSideInputs extends StatefulWidget {
 }
 
 // Define a corresponding State class.
-// This class holds the data related to the Form.
+// This holds the data related to the following input widgets
 class _RightSideInputsState extends State<RightSideInputs> {
   late BleDevice device = widget.device;
 
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
+  // Create text controllers and use them to retrieve the current value
+  // of the TextFields.
   TextEditingController? _phase1CurrentTextfield;
-  TextEditingController? _phase2CurrentTextfield;
+  TextEditingController? _phase2CurrentTextfield; 
   TextEditingController? _dcCurrentTargetTextfield;
   TextEditingController? _dcHoldTimeTextfield;
   TextEditingController? _rampUpTimeTextfield;
   TextEditingController? _dcBurstGapTextfield;
-
+  // these two text controllers are to recieve the minutes and seconds
+  // for the stimulation duration, I put them below as their inputs are handled
+  // differently, instead of being "saved" straight into provider, some 
+  // calculations take place to convert their units
   TextEditingController? _endByMinutesTextfield;
   TextEditingController? _endBySecondsTextfield;
-
+  // end stimulation textfield for ending by burst number, this is done seperately
+  // to the duration by time inputs as it takes in different value types
   TextEditingController? _endStimulationTextField;
+  // Fixed length list is to control the end by stimulation toggle box
   List<bool> fixedLengthList = [true, false, false];
-  String error = "none";
-  String result = "";
-  bool connected = false;
 
-//////////////////////////////////////////////////
-  /// this shouldn't be here, this is to fix an error where the device disconnects upon
-  /// navigating to the workspace. this should be fixed soon with the BLE code being moved to provider
 
-///////////////////////////////////////////////////
-  String? get _durationErrorText {
-    // at any time, we can get the text from _controller.value.text
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
+  // the following duration error text functions are for the minute and second textfields
+  // they have independent errors functions as this helps with formatting the page,
+  // Since they have small textfield sizes we can't fit the entire error message
+  // so they are handled independently and appear concatated visually to the user
 
-    if (Provider.of<Data>(context).getendbyseconds +
-            Provider.of<Data>(context).getendbyminutes ==
-        0) {
-      return 'Must be > 0';
+  String? get _durationSecondsErrorText {
+    var burstduration = Provider.of<Data>(context).getBurstDuration;
+    // Calls error checking function to assert stimduration is larger than burst duration
+    if (stimulation_duration_minimum(
+      Provider.of<Data>(context).getendbyminutes, 
+      Provider.of<Data>(context).getendbyseconds, 
+      burstduration)) {
+      return 'Must be > burstduration';
     }
     // return null if the text is valid
     return null;
   }
 
   String? get _durationMinutesErrorText {
-    // at any time, we can get the text from _controller.value.text
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
-
-    if (Provider.of<Data>(context).getendbyseconds +
-            Provider.of<Data>(context).getendbyminutes ==
-        0) {
+    // Calls error checking function to assert stimduration is larger than burst duration
+    if (stimulation_duration_minimum(
+      Provider.of<Data>(context).getendbyminutes, 
+      Provider.of<Data>(context).getendbyseconds, 
+      Provider.of<Data>(context).getBurstDuration)) {
       return 'Invalid Duration';
     }
     // return null if the text is valid
     return null;
   }
 
-  void showSuccess(String value) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(value),
-          backgroundColor: Colors.green,
-          duration: const Duration(milliseconds: 700)));
-
-  void showError(String value) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(value),
-          backgroundColor: Colors.red,
-          duration: const Duration(milliseconds: 300)));
-
-
+  /// initstate is called when the widget is built, it initialises all the textfields
+  /// with their respective values in provider.
   @override
   void initState() {
     device = widget.device;
     final Data myProvider = Provider.of<Data>(context, listen: false);
-    // _characteristicValueStream =
-    //     WinBle.characteristicValueStream.listen((event) {
-    // });
     super.initState();
     _phase1CurrentTextfield =
         TextEditingController(text: myProvider.getPhase1Current.toString());
@@ -114,7 +101,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
-
+  // this calls a rebuild whenever a change is made, it is required for the toggle box
   @override
   void didChangeDependencies() {
     fixedLengthList = [
@@ -257,10 +244,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
+                      FilteringTextInputFormatter.digitsOnly,        
+                 LengthLimitingTextInputFormatter(18),
                     ],
                     onChanged: (value) {
                       myProvider.setphase1current(value);
+                      print(value);
                     },
                     decoration:  InputDecoration(
                       disabledBorder: OutlineInputBorder(
@@ -283,6 +272,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
+                                       LengthLimitingTextInputFormatter(18),
+
                       FilteringTextInputFormatter.digitsOnly,
                    ],
                     onChanged: (value) {
@@ -314,6 +305,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     keyboardType: TextInputType.number,
                     controller: _dcCurrentTargetTextfield,
                     inputFormatters: [
+                                       LengthLimitingTextInputFormatter(18),
+
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                     onChanged: (value) {
@@ -471,7 +464,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 const SizedBox(width: 250, height: 50),
               if (Provider.of<Data>(context).endByDuration)
                 SizedBox(
-                  width: 250,
+                  width: 300,
                   height: 70,
                   child: Row(children: [
                     Flexible(
@@ -513,7 +506,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                         },
                         decoration: InputDecoration(
                           labelText: "Seconds",
-                          errorText: _durationErrorText,
+                          errorText: _durationSecondsErrorText,
                           disabledBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
                           focusedBorder: const OutlineInputBorder(

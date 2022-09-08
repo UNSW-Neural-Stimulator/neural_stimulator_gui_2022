@@ -1,12 +1,12 @@
 import 'dart:ffi';
 import 'dart:typed_data';
 
-import 'package:ns_2022/workspace.dart';
+import 'package:ns_2022/pages/workspace.dart';
 
 import 'data_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:win_ble/win_ble.dart';
-import 'full_page_layout.dart';
+import 'pages/full_page_layout.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());

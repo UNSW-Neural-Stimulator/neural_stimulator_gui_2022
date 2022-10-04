@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../persistance/presets.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import "../data_provider.dart";
 import '../util/consts.dart';
@@ -135,8 +136,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
     var value_one = "";
     return Column(
       children: [
-        myProvider.getDcMode
-            ? SizedBox(
+        if (myProvider.getDcMode && myProvider.getConnected)
+            SizedBox(
                 height: 45,
                 child: Row(
                   children: const [
@@ -150,8 +151,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     )
                   ],
                 ),
-              )
-            : const SizedBox(
+              )               
+            else const SizedBox(
                 height: 45,
               ),
         Row(
@@ -214,12 +215,16 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
 
               onPressed: () {
-                myProvider.writeCharacteristic(
-                    device.address,
-                    SERVICE_UUID,
-                    SERIAL_COMMAND_INPUT_CHAR_UUID,
-                    Uint8List.fromList([2, 0, 0, 0, 0]),
-                    true);
+                myProvider.setall();
+                setState(() {
+                  _phase1CurrentTextfield?.text = "1";
+                });
+                // myProvider.writeCharacteristic(
+                //     device.address,
+                //     SERVICE_UUID,
+                //     SERIAL_COMMAND_INPUT_CHAR_UUID,
+                //     Uint8List.fromList([2, 0, 0, 0, 0]),
+                //     true);
               },
               icon: const Icon(
                 Icons.stop_outlined,
@@ -240,7 +245,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
-                    enabled: !myProvider.getDcMode,
+                    enabled: !myProvider.getDcMode && myProvider.getConnected,
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
@@ -268,7 +273,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
-                    enabled: !myProvider.getDcMode,
+                    enabled: !myProvider.getDcMode && myProvider.getConnected,
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
@@ -312,7 +317,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     onChanged: (value) {
                       myProvider.setDCCurrentTarget(value);
                     },
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     decoration:  InputDecoration(
                       disabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
@@ -331,7 +336,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _dcHoldTimeTextfield,
                     onChanged: (value) {
                       myProvider.setDCHoldTime(value);
@@ -354,7 +359,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _rampUpTimeTextfield,
                     onChanged: (value) {
                       myProvider.setrampUpTime(value);
@@ -375,7 +380,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _dcBurstGapTextfield,
                     onChanged: (value) {
                       myProvider.setDCBurstGap(value);
@@ -480,6 +485,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                         },
                         decoration: InputDecoration(
                           labelText: "Minutes",
+                          enabled:  myProvider.getConnected,
                           errorText: _durationMinutesErrorText,
                           disabledBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
@@ -497,6 +503,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       child: TextField(
                         keyboardType: TextInputType.number,
                         controller: _endBySecondsTextfield,
+                        enabled:  myProvider.getConnected,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           num_range_formatter(min: 0, max: 60)

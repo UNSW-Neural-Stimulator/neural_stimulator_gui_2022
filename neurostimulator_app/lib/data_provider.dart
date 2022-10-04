@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'dart:convert';
 import "dart:typed_data";
 import 'package:win_ble/win_ble.dart';
@@ -194,7 +195,7 @@ class Data extends ChangeNotifier {
   setinterstimdelay(String interStimDelayStringFromTextField) {
     _interStimDelayMicrosec =
         int.tryParse(interStimDelayStringFromTextField) ?? 1000;
-        print(_interStimDelayMicrosec);
+    print(_interStimDelayMicrosec);
     notifyListeners();
   }
 
@@ -398,7 +399,6 @@ class Data extends ChangeNotifier {
     serial_command_input_char["dc_hold_time"] =
         bytearray_maker(dc_hold_time, _dcHoldTime);
 
-    print(_dcBurstGap);
     serial_command_input_char["dc_burst_gap"] =
         bytearray_maker(dc_burst_gap, _dcBurstGap);
 
@@ -575,6 +575,40 @@ class Data extends ChangeNotifier {
     serial_command_input_char["pulse_num"] =
         bytearray_maker(pulse_num, pulsenumber);
   }
+  /////////////////////////////////////////////////////////////////////
+  
+
+
+	Map<String, dynamic> generatePresetMap(String presetname) {
+
+		Map<String, dynamic> presetValuesMap = {
+			//fix burst num
+			//fix pulse num
+			"preset_name": presetname,
+			"dc_mode": _dcMode,
+			"cathodic_first": _cathodicFirst,
+			"phase_one_time": _phase1TimeMicrosec,
+			"phase_two_time": _phase2TimeMicrosec,
+			"inter_phase_gap": _interPhaseDelayMicrosec,
+			"inter_stim_delay": _interStimDelayMicrosec,
+			"dac_phase_one": _phase1CurrentMicroAmp,
+			"dac_phase_two": _phase2CurrentMicroAmp,
+			"ramp_up_time": _rampUpTime,
+			"dc_hold_time": _dcHoldTime,
+			"dc_curr_target": _dcCurrentTargetMicroAmp,
+			"dc_burst_gap": _dcBurstGap,
+			"dc_burst_num": _dcBurstNum,
+			"end_by_minutes": _endStimulationMinute,
+			"end_by_seconds": _endStimulationSeconds,
+			"end_by_value": _endbyvalue,
+
+		};
+		return presetValuesMap;
+  }
+
+
+
+
   ///////////////////////////////////////////////////////////////
   ///BLE Section
   /// the following values are use for BLE connection
@@ -599,6 +633,11 @@ class Data extends ChangeNotifier {
   StreamSubscription? get getConnnectionStream {
     return connectionStream;
   }
+
+
+  bool connected = false;
+//TODO CHANGE THIS BACK TO connected
+  bool get getConnected => true;
 
   setScanStream(StreamSubscription stream) {
     scanStream = stream;
@@ -634,6 +673,11 @@ class Data extends ChangeNotifier {
 
   List<BleDevice> get getdevices => devices;
 
+  resetDevices() {
+    devices = <BleDevice>[];
+    notifyListeners();
+  }
+
   startScanning() {
     WinBle.startScanning();
   }
@@ -665,6 +709,8 @@ class Data extends ChangeNotifier {
   disconnect(address) async {
     try {
       await WinBle.disconnect(address);
+      connected = false;
+
       return true;
     } catch (e) {
       return false;
@@ -674,9 +720,44 @@ class Data extends ChangeNotifier {
   connect(address) async {
     try {
       await WinBle.connect(address);
+      connected = true;
       return true;
     } catch (e) {
       return false;
     }
+  }
+
+  setall() {
+      _rampUpTime = 0;
+  _dcHoldTime = 0;
+  _dcCurrentTargetMicroAmp = 1000;
+  _dcBurstGap = 0;
+  _dcBurstNum = 0;
+  _phase1CurrentMicroAmp = 1500;
+  _phase2CurrentMicroAmp = 3000;
+
+   _endStimulationMinute = 0;
+   _endStimulationSeconds = 0;
+
+   _endbyvalue = 1;
+
+  // calculate interstim by freq
+   _calculate_interstim_by_freq = false;
+
+  //burst or continuos stimulation
+   _continuousStim = false;
+  //buttons from right side of workspace
+  //bool _start = false;
+   _dcMode = false;
+
+  //end simulation toggle button
+   _endByDuration = true;
+   _endByBurst = false;
+   _stimForever = false;
+
+  // if false then anodic first is true
+   _cathodicFirst = true;
+   _anodicFirst = false;
+   notifyListeners();
   }
 }

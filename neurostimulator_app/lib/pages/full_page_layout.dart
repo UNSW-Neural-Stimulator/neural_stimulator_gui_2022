@@ -106,6 +106,7 @@ class _FullPageLayoutState extends State<FullPageLayout> {
                       // "bursts" with durations starting from one seconds and increasing to 4
                       for (int i = 1; i <= 4; i += 1) {
                         myProvider.startScanning();
+                        setState(() {myProvider.resetDevices();});
                         Timer(Duration(seconds: i), () {
                           myProvider.stopScanning();
                           if (devices != []) {
@@ -168,3 +169,5 @@ class _FullPageLayoutState extends State<FullPageLayout> {
     );
   }
 }
+
+

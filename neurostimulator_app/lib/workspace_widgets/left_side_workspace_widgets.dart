@@ -470,7 +470,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                          title: Text('Presets'),
+                          title: Text('Presets: '),
                           content:
                                 presetContainer(),
                                 

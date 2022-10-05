@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'dart:convert';
 import "dart:typed_data";
 import 'package:win_ble/win_ble.dart';
@@ -118,7 +119,6 @@ class Data extends ChangeNotifier {
 
   void toggleburstcont(bool continuous) {
     _continuousStim = !continuous;
-    // //print("burstmode is equal to $_continuousStim");
     notifyListeners();
   }
 
@@ -173,6 +173,15 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
+  setfrequencyNoNotify(String frequencyinput) {
+    _frequency = double.tryParse(frequencyinput) ?? 0.0;
+    _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency,
+        _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+    _interStimDelayStringForDisplay_frequency =
+        _interStimDelayMicrosec.toString();
+  }
+
+
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
     notifyListeners();
@@ -194,7 +203,6 @@ class Data extends ChangeNotifier {
   setinterstimdelay(String interStimDelayStringFromTextField) {
     _interStimDelayMicrosec =
         int.tryParse(interStimDelayStringFromTextField) ?? 1000;
-        print(_interStimDelayMicrosec);
     notifyListeners();
   }
 
@@ -374,6 +382,18 @@ class Data extends ChangeNotifier {
         _interStimDelayMicrosec);
   }
 
+  bool get getEndByDuration {
+    return _endByDuration;
+  }
+
+  bool get getEndByBurst {
+    return _endByBurst;
+  }
+
+  bool get getStimForever {
+    return _stimForever;
+  }
+
   ///////////////////////////////////////////////////////////////////////////////////
   ///end of get functions
 
@@ -398,7 +418,6 @@ class Data extends ChangeNotifier {
     serial_command_input_char["dc_hold_time"] =
         bytearray_maker(dc_hold_time, _dcHoldTime);
 
-    print(_dcBurstGap);
     serial_command_input_char["dc_burst_gap"] =
         bytearray_maker(dc_burst_gap, _dcBurstGap);
 
@@ -575,6 +594,44 @@ class Data extends ChangeNotifier {
     serial_command_input_char["pulse_num"] =
         bytearray_maker(pulse_num, pulsenumber);
   }
+  /////////////////////////////////////////////////////////////////////
+  
+
+
+	Map<String, dynamic> generatePresetMap(String presetname) {
+
+		Map<String, dynamic> presetValuesMap = {
+			//fix burst num
+			//fix pulse num
+			"preset_name": presetname,
+			"dc_mode": _dcMode,
+			"cathodic_first": _cathodicFirst,
+			"phase_one_time": _phase1TimeMicrosec,
+			"phase_two_time": _phase2TimeMicrosec,
+			"inter_phase_gap": _interPhaseDelayMicrosec,
+			"inter_stim_delay": _interStimDelayMicrosec,
+			"dac_phase_one": _phase1CurrentMicroAmp,
+			"dac_phase_two": _phase2CurrentMicroAmp,
+			"ramp_up_time": _rampUpTime,
+			"dc_hold_time": _dcHoldTime,
+			"dc_curr_target": _dcCurrentTargetMicroAmp,
+			"dc_burst_gap": _dcBurstGap,
+			"dc_burst_num": _dcBurstNum,
+			"end_by_minutes": _endStimulationMinute,
+			"end_by_seconds": _endStimulationSeconds,
+			"end_by_value": _endbyvalue,
+      "end_by_burst": _endByBurst,
+      "end_by_duration": _endByDuration,
+      "stim_forever": _stimForever,
+      "frequency": _frequency,
+
+		};
+		return presetValuesMap;
+  }
+
+
+
+
   ///////////////////////////////////////////////////////////////
   ///BLE Section
   /// the following values are use for BLE connection
@@ -599,6 +656,11 @@ class Data extends ChangeNotifier {
   StreamSubscription? get getConnnectionStream {
     return connectionStream;
   }
+
+
+  bool connected = false;
+//TODO CHANGE THIS BACK TO connected
+  bool get getConnected => true;
 
   setScanStream(StreamSubscription stream) {
     scanStream = stream;
@@ -634,6 +696,11 @@ class Data extends ChangeNotifier {
 
   List<BleDevice> get getdevices => devices;
 
+  resetDevices() {
+    devices = <BleDevice>[];
+    notifyListeners();
+  }
+
   startScanning() {
     WinBle.startScanning();
   }
@@ -665,6 +732,8 @@ class Data extends ChangeNotifier {
   disconnect(address) async {
     try {
       await WinBle.disconnect(address);
+      connected = false;
+
       return true;
     } catch (e) {
       return false;
@@ -674,9 +743,63 @@ class Data extends ChangeNotifier {
   connect(address) async {
     try {
       await WinBle.connect(address);
+      connected = true;
       return true;
     } catch (e) {
       return false;
     }
   }
+  /////////////////////////////////////
+  // preset update functions
+
+  bool prepareUpdatePreset = false;
+
+  bool get getPrepareUpdatePreset => prepareUpdatePreset;
+  
+  setPrepareUpdatePreset(bool value) {
+    prepareUpdatePreset = value;
+    notifyListeners();
+  }
+
+
+  bool updatePreset = false;
+
+  bool get getUpdatePreset => updatePreset;
+  
+  setUpdatePreset(bool value) {
+    updatePreset = value;
+    notifyListeners();
+  }
+
+  setFromPreset(Map<String, dynamic> presetMap) async {
+    _dcMode = presetMap["dc_mode"];
+    _cathodicFirst = presetMap["cathodic_first"];
+    _phase1TimeMicrosec = presetMap["phase_one_time"];
+    _phase2TimeMicrosec= presetMap["phase_two_time"];
+    _interPhaseDelayMicrosec = presetMap["inter_phase_gap"];
+    _interStimDelayMicrosec = presetMap["inter_stim_delay"];
+    _phase1CurrentMicroAmp = presetMap["dac_phase_one"];
+    _phase2CurrentMicroAmp = presetMap["dac_phase_two"];
+    _rampUpTime = presetMap["ramp_up_time"];
+    _dcHoldTime = presetMap["dc_hold_time"];
+    _dcCurrentTargetMicroAmp = presetMap["dc_curr_target"];
+    _dcBurstGap = presetMap["dc_burst_gap"];
+    _dcBurstNum = presetMap["dc_burst_num"];
+    _endStimulationMinute = presetMap["end_by_minutes"];
+    _endStimulationSeconds = presetMap["end_by_seconds"];
+    _endbyvalue = presetMap["end_by_value"];
+    _endByDuration = presetMap["end_by_duration"];
+    _endByBurst = presetMap["end_by_burst"];
+    _stimForever = presetMap["stim_forever"];
+    _frequency = presetMap["frequency"];
+    setPrepareUpdatePreset(true);
+    await Future.delayed(Duration(milliseconds: 10));
+    setPrepareUpdatePreset(false);
+
+    setUpdatePreset(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    setUpdatePreset(false);
+
+  }
+
 }

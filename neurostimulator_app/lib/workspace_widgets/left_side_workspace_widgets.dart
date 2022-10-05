@@ -1,12 +1,13 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:ns_2022/preset_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:win_ble/win_ble.dart';
 import "../data_provider.dart";
 import '../util/consts.dart';
 import '../util/helper_functions.dart';
-
+import '../persistance/presetList.dart';
 
 class leftTextFields extends StatefulWidget {
   final BleDevice device;
@@ -67,10 +68,34 @@ class _leftTextFieldsState extends State<leftTextFields> {
   @override
   Widget build(BuildContext context) {
     final Data myProvider = Provider.of<Data>(context);
+    final Presets presetProvider = Provider.of<Presets>(context);
     var interstim_from_freq = Provider.of<Data>(context).getinterstimstring;
     bool show_interstim_tab =
         !Provider.of<Data>(context).getCalculateByFrequency;
+///////////////////////////////////////
+    if (myProvider.getUpdatePreset) {
+      setState(() {
+  _phase1Textfield =
+        TextEditingController(text: myProvider.getPhase1Time.toString());
+    _interPhaseDelayTextfield =
+        TextEditingController(text: myProvider.getInterPhaseDelay.toString());
+    _phase2Textfield =
+        TextEditingController(text: myProvider.getPhase2Time.toString());
+    _interStimDelayTexfield =
+        TextEditingController(text: myProvider.getInterstimDelay.toString());
+    _burstDurationTextfield =
+        TextEditingController(text: myProvider.getBurstDuration.toString());
+    _dutyCycleTextfield =
+        TextEditingController(text: myProvider.getDutyCycle.toString());
+    _frequencyTextfield =
+        TextEditingController(text: myProvider.getFrequency.toString());
+      myProvider.setfrequencyNoNotify(myProvider.getFrequency.toString());
+    interstim_from_freq = myProvider.getinterstimstring;
 
+      });
+
+    }
+///////////////////
     return Column(children: [
       SizedBox(
         height: 20,
@@ -83,7 +108,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
             child: ElevatedButton.icon(
               onPressed: () async {
                 if (await myProvider.connect(widget.device.address) == true) {
-                  print('ready');
+                  setState(() {});
                 } else {
                   print("error on connection");
                 }
@@ -104,7 +129,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               onPressed: () async {
                 if (await myProvider.disconnect(widget.device.address) ==
                     true) {
-                  print('disconnected');
+                  setState(() {});
                 } else {
                   print("error on disconnection");
                 }
@@ -141,9 +166,24 @@ class _leftTextFieldsState extends State<leftTextFields> {
         ],
         mainAxisAlignment: MainAxisAlignment.start,
       ),
-      SizedBox(
-        height: 10,
-      ),
+      if (!myProvider.getConnected)
+        SizedBox(
+          height: 30,
+          child: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 30),
+              Text(
+                "    The device is not connected",
+                style:
+                    TextStyle(fontWeight: FontWeight.w500, color: Colors.red),
+              )
+            ],
+          ),
+        )
+      else
+        SizedBox(
+          height: 30,
+        ),
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -160,7 +200,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: CustomTextField(
-                  enabled: !myProvider.getDcMode,
+                  enabled: !myProvider.getDcMode && myProvider.getConnected,
                   controller: _phase1Textfield,
                   onChanged: (value) {
                     myProvider.setphase1(value);
@@ -179,10 +219,9 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: CustomTextField(
-                  enabled: !myProvider.getDcMode,
+                  enabled: !myProvider.getDcMode && myProvider.getConnected,
                   controller: _interPhaseDelayTextfield,
                   onChanged: (value) {
-                    print(value);
                     myProvider.setinterphasedelay(value);
                   },
                   labelText: 'Inter-phase Delay',
@@ -199,7 +238,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               SizedBox(
                 width: 250,
                 child: CustomTextField(
-                  enabled: !myProvider.getDcMode,
+                  enabled: !myProvider.getDcMode && myProvider.getConnected,
                   controller: _phase2Textfield,
                   onChanged: (value) {
                     myProvider.setphase2(value);
@@ -219,7 +258,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   ? SizedBox(
                       width: 250,
                       child: CustomTextField(
-                        enabled: !myProvider.getDcMode,
+                        enabled:
+                            !myProvider.getDcMode && myProvider.getConnected,
                         controller: _interStimDelayTexfield,
                         onChanged: (value) {
                           myProvider.setinterstimdelay(value);
@@ -310,8 +350,9 @@ class _leftTextFieldsState extends State<leftTextFields> {
             SizedBox(
               width: 250,
               child: TextField(
-                enabled: (myProvider.getCalculateByFrequency &
-                    !myProvider.getDcMode),
+                enabled: (myProvider.getCalculateByFrequency &&
+                    !myProvider.getDcMode &&
+                    myProvider.getConnected),
                 controller: _frequencyTextfield,
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(
@@ -347,7 +388,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
           Column(
             children: [
               const SizedBox(
-                height: 50,
+                height: 40,
                 width: 300,
                 child: Text(
                   "    Burst Settings",
@@ -362,7 +403,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 width: 250,
                 child: CustomTextField(
                   enabled: (!Provider.of<Data>(context).getBurstMode &
-                      !myProvider.getDcMode),
+                          !myProvider.getDcMode &&
+                      myProvider.getConnected),
                   controller: _burstDurationTextfield,
                   onChanged: (value) {
                     myProvider.setburstduration(value);
@@ -382,7 +424,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
                 width: 250,
                 child: TextField(
                   enabled: (!Provider.of<Data>(context).getBurstMode &
-                      !myProvider.getDcMode),
+                          !myProvider.getDcMode &&
+                      myProvider.getConnected),
                   keyboardType: TextInputType.number,
                   controller: _dutyCycleTextfield,
                   inputFormatters: [
@@ -408,37 +451,79 @@ class _leftTextFieldsState extends State<leftTextFields> {
           ),
         ],
       ),
-      SizedBox(
-        height: 10,
-      ),
-      const Text(
-        "Toggle anodic or cathodic first:",
-        style: TextStyle(
-          fontSize: 20,
-          color: Color.fromARGB(255, 0, 60, 109),
-        ),
-      ),
-      SizedBox(
-        height: 10,
-      ),
-      FlutterSwitch(
-        activeColor: Colors.blue,
-        inactiveColor: Colors.blue,
-        activeTextColor: Colors.white,
-        inactiveTextColor: Colors.white,
-        activeTextFontWeight: FontWeight.w400,
-        inactiveTextFontWeight: FontWeight.w400,
-        activeText: "cathodic first",
-        inactiveText: "anodic first",
-        width: 150,
-        height: 40,
-        showOnOff: true,
-        onToggle: (bool cathodic) {
-          Provider.of<Data>(context, listen: false)
-              .toggleCathodicAnodic(cathodic);
-        },
-        value: Provider.of<Data>(context)
-            .getCathodicFirst, // remove `listen: false`
+      Row(
+        children: [
+          SizedBox(
+            width: 50,
+          ),
+          SizedBox(
+            width: 200,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blue,
+                minimumSize: const Size(150, 50),
+              ),
+
+              onPressed: () {
+
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                          title: Text('Presets'),
+                          content:
+                                presetContainer(),
+                                
+                              );
+                    });
+              },
+
+              icon: const Icon(
+                Icons.save,
+                size: 24.0,
+              ),
+              label: const Text('Presets',
+                  style: TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w400)), // <-- Text
+            ),
+          ),
+          SizedBox(
+            width: 50,
+          ),
+          Column(
+            children: [
+              const Text(
+                "Toggle anodic or cathodic first:",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Color.fromARGB(255, 0, 60, 109),
+                ),
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              FlutterSwitch(
+                activeColor: Colors.blue,
+                inactiveColor: Colors.blue,
+                activeTextColor: Colors.white,
+                inactiveTextColor: Colors.white,
+                activeTextFontWeight: FontWeight.w400,
+                inactiveTextFontWeight: FontWeight.w400,
+                activeText: "cathodic first",
+                inactiveText: "anodic first",
+                width: 150,
+                height: 40,
+                showOnOff: true,
+                onToggle: (bool cathodic) {
+                  Provider.of<Data>(context, listen: false)
+                      .toggleCathodicAnodic(cathodic);
+                },
+                value: Provider.of<Data>(context)
+                    .getCathodicFirst, // remove `listen: false`
+              ),
+            ],
+          )
+        ],
       ),
       SizedBox(
         height: 65,

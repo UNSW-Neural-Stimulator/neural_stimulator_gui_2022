@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:provider/provider.dart';
 import "../data_provider.dart";
 import '../util/consts.dart';
 import 'package:win_ble/win_ble.dart';
@@ -98,7 +99,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
         TextEditingController(text: myProvider.getendbyminutes.toString());
     _endBySecondsTextfield =
         TextEditingController(text: myProvider.getendbyseconds.toString());
-    TextEditingController(text: myProvider.getendByValue);
+    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
   // this calls a rebuild whenever a change is made, it is required for the toggle box
@@ -133,10 +134,33 @@ class _RightSideInputsState extends State<RightSideInputs> {
     final Data myProvider = Provider.of<Data>(context);
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
+
+    if (myProvider.getUpdatePreset) {
+      setState(() {
+_phase1CurrentTextfield =
+        TextEditingController(text: myProvider.getPhase1Current.toString());
+    _phase2CurrentTextfield =
+        TextEditingController(text: myProvider.getPhase2Current.toString());
+    _dcCurrentTargetTextfield =
+        TextEditingController(text: myProvider.getDCCurrentTarget.toString());
+    _dcHoldTimeTextfield =
+        TextEditingController(text: myProvider.getDCHoldTime.toString());
+    _dcBurstGapTextfield =
+        TextEditingController(text: myProvider.getDCBurstGap.toString());
+    _rampUpTimeTextfield =
+        TextEditingController(text: myProvider.getRampUpTime.toString());
+    _endByMinutesTextfield =
+        TextEditingController(text: myProvider.getendbyminutes.toString());
+    _endBySecondsTextfield =
+        TextEditingController(text: myProvider.getendbyseconds.toString());
+    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
+      });
+    }
+
     return Column(
       children: [
-        myProvider.getDcMode
-            ? SizedBox(
+        if (myProvider.getDcMode && myProvider.getConnected)
+            SizedBox(
                 height: 45,
                 child: Row(
                   children: const [
@@ -150,8 +174,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     )
                   ],
                 ),
-              )
-            : const SizedBox(
+              )               
+            else const SizedBox(
                 height: 45,
               ),
         Row(
@@ -240,7 +264,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
-                    enabled: !myProvider.getDcMode,
+                    enabled: !myProvider.getDcMode && myProvider.getConnected,
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
@@ -268,7 +292,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: TextField(
-                    enabled: !myProvider.getDcMode,
+                    enabled: !myProvider.getDcMode && myProvider.getConnected,
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
@@ -312,7 +336,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     onChanged: (value) {
                       myProvider.setDCCurrentTarget(value);
                     },
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     decoration:  InputDecoration(
                       disabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.grey)),
@@ -331,7 +355,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _dcHoldTimeTextfield,
                     onChanged: (value) {
                       myProvider.setDCHoldTime(value);
@@ -354,7 +378,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _rampUpTimeTextfield,
                     onChanged: (value) {
                       myProvider.setrampUpTime(value);
@@ -375,7 +399,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                 SizedBox(
                   width: 250,
                   child: CustomTextField(
-                    enabled: myProvider.getDcMode,
+                    enabled: myProvider.getDcMode && myProvider.getConnected,
                     controller: _dcBurstGapTextfield,
                     onChanged: (value) {
                       myProvider.setDCBurstGap(value);
@@ -480,6 +504,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                         },
                         decoration: InputDecoration(
                           labelText: "Minutes",
+                          enabled:  myProvider.getConnected,
                           errorText: _durationMinutesErrorText,
                           disabledBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
@@ -497,6 +522,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                       child: TextField(
                         keyboardType: TextInputType.number,
                         controller: _endBySecondsTextfield,
+                        enabled:  myProvider.getConnected,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           num_range_formatter(min: 0, max: 60)

@@ -45,6 +45,7 @@ dependencies:
   win_ble: ^0.0.4
   google_fonts: ^3.0.1
   splashscreen: ^1.3.5
+  localstorage: ^4.0.0+1
 
 dev_dependencies:
   flutter_test:

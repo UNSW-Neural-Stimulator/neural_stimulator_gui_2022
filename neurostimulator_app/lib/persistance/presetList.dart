@@ -70,6 +70,10 @@ class _presetContainer extends State<presetContainer> {
           SizedBox(
             height: 10,
           ),
+          TextButton(
+                child: Text("Cancel", style: TextStyle(color: Colors.red),),
+                onPressed: () => Navigator.pop(context),
+          )
         ]),
       ),
     ]);

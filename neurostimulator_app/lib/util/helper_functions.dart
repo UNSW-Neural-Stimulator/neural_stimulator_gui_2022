@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'dart:math';
-
+import 'package:provider/provider.dart';
+import "../data_provider.dart";
 ///////////////////////////////////////////
 /// Custom textfields with selectable units from microsec to minutes
 
@@ -31,12 +32,17 @@ class CustomTextField extends StatefulWidget {
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+
   String dropdownValue = 'µs';
   var inputtedNumberAsInt;
   double inputtedNumber = 0.0;
   Map dropDownExponents = {'µs': 0, 'ms': 1, 's': 2};
   @override
   Widget build(BuildContext context) {
+    final Data myProvider = Provider.of<Data>(context, listen: false);
+    if (myProvider.getPrepareUpdatePreset) {
+      dropdownValue = 'µs';
+    }
     String input = widget.controller!.text;
     inputtedNumber = double.tryParse(input) ?? 0.0;
     return Row(children: [
@@ -69,7 +75,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             }
 
             if (widget.onChanged != null) {
-              print(inputtedNumberAsInt.toString());
               widget.onChanged(inputtedNumberAsInt.toString());
             }
           },

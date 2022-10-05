@@ -119,7 +119,6 @@ class Data extends ChangeNotifier {
 
   void toggleburstcont(bool continuous) {
     _continuousStim = !continuous;
-    // //print("burstmode is equal to $_continuousStim");
     notifyListeners();
   }
 
@@ -174,6 +173,15 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
+  setfrequencyNoNotify(String frequencyinput) {
+    _frequency = double.tryParse(frequencyinput) ?? 0.0;
+    _interStimDelayMicrosec = calculate_interstim_from_frequency(_frequency,
+        _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+    _interStimDelayStringForDisplay_frequency =
+        _interStimDelayMicrosec.toString();
+  }
+
+
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
     notifyListeners();
@@ -195,7 +203,6 @@ class Data extends ChangeNotifier {
   setinterstimdelay(String interStimDelayStringFromTextField) {
     _interStimDelayMicrosec =
         int.tryParse(interStimDelayStringFromTextField) ?? 1000;
-    print(_interStimDelayMicrosec);
     notifyListeners();
   }
 
@@ -373,6 +380,18 @@ class Data extends ChangeNotifier {
         _phase2TimeMicrosec +
         _interPhaseDelayMicrosec +
         _interStimDelayMicrosec);
+  }
+
+  bool get getEndByDuration {
+    return _endByDuration;
+  }
+
+  bool get getEndByBurst {
+    return _endByBurst;
+  }
+
+  bool get getStimForever {
+    return _stimForever;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -601,6 +620,10 @@ class Data extends ChangeNotifier {
 			"end_by_minutes": _endStimulationMinute,
 			"end_by_seconds": _endStimulationSeconds,
 			"end_by_value": _endbyvalue,
+      "end_by_burst": _endByBurst,
+      "end_by_duration": _endByDuration,
+      "stim_forever": _stimForever,
+      "frequency": _frequency,
 
 		};
 		return presetValuesMap;
@@ -726,38 +749,57 @@ class Data extends ChangeNotifier {
       return false;
     }
   }
+  /////////////////////////////////////
+  // preset update functions
 
-  setall() {
-      _rampUpTime = 0;
-  _dcHoldTime = 0;
-  _dcCurrentTargetMicroAmp = 1000;
-  _dcBurstGap = 0;
-  _dcBurstNum = 0;
-  _phase1CurrentMicroAmp = 1500;
-  _phase2CurrentMicroAmp = 3000;
+  bool prepareUpdatePreset = false;
 
-   _endStimulationMinute = 0;
-   _endStimulationSeconds = 0;
-
-   _endbyvalue = 1;
-
-  // calculate interstim by freq
-   _calculate_interstim_by_freq = false;
-
-  //burst or continuos stimulation
-   _continuousStim = false;
-  //buttons from right side of workspace
-  //bool _start = false;
-   _dcMode = false;
-
-  //end simulation toggle button
-   _endByDuration = true;
-   _endByBurst = false;
-   _stimForever = false;
-
-  // if false then anodic first is true
-   _cathodicFirst = true;
-   _anodicFirst = false;
-   notifyListeners();
+  bool get getPrepareUpdatePreset => prepareUpdatePreset;
+  
+  setPrepareUpdatePreset(bool value) {
+    prepareUpdatePreset = value;
+    notifyListeners();
   }
+
+
+  bool updatePreset = false;
+
+  bool get getUpdatePreset => updatePreset;
+  
+  setUpdatePreset(bool value) {
+    updatePreset = value;
+    notifyListeners();
+  }
+
+  setFromPreset(Map<String, dynamic> presetMap) async {
+    _dcMode = presetMap["dc_mode"];
+    _cathodicFirst = presetMap["cathodic_first"];
+    _phase1TimeMicrosec = presetMap["phase_one_time"];
+    _phase2TimeMicrosec= presetMap["phase_two_time"];
+    _interPhaseDelayMicrosec = presetMap["inter_phase_gap"];
+    _interStimDelayMicrosec = presetMap["inter_stim_delay"];
+    _phase1CurrentMicroAmp = presetMap["dac_phase_one"];
+    _phase2CurrentMicroAmp = presetMap["dac_phase_two"];
+    _rampUpTime = presetMap["ramp_up_time"];
+    _dcHoldTime = presetMap["dc_hold_time"];
+    _dcCurrentTargetMicroAmp = presetMap["dc_curr_target"];
+    _dcBurstGap = presetMap["dc_burst_gap"];
+    _dcBurstNum = presetMap["dc_burst_num"];
+    _endStimulationMinute = presetMap["end_by_minutes"];
+    _endStimulationSeconds = presetMap["end_by_seconds"];
+    _endbyvalue = presetMap["end_by_value"];
+    _endByDuration = presetMap["end_by_duration"];
+    _endByBurst = presetMap["end_by_burst"];
+    _stimForever = presetMap["stim_forever"];
+    _frequency = presetMap["frequency"];
+    setPrepareUpdatePreset(true);
+    await Future.delayed(Duration(milliseconds: 10));
+    setPrepareUpdatePreset(false);
+
+    setUpdatePreset(true);
+    await Future.delayed(Duration(milliseconds: 50));
+    setUpdatePreset(false);
+
+  }
+
 }

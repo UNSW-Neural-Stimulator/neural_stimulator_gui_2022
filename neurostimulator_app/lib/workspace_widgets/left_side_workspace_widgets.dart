@@ -72,13 +72,30 @@ class _leftTextFieldsState extends State<leftTextFields> {
     var interstim_from_freq = Provider.of<Data>(context).getinterstimstring;
     bool show_interstim_tab =
         !Provider.of<Data>(context).getCalculateByFrequency;
-
-    if (myProvider.getPhase1Current == 1500) {
+///////////////////////////////////////
+    if (myProvider.getUpdatePreset) {
       setState(() {
-        _phase1Textfield?.text = "6";
-      });
-    }
+  _phase1Textfield =
+        TextEditingController(text: myProvider.getPhase1Time.toString());
+    _interPhaseDelayTextfield =
+        TextEditingController(text: myProvider.getInterPhaseDelay.toString());
+    _phase2Textfield =
+        TextEditingController(text: myProvider.getPhase2Time.toString());
+    _interStimDelayTexfield =
+        TextEditingController(text: myProvider.getInterstimDelay.toString());
+    _burstDurationTextfield =
+        TextEditingController(text: myProvider.getBurstDuration.toString());
+    _dutyCycleTextfield =
+        TextEditingController(text: myProvider.getDutyCycle.toString());
+    _frequencyTextfield =
+        TextEditingController(text: myProvider.getFrequency.toString());
+      myProvider.setfrequencyNoNotify(myProvider.getFrequency.toString());
+    interstim_from_freq = myProvider.getinterstimstring;
 
+      });
+
+    }
+///////////////////
     return Column(children: [
       SizedBox(
         height: 20,
@@ -205,7 +222,6 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   enabled: !myProvider.getDcMode && myProvider.getConnected,
                   controller: _interPhaseDelayTextfield,
                   onChanged: (value) {
-                    print(value);
                     myProvider.setinterphasedelay(value);
                   },
                   labelText: 'Inter-phase Delay',

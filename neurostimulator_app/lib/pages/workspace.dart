@@ -64,38 +64,7 @@ class _workspaceState extends State<workspace> {
         ),
       ),
       body: ListView(children: [content]),
-      // this is a debug feature, must be removed before compilation
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.question_mark_sharp),
-      //   onPressed: () { showDialog<String>(
-      //     context: context,
-      //     builder: (BuildContext context) => AlertDialog(
-      //       title: const Text('Help'),
-      //       content: Text(
-      //           "sowwy"
-      //           // "Phase 1 Time (μs): $phase1Time\nInter-Phase Delay (μs): $interPhaseDelayTime\n"
-      //           //  "debugmap: $debugmap\n"
-      //           // "anodic_cathodic: $anodic_cathodic\n"
-      //           // "endbyduration: $endbyduration\n"
-      //           // "endbyburst: $endbyburst\n"
-      //           // "stimforever: $stimforever\n"
-      //           ),
-      //       actions: <Widget>[
-      //         TextButton(
-      //           onPressed: () => Navigator.pop(context, 'Cancel'),
-      //           child: const Text('Cancel'),
-      //         ),
-      //         TextButton(
-      //           onPressed: () => Navigator.pop(context, 'OK'),
-      //           child: const Text('OK'),
-      //         ),
-      //       ],
-      //     )
-      //   );
-      //   print(Provider.of<Data>(context, listen: false).getdebugmap);
-      //         }
-
-      // ),
+   
     );
   }
 }

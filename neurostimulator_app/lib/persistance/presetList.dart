@@ -31,9 +31,10 @@ class _presetContainer extends State<presetContainer> {
               shrinkWrap: true,
               itemCount: presets.length,
               itemBuilder: (BuildContext context, int index) {
-                print(index);
                 return InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    myProvider.setFromPreset(presets[index]);
+                  },
                   child: Card(
                     child: ListTile(
                       title: Text(presets[index]["preset_name"]),
@@ -41,39 +42,7 @@ class _presetContainer extends State<presetContainer> {
                           // I know this is bad
                           Tooltip(
                               textStyle: TextStyle(fontSize: 15),
-                              message: "dc_mode:" +
-                                  presets[index]["dc_mode"].toString() +
-                                  "\ncathodic_first: " +
-                                  presets[index]["cathodic_first"].toString() +
-                                  "\nphase_one_time: " +
-                                  presets[index]["phase_one_time"].toString() +
-                                  "\nphase_two_time: " +
-                                  presets[index]["phase_two_time"].toString() +
-                                  "\ninter_phase_gap: " +
-                                  presets[index]["inter_phase_gap"].toString() +
-                                  "\ninter_stim_delay:" +
-                                  presets[index]["inter_stim_delay"]
-                                      .toString() +
-                                  "\ndac_phase_one: " +
-                                  presets[index]["dac_phase_one"].toString() +
-                                  "\ndac_phase_two: " +
-                                  presets[index]["dac_phase_two"].toString() +
-                                  "\nramp_up_time: " +
-                                  presets[index]["ramp_up_time"].toString() +
-                                  "\ndc_hold_time: " +
-                                  presets[index]["dc_hold_time"].toString() +
-                                  "\ndc_curr_target: " +
-                                  presets[index]["dc_curr_target"].toString() +
-                                  "\ndc_burst_gap: " +
-                                  presets[index]["dc_burst_gap"].toString() +
-                                  "\ndc_burst_num: " +
-                                  presets[index]["dc_burst_num"].toString() +
-                                  "\nend_by_minutes: " +
-                                  presets[index]["end_by_minutes"].toString() +
-                                  "\nend_by_seconds: " +
-                                  presets[index]["end_by_seconds"].toString() +
-                                  "\nend_by_value:" +
-                                  presets[index]["end_by_value"].toString(),
+                              message: previewString(presets, index),
                               child: new Text("Preview")),
                     ),
                   ),
@@ -98,4 +67,48 @@ class _presetContainer extends State<presetContainer> {
       ),
     ]);
   }
+}
+
+String previewString (List<dynamic> presets, int index) {
+    return  "DC mode: " +
+      presets[index]["dc_mode"].toString() +
+      "\nCathodic first: " +
+      presets[index]["cathodic_first"].toString() +
+      "\nPhase one time: " +
+      presets[index]["phase_one_time"].toString() +
+      "\nPhase two time: " +
+      presets[index]["phase_two_time"].toString() +
+      "\nInter phase gap: " +
+      presets[index]["inter_phase_gap"].toString() +
+      "\nInter stim delay:" +
+      presets[index]["inter_stim_delay"]
+          .toString() +
+      "\nPhase 1 current: " +
+      presets[index]["dac_phase_one"].toString() +
+      "\nPhase 2 current: " +
+      "\nFrequency: " +
+      presets[index]["frequency"].toString() +
+      presets[index]["dac_phase_two"].toString() +
+      "\nDC ramp up time: " +
+      presets[index]["ramp_up_time"].toString() +
+      "\nDC hold time: " +
+      presets[index]["dc_hold_time"].toString() +
+      "\nDC current target: " +
+      presets[index]["dc_curr_target"].toString() +
+      "\nDC burst gap: " +
+      presets[index]["dc_burst_gap"].toString() +
+      "\nDC number of bursts: " +
+      presets[index]["dc_burst_num"].toString() +
+      "\nMinutes (duration): " +
+      presets[index]["end_by_minutes"].toString() +
+      "\nSeconds (duration): " +
+      presets[index]["end_by_seconds"].toString() +
+      "\nNumber of bursts (duration): " +
+      presets[index]["end_by_value"].toString() +
+      "\nEnd by bursts: " +
+      presets[index]["end_by_burst"].toString() +
+      "\nEnd by Duration: " +
+      presets[index]["end_by_duration"].toString() +
+      "\nStimulate Forever: " +
+      presets[index]["stim_forever"].toString();
 }

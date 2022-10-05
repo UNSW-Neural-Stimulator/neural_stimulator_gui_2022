@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../persistance/presets.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:provider/provider.dart';
 import "../data_provider.dart";
 import '../util/consts.dart';
 import 'package:win_ble/win_ble.dart';
@@ -99,7 +99,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
         TextEditingController(text: myProvider.getendbyminutes.toString());
     _endBySecondsTextfield =
         TextEditingController(text: myProvider.getendbyseconds.toString());
-    TextEditingController(text: myProvider.getendByValue);
+    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
   // this calls a rebuild whenever a change is made, it is required for the toggle box
@@ -134,6 +134,29 @@ class _RightSideInputsState extends State<RightSideInputs> {
     final Data myProvider = Provider.of<Data>(context);
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
+
+    if (myProvider.getUpdatePreset) {
+      setState(() {
+_phase1CurrentTextfield =
+        TextEditingController(text: myProvider.getPhase1Current.toString());
+    _phase2CurrentTextfield =
+        TextEditingController(text: myProvider.getPhase2Current.toString());
+    _dcCurrentTargetTextfield =
+        TextEditingController(text: myProvider.getDCCurrentTarget.toString());
+    _dcHoldTimeTextfield =
+        TextEditingController(text: myProvider.getDCHoldTime.toString());
+    _dcBurstGapTextfield =
+        TextEditingController(text: myProvider.getDCBurstGap.toString());
+    _rampUpTimeTextfield =
+        TextEditingController(text: myProvider.getRampUpTime.toString());
+    _endByMinutesTextfield =
+        TextEditingController(text: myProvider.getendbyminutes.toString());
+    _endBySecondsTextfield =
+        TextEditingController(text: myProvider.getendbyseconds.toString());
+    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
+      });
+    }
+
     return Column(
       children: [
         if (myProvider.getDcMode && myProvider.getConnected)
@@ -215,16 +238,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
               ),
 
               onPressed: () {
-                myProvider.setall();
-                setState(() {
-                  _phase1CurrentTextfield?.text = "1";
-                });
-                // myProvider.writeCharacteristic(
-                //     device.address,
-                //     SERVICE_UUID,
-                //     SERIAL_COMMAND_INPUT_CHAR_UUID,
-                //     Uint8List.fromList([2, 0, 0, 0, 0]),
-                //     true);
+                myProvider.writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    Uint8List.fromList([2, 0, 0, 0, 0]),
+                    true);
               },
               icon: const Icon(
                 Icons.stop_outlined,

@@ -32,10 +32,6 @@ class Presets extends ChangeNotifier {
 			return [];
 		}
 
-		
 	}
-
-  
-
 
 }

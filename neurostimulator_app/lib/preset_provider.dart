@@ -23,6 +23,16 @@ class Presets extends ChangeNotifier {
 		
 	} 
 
+	void delete_preset (Map<String, dynamic> presetMap) {
+		if (storage.getItem("presets") != null) {
+			presets = storage.getItem("presets");
+		}
+		presets.remove(presetMap);
+		storage.setItem('presets', presets);
+
+		
+	} 
+
 	List<dynamic> load_presets () {
 		if (storage.getItem("presets") != null) {
 			presets = storage.getItem("presets");

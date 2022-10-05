@@ -37,13 +37,20 @@ class _presetContainer extends State<presetContainer> {
                   },
                   child: Card(
                     child: ListTile(
+                      leading: Tooltip(
+                          textStyle: TextStyle(fontSize: 15),
+                          message: previewString(presets, index),
+                          child: new Text("Preview")),
                       title: Text(presets[index]["preset_name"]),
-                      trailing:
-                          // I know this is bad
-                          Tooltip(
-                              textStyle: TextStyle(fontSize: 15),
-                              message: previewString(presets, index),
-                              child: new Text("Preview")),
+                      trailing: TextButton(
+                        child: Text("Delete", style: TextStyle(color: Colors.red),),
+                        onPressed: () {
+                          presetProvider.delete_preset(presets[index]);
+                          setState(() {
+                            
+                          });
+                        },
+                      ),
                     ),
                   ),
                 );
@@ -69,8 +76,8 @@ class _presetContainer extends State<presetContainer> {
   }
 }
 
-String previewString (List<dynamic> presets, int index) {
-    return  "DC mode: " +
+String previewString(List<dynamic> presets, int index) {
+  return "DC mode: " +
       presets[index]["dc_mode"].toString() +
       "\nCathodic first: " +
       presets[index]["cathodic_first"].toString() +
@@ -81,8 +88,7 @@ String previewString (List<dynamic> presets, int index) {
       "\nInter phase gap: " +
       presets[index]["inter_phase_gap"].toString() +
       "\nInter stim delay:" +
-      presets[index]["inter_stim_delay"]
-          .toString() +
+      presets[index]["inter_stim_delay"].toString() +
       "\nPhase 1 current: " +
       presets[index]["dac_phase_one"].toString() +
       "\nPhase 2 current: " +

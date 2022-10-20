@@ -37,7 +37,7 @@ class Data extends ChangeNotifier {
   var _dcBurstNum = 0;
 
   //ints for right side of workspace
-  var _phase1CurrentMicroAmp = 1500;
+  var _phase1CurrentMicroAmp = 3000;
   var _phase2CurrentMicroAmp = 3000;
 
   //end stimulation by duration, minute and seconds
@@ -82,7 +82,7 @@ class Data extends ChangeNotifier {
     "inter_burst_delay": Uint8List.fromList([inter_burst_delay, 0, 0, 0, 0]),
     "burst_num": Uint8List.fromList([burst_num, 0, 0, 0, 0]),
     "pulse_num": Uint8List.fromList([pulse_num, 0, 0, 0, 0]),
-    "dac_phase_one": Uint8List.fromList([dac_phase_one, 220, 5, 0, 0]),
+    "dac_phase_one": Uint8List.fromList([dac_phase_one, 184, 11, 0, 0]),
     "dac_phase_two": Uint8List.fromList([dac_phase_two, 184, 11, 0, 0]),
     "ramp_up_time": Uint8List.fromList([ramp_up_time, 0, 0, 0, 0]),
     "dc_hold_time": Uint8List.fromList([dc_hold_time, 0, 0, 0, 0]),
@@ -226,7 +226,7 @@ class Data extends ChangeNotifier {
   }
 
   setphase1current(String phase1current) {
-    _phase1CurrentMicroAmp = int.tryParse(phase1current) ?? 1500;
+    _phase1CurrentMicroAmp = int.tryParse(phase1current) ?? 3000;
     notifyListeners();
   }
 
@@ -643,13 +643,13 @@ class Data extends ChangeNotifier {
 			formattedWarning = formattedWarning + "DC stimulation values are invalid\n";
 			}
 	}
-	bool stimDurationInalid = stimulation_duration_minimum(_endStimulationMinute, 
+	bool stimDurationInvalid = stimulation_duration_minimum(_endStimulationMinute, 
 															_endStimulationSeconds,
 															_burstDurationMicrosec, 
 															_dcHoldTime, 
 															_dcBurstGap, 
 															_dcMode);
-	if (stimDurationInalid) {
+	if (stimDurationInvalid && _endByDuration) {
 		formattedWarning = formattedWarning + "Stimulation duration values are invalid\n";
 
 	}
@@ -719,7 +719,6 @@ class Data extends ChangeNotifier {
 
 
   bool connected = false;
-//TODO CHANGE THIS BACK TO connected
   bool get getConnected => connected;
 
   setScanStream(StreamSubscription stream) {

@@ -422,7 +422,13 @@ class _leftTextFieldsState extends State<leftTextFields> {
               const SizedBox(height: 60),
               SizedBox(
                 width: 250,
-                child: TextField(
+                child: 
+                
+                
+                
+                
+                
+                TextField(
                   enabled: (!Provider.of<Data>(context).getBurstMode &
                           !myProvider.getDcMode &&
                       myProvider.getConnected),
@@ -435,7 +441,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   onChanged: (value) {
                     myProvider.setdutycycle(value);
                   },
-                  decoration: const InputDecoration(
+                  decoration:  InputDecoration(
                     disabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey)),
                     labelText: 'Duty Cycle (%)',
@@ -444,6 +450,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                         borderSide: BorderSide(color: Colors.blue)),
                     enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.blue)),
+                    errorText: Duty_cycle_input_error_text(1, 100, _dutyCycleTextfield!.text)
                   ),
                 ),
               ),

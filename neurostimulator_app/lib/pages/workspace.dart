@@ -94,7 +94,7 @@ class workspaceHome extends StatelessWidget {
                           fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),
                     ),
                     Text(
-                      "Miniature Neuro Stimulator | 2022 v1.0",
+                      "Miniature Neuro Stimulator | v3.0",
                       style: GoogleFonts.montserrat(
                           fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)),
                     ),

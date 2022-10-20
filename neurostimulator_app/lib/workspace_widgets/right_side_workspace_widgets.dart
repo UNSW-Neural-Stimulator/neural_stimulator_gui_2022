@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:ns_2022/workspace_widgets/ErrorDialogue.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:provider/provider.dart';
@@ -28,14 +30,14 @@ class _RightSideInputsState extends State<RightSideInputs> {
   // Create text controllers and use them to retrieve the current value
   // of the TextFields.
   TextEditingController? _phase1CurrentTextfield;
-  TextEditingController? _phase2CurrentTextfield; 
+  TextEditingController? _phase2CurrentTextfield;
   TextEditingController? _dcCurrentTargetTextfield;
   TextEditingController? _dcHoldTimeTextfield;
   TextEditingController? _rampUpTimeTextfield;
   TextEditingController? _dcBurstGapTextfield;
   // these two text controllers are to recieve the minutes and seconds
   // for the stimulation duration, I put them below as their inputs are handled
-  // differently, instead of being "saved" straight into provider, some 
+  // differently, instead of being "saved" straight into provider, some
   // calculations take place to convert their units
   TextEditingController? _endByMinutesTextfield;
   TextEditingController? _endBySecondsTextfield;
@@ -45,31 +47,38 @@ class _RightSideInputsState extends State<RightSideInputs> {
   // Fixed length list is to control the end by stimulation toggle box
   List<bool> fixedLengthList = [true, false, false];
 
-
   // the following duration error text functions are for the minute and second textfields
   // they have independent errors functions as this helps with formatting the page,
   // Since they have small textfield sizes we can't fit the entire error message
   // so they are handled independently and appear concatated visually to the user
 
   String? get _durationSecondsErrorText {
+    final Data myProvider = Provider.of<Data>(context);
     var burstduration = Provider.of<Data>(context).getBurstDuration;
     // Calls error checking function to assert stimduration is larger than burst duration
     if (stimulation_duration_minimum(
-      Provider.of<Data>(context).getendbyminutes, 
-      Provider.of<Data>(context).getendbyseconds, 
-      burstduration)) {
-      return 'Must be > burstduration';
+        myProvider.getendbyminutes,
+        myProvider.getendbyseconds,
+        burstduration,
+        myProvider.getRampUpTime,
+        myProvider.getDCHoldTime,
+        myProvider.getDcMode)) {
+      return 'Must be > burst duration';
     }
     // return null if the text is valid
     return null;
   }
 
   String? get _durationMinutesErrorText {
+    final Data myProvider = Provider.of<Data>(context);
     // Calls error checking function to assert stimduration is larger than burst duration
     if (stimulation_duration_minimum(
-      Provider.of<Data>(context).getendbyminutes, 
-      Provider.of<Data>(context).getendbyseconds, 
-      Provider.of<Data>(context).getBurstDuration)) {
+        myProvider.getendbyminutes,
+        myProvider.getendbyseconds,
+        myProvider.getBurstDuration,
+        myProvider.getRampUpTime,
+        myProvider.getDCHoldTime,
+        myProvider.getDcMode)) {
       return 'Invalid Duration';
     }
     // return null if the text is valid
@@ -99,9 +108,11 @@ class _RightSideInputsState extends State<RightSideInputs> {
         TextEditingController(text: myProvider.getendbyminutes.toString());
     _endBySecondsTextfield =
         TextEditingController(text: myProvider.getendbyseconds.toString());
-    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
+    _endStimulationTextField =
+        TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
   }
+
   // this calls a rebuild whenever a change is made, it is required for the toggle box
   @override
   void didChangeDependencies() {
@@ -137,47 +148,49 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
     if (myProvider.getUpdatePreset) {
       setState(() {
-_phase1CurrentTextfield =
-        TextEditingController(text: myProvider.getPhase1Current.toString());
-    _phase2CurrentTextfield =
-        TextEditingController(text: myProvider.getPhase2Current.toString());
-    _dcCurrentTargetTextfield =
-        TextEditingController(text: myProvider.getDCCurrentTarget.toString());
-    _dcHoldTimeTextfield =
-        TextEditingController(text: myProvider.getDCHoldTime.toString());
-    _dcBurstGapTextfield =
-        TextEditingController(text: myProvider.getDCBurstGap.toString());
-    _rampUpTimeTextfield =
-        TextEditingController(text: myProvider.getRampUpTime.toString());
-    _endByMinutesTextfield =
-        TextEditingController(text: myProvider.getendbyminutes.toString());
-    _endBySecondsTextfield =
-        TextEditingController(text: myProvider.getendbyseconds.toString());
-    _endStimulationTextField = TextEditingController(text: myProvider.getendByValue);
+        _phase1CurrentTextfield =
+            TextEditingController(text: myProvider.getPhase1Current.toString());
+        _phase2CurrentTextfield =
+            TextEditingController(text: myProvider.getPhase2Current.toString());
+        _dcCurrentTargetTextfield = TextEditingController(
+            text: myProvider.getDCCurrentTarget.toString());
+        _dcHoldTimeTextfield =
+            TextEditingController(text: myProvider.getDCHoldTime.toString());
+        _dcBurstGapTextfield =
+            TextEditingController(text: myProvider.getDCBurstGap.toString());
+        _rampUpTimeTextfield =
+            TextEditingController(text: myProvider.getRampUpTime.toString());
+        _endByMinutesTextfield =
+            TextEditingController(text: myProvider.getendbyminutes.toString());
+        _endBySecondsTextfield =
+            TextEditingController(text: myProvider.getendbyseconds.toString());
+        _endStimulationTextField =
+            TextEditingController(text: myProvider.getendByValue);
       });
     }
 
     return Column(
       children: [
         if (myProvider.getDcMode && myProvider.getConnected)
-            SizedBox(
-                height: 45,
-                child: Row(
-                  children: const [
-                    Icon(Icons.warning_amber_rounded,
-                        color: Colors.amber, size: 45),
-                    Text(
-                      "    CAUTION: DC stimulation can be unsafe if not used appropriately.",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    )
-                  ],
-                ),
-              )               
-            else const SizedBox(
-                height: 45,
-              ),
+          SizedBox(
+            height: 45,
+            child: Row(
+              children: const [
+                Icon(Icons.warning_amber_rounded,
+                    color: Colors.amber, size: 45),
+                Text(
+                  "    CAUTION: DC stimulation can be unsafe if not used appropriately.",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              ],
+            ),
+          )
+        else
+          const SizedBox(
+            height: 45,
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -209,15 +222,30 @@ _phase1CurrentTextfield =
               ),
 
               onPressed: () async {
-                Provider.of<Data>(context, listen: false)
-                    .prepare_stimulation_values();
-                var serial_command_inputs =
-                    Provider.of<Data>(context, listen: false)
-                        .get_serial_command_input_char;
-                for (var value in serial_command_inputs.values) {
-                  myProvider.writeCharacteristic(device.address, SERVICE_UUID,
-                      SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
-                  await Future.delayed(const Duration(milliseconds: 1), () {});
+                String allErrors = myProvider.startStimErrorCheck();
+                if (allErrors != "") {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                            title:
+                                Text('Please address the following warnings: '),
+                            content: SingleChildScrollView(
+                              child: errorDialogue(description: allErrors),
+                            ));
+                      });
+                } else {
+                  Provider.of<Data>(context, listen: false)
+                      .prepare_stimulation_values();
+                  var serial_command_inputs =
+                      Provider.of<Data>(context, listen: false)
+                          .get_serial_command_input_char;
+                  for (var value in serial_command_inputs.values) {
+                    myProvider.writeCharacteristic(device.address, SERVICE_UUID,
+                        SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
+                    await Future.delayed(
+                        const Duration(milliseconds: 1), () {});
+                  }
                 }
               },
               icon: const Icon(
@@ -268,24 +296,27 @@ _phase1CurrentTextfield =
                     keyboardType: TextInputType.number,
                     controller: _phase1CurrentTextfield,
                     inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,        
-                 LengthLimitingTextInputFormatter(18),
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(18),
                     ],
                     onChanged: (value) {
                       myProvider.setphase1current(value);
                       print(value);
                     },
-                    decoration:  InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'Phase 1 Current (µA)',
-                      labelStyle: TextStyle(fontSize: 20),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                        errorText: generic_error_string(myProvider.getPhase1Current, 3000, 0, "Must be less than 3000")
-                    ),
+                    decoration: InputDecoration(
+                        disabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey)),
+                        labelText: 'Phase 1 Current (µA)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        errorText: generic_error_string(
+                            myProvider.getPhase1Current,
+                            3000,
+                            0,
+                            "Must be less than 3000")),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -296,25 +327,26 @@ _phase1CurrentTextfield =
                     keyboardType: TextInputType.number,
                     controller: _phase2CurrentTextfield,
                     inputFormatters: [
-                                       LengthLimitingTextInputFormatter(18),
-
+                      LengthLimitingTextInputFormatter(18),
                       FilteringTextInputFormatter.digitsOnly,
-                   ],
+                    ],
                     onChanged: (value) {
                       myProvider.setphase2current(value);
                     },
-                    decoration:  InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'Phase 2 Current (µA)',
-                      labelStyle: TextStyle(fontSize: 20),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                                                 errorText: generic_error_string(myProvider.getPhase2Current, 3000, 0, "Must be less than 3000")
- 
-                    ),
+                    decoration: InputDecoration(
+                        disabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey)),
+                        labelText: 'Phase 2 Current (µA)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        errorText: generic_error_string(
+                            myProvider.getPhase2Current,
+                            3000,
+                            0,
+                            "Must be less than 3000")),
                   ),
                 ),
               ],
@@ -329,26 +361,27 @@ _phase1CurrentTextfield =
                     keyboardType: TextInputType.number,
                     controller: _dcCurrentTargetTextfield,
                     inputFormatters: [
-                                       LengthLimitingTextInputFormatter(18),
-
+                      LengthLimitingTextInputFormatter(18),
                       FilteringTextInputFormatter.digitsOnly,
                     ],
                     onChanged: (value) {
                       myProvider.setDCCurrentTarget(value);
                     },
                     enabled: myProvider.getDcMode && myProvider.getConnected,
-                    decoration:  InputDecoration(
-                      disabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey)),
-                      labelText: 'DC Current Target (µA)',
-                      labelStyle: TextStyle(fontSize: 20),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                      enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.blue)),
-                                                  errorText: generic_error_string(myProvider.getDCCurrentTarget, 3000, 0, "Must be less than 3000")
-
-                    ),
+                    decoration: InputDecoration(
+                        disabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey)),
+                        labelText: 'DC Current Target (µA)',
+                        labelStyle: TextStyle(fontSize: 20),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.blue)),
+                        errorText: generic_error_string(
+                            myProvider.getDCCurrentTarget,
+                            3000,
+                            0,
+                            "Must be less than 3000")),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -383,7 +416,7 @@ _phase1CurrentTextfield =
                     onChanged: (value) {
                       myProvider.setrampUpTime(value);
                     },
-                    labelText: 'Ramp Up Time ',
+                    labelText: 'Ramp Up/Down Time ',
                     minValue: 0,
                     maxValue: UINT32MAX,
                   ),
@@ -456,9 +489,9 @@ _phase1CurrentTextfield =
                 },
                 isSelected: fixedLengthList,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               Text("$endStimulationTitle"),
-              const SizedBox(height: 10),
+              const SizedBox(height: 5),
               if (Provider.of<Data>(context).endByBurst)
                 SizedBox(
                   width: 250,
@@ -504,7 +537,7 @@ _phase1CurrentTextfield =
                         },
                         decoration: InputDecoration(
                           labelText: "Minutes",
-                          enabled:  myProvider.getConnected,
+                          enabled: myProvider.getConnected,
                           errorText: _durationMinutesErrorText,
                           disabledBorder: const OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
@@ -522,7 +555,7 @@ _phase1CurrentTextfield =
                       child: TextField(
                         keyboardType: TextInputType.number,
                         controller: _endBySecondsTextfield,
-                        enabled:  myProvider.getConnected,
+                        enabled: myProvider.getConnected,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           num_range_formatter(min: 0, max: 60)
@@ -544,6 +577,31 @@ _phase1CurrentTextfield =
                     )
                   ]),
                 ),
+                // TODO: once impedence check is implemented this should be uncommented. Includes 
+                // a button with its Onpressed function left empty 
+              // SizedBox(height: 5),
+              // SizedBox(
+              //   width: 250,
+              //   child: ElevatedButton.icon(
+              //     style: ElevatedButton.styleFrom(
+              //       primary: Colors.red,
+              //       minimumSize: const Size(150, 50),
+              //     ),
+
+              //     onPressed: () {
+              //       //This shall be updated to run and impedence check
+              //     },
+
+              //     icon: const Icon(
+              //       Icons.bolt,
+              //       size: 24.0,
+              //     ),
+              //     label: const Text('Impedence check',
+              //         style: TextStyle(
+              //             fontSize: 20,
+              //             fontWeight: FontWeight.w400)), // <-- Text
+              //   ),
+              // ),
             ],
           ),
         ),

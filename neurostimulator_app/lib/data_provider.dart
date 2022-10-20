@@ -23,7 +23,7 @@ class Data extends ChangeNotifier {
   var _phase2TimeMicrosec = 1000;
   var _interStimDelayMicrosec = 1000;
   var _burstDurationMicrosec = 0;
-  var _dutyCyclePercentage = 0;
+  var _dutyCyclePercentage = 1;
   var _frequency = 0.0;
 
   //
@@ -216,7 +216,7 @@ class Data extends ChangeNotifier {
   /// How the following values are used, need to be sorted
 
   setdutycycle(String dutyCycleFromTextField) {
-    _dutyCyclePercentage = int.tryParse(dutyCycleFromTextField) ?? defaultValue;
+    _dutyCyclePercentage = int.tryParse(dutyCycleFromTextField) ?? 1;
     notifyListeners();
   }
 
@@ -513,11 +513,10 @@ class Data extends ChangeNotifier {
 
 /////////////////////////////////
     // if it is burst mode calculate interburst delay
-
     if (!_continuousStim && !_dcMode && _burstDurationMicrosec != 0) {
       burstPeriod = (_burstDurationMicrosec * 100) / _dutyCyclePercentage;
-
       int interburst = 0;
+      var burstPeriodValidityCheckValue = burstPeriod - _burstDurationMicrosec;
       if ((burstPeriod - _burstDurationMicrosec).round() >
           _interStimDelayMicrosec) {
         interburst = (burstPeriod - _burstDurationMicrosec).round() -
@@ -551,16 +550,21 @@ class Data extends ChangeNotifier {
     // if ending by duration, calculate the number of bursts that are needed for the specified duration time
     if (_endByDuration) {
       stimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
-
+    // print("burstPeriod $burstPeriod");
       if (burstPeriod != 0) {
         //burst number is calculated as time divided by duration of each burst
         // returns an interger
         burstnumber = (stimduration * 1000000) ~/ burstPeriod;
+        // print(burstnumber);
+      } else if (_continuousStim) {
+        burstPeriod = pulsePeriod.toDouble();
+        burstnumber = 1;
       } else {
-        //in adherrance to old ui, returns zero, but I want to add an
-        // error case
         burstnumber = 0;
+
       }
+
+
     }
     // if ending by number of bursts, the user inputs the number of bursts
 
@@ -595,9 +599,65 @@ class Data extends ChangeNotifier {
         bytearray_maker(pulse_num, pulsenumber);
   }
   /////////////////////////////////////////////////////////////////////
-  
+  // Final start stimulation error check
+  String startStimErrorCheck() {
+    String formattedWarning = "";
+  if (!connected) {
+    	formattedWarning = formattedWarning + "Device is not connected.\n";
+      return formattedWarning;
 
+  }
+	if (!_dcMode) {
+		if (_phase1TimeMicrosec > UINT32MAX
+			|| _phase2TimeMicrosec > UINT32MAX
+			|| _interPhaseDelayMicrosec > UINT32MAX
+			|| _interStimDelayMicrosec > UINT32MAX) {
+			
+			formattedWarning = formattedWarning + "Phase time settings are invalid\n";
 
+			}
+		var interstim_by_freq = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+
+		if (_calculate_interstim_by_freq 
+			&&  interstim_by_freq < 0) {
+			formattedWarning = formattedWarning + "Frequency value is invalid.\n";
+
+			}
+		if (_burstDurationMicrosec <= getpulsePeriod && !_continuousStim) {
+			formattedWarning = formattedWarning + "Burst duration is invalid.\n";
+			}
+
+		if (_dutyCyclePercentage <= 0 || _dutyCyclePercentage > 100 && !_continuousStim) {
+			formattedWarning = formattedWarning + "Duty Cycle is invalid.\n";
+			}
+
+		if (_phase1CurrentMicroAmp > UINT32MAX
+			|| _phase2CurrentMicroAmp > UINT32MAX) {
+			formattedWarning = formattedWarning + "Current values are invalid\n";
+			}
+	} else {
+		if (_dcCurrentTargetMicroAmp > UINT32MAX
+			|| _dcBurstGap > UINT32MAX
+			|| _rampUpTime > UINT32MAX
+			|| _dcHoldTime > UINT32MAX) {
+			formattedWarning = formattedWarning + "DC stimulation values are invalid\n";
+			}
+	}
+	bool stimDurationInalid = stimulation_duration_minimum(_endStimulationMinute, 
+															_endStimulationSeconds,
+															_burstDurationMicrosec, 
+															_dcHoldTime, 
+															_dcBurstGap, 
+															_dcMode);
+	if (stimDurationInalid) {
+		formattedWarning = formattedWarning + "Stimulation duration values are invalid\n";
+
+	}
+
+	return formattedWarning;
+  }
+
+  ////////////////////////////////////////////////////////////////////
 	Map<String, dynamic> generatePresetMap(String presetname) {
 
 		Map<String, dynamic> presetValuesMap = {
@@ -660,7 +720,7 @@ class Data extends ChangeNotifier {
 
   bool connected = false;
 //TODO CHANGE THIS BACK TO connected
-  bool get getConnected => true;
+  bool get getConnected => connected;
 
   setScanStream(StreamSubscription stream) {
     scanStream = stream;

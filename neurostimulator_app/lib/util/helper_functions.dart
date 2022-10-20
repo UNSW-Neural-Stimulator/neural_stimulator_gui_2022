@@ -175,6 +175,29 @@ String? input_error_text(int min, int max, String unit, String input) {
   if (inputtedNumberAsInt < min) {
     return "Input must be greater then \n$min µs";
   } else if (inputtedNumberAsInt > max) {
+    return "Cannot exceed $max µs";
+  } else {
+    return null;
+  }
+}
+
+String? Duty_cycle_input_error_text(int min, int max, String input) {
+  double inputtedNumber = 0;
+  int inputtedNumberAsInt = 0;
+  // if nothing is in the textfield, then do nothing
+
+  if (input == '') {
+    return null;
+  }
+  // convert the number to an int, based on the unit specified
+  else {
+    inputtedNumber = double.parse(input);
+  }
+  inputtedNumberAsInt = (inputtedNumber).round();
+
+  if (inputtedNumberAsInt < min) {
+    return "Input must be greater then \n$min";
+  } else if (inputtedNumberAsInt > max) {
     return "Cannot exceed $max";
   } else {
     return null;
@@ -243,9 +266,9 @@ int calculate_interstim_from_frequency(
 
 
 /// stim Duration error check
-/// returns true if stim duration is larger than or equal to  burst duration
+/// returns true if stim duration is smaller than or equal to  burst duration
 /// else returns false
-bool stimulation_duration_minimum(stimduration_minutes, stimduration_seconds, burstduration) {
+bool stimulation_duration_minimum(stimduration_minutes, stimduration_seconds, burstduration, holdTime, dcBurst, dcMode) {
 
   var stimduration = (stimduration_minutes * 60) + stimduration_seconds;
   // conversion into microseconds
@@ -253,8 +276,13 @@ bool stimulation_duration_minimum(stimduration_minutes, stimduration_seconds, bu
 
   // If stimulation duration is less than burst duration,returns true as the
   // stim duration is invalid, else returns false
-  if (stimduration < burstduration) {
+  if (stimduration < burstduration && !dcMode) {
     return true;
   }
+  if (stimduration < (holdTime*2 + dcBurst) && dcMode) {
+    return true;
+  }
+
   return false;
 }
+

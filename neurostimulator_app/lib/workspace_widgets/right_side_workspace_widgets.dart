@@ -171,6 +171,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
             TextEditingController(text: myProvider.getendByValue);
       });
     }
+    
 
     return Column(
       children: [
@@ -186,6 +187,24 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     color: Colors.amber, size: 45),
                 Text(
                   "    CAUTION: DC stimulation can be unsafe if not used appropriately.",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              ],
+            ),
+          )
+        else if (!myProvider.getDcMode &&
+                 (myProvider.getPhase1Current * myProvider.getPhase1Time 
+                 != myProvider.getPhase2Current * myProvider.getPhase2Time))
+        SizedBox(
+            height: 45,
+            child: Row(
+              children: const [
+                Icon(Icons.warning_amber_rounded,
+                    color: Colors.amber, size: 45),
+                Text(
+                  "    CAUTION: The waveform is charge imbalanced.",
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                   ),

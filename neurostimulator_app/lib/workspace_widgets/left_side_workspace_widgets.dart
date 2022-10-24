@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:ns_2022/preset_provider.dart';
@@ -19,6 +21,8 @@ class leftTextFields extends StatefulWidget {
 // Define a corresponding State class.
 // This class holds the data related to the Form.
 class _leftTextFieldsState extends State<leftTextFields> {
+    late BleDevice device = widget.device;
+
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
   TextEditingController? _phase1Textfield;
@@ -35,6 +39,8 @@ class _leftTextFieldsState extends State<leftTextFields> {
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
     super.initState();
+        device = widget.device;
+
     _phase1Textfield =
         TextEditingController(text: myProvider.getPhase1Time.toString());
     _interPhaseDelayTextfield =
@@ -75,25 +81,23 @@ class _leftTextFieldsState extends State<leftTextFields> {
 ///////////////////////////////////////
     if (myProvider.getUpdatePreset) {
       setState(() {
-  _phase1Textfield =
-        TextEditingController(text: myProvider.getPhase1Time.toString());
-    _interPhaseDelayTextfield =
-        TextEditingController(text: myProvider.getInterPhaseDelay.toString());
-    _phase2Textfield =
-        TextEditingController(text: myProvider.getPhase2Time.toString());
-    _interStimDelayTexfield =
-        TextEditingController(text: myProvider.getInterstimDelay.toString());
-    _burstDurationTextfield =
-        TextEditingController(text: myProvider.getBurstDuration.toString());
-    _dutyCycleTextfield =
-        TextEditingController(text: myProvider.getDutyCycle.toString());
-    _frequencyTextfield =
-        TextEditingController(text: myProvider.getFrequency.toString());
-      myProvider.setfrequencyNoNotify(myProvider.getFrequency.toString());
-    interstim_from_freq = myProvider.getinterstimstring;
-
+        _phase1Textfield =
+            TextEditingController(text: myProvider.getPhase1Time.toString());
+        _interPhaseDelayTextfield = TextEditingController(
+            text: myProvider.getInterPhaseDelay.toString());
+        _phase2Textfield =
+            TextEditingController(text: myProvider.getPhase2Time.toString());
+        _interStimDelayTexfield = TextEditingController(
+            text: myProvider.getInterstimDelay.toString());
+        _burstDurationTextfield =
+            TextEditingController(text: myProvider.getBurstDuration.toString());
+        _dutyCycleTextfield =
+            TextEditingController(text: myProvider.getDutyCycle.toString());
+        _frequencyTextfield =
+            TextEditingController(text: myProvider.getFrequency.toString());
+        myProvider.setfrequencyNoNotify(myProvider.getFrequency.toString());
+        interstim_from_freq = myProvider.getinterstimstring;
       });
-
     }
 ///////////////////
     return Column(children: [
@@ -109,6 +113,9 @@ class _leftTextFieldsState extends State<leftTextFields> {
               onPressed: () async {
                 if (await myProvider.connect(widget.device.address) == true) {
                   setState(() {});
+                  myProvider.subsCribeToCharacteristic(
+                      widget.device.address, SERVICE_UUID, NOTIFY_CHAR_UUID);
+                  print('ready');
                 } else {
                   print("error on connection");
                 }
@@ -129,7 +136,10 @@ class _leftTextFieldsState extends State<leftTextFields> {
               onPressed: () async {
                 if (await myProvider.disconnect(widget.device.address) ==
                     true) {
+                  myProvider.unSubscribeToCharacteristic(
+                      widget.device.address, SERVICE_UUID, NOTIFY_CHAR_UUID);
                   setState(() {});
+                  print('disconnected');
                 } else {
                   print("error on disconnection");
                 }
@@ -422,13 +432,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
               const SizedBox(height: 60),
               SizedBox(
                 width: 250,
-                child: 
-                
-                
-                
-                
-                
-                TextField(
+                child: TextField(
                   enabled: (!Provider.of<Data>(context).getBurstMode &
                           !myProvider.getDcMode &&
                       myProvider.getConnected),
@@ -441,17 +445,17 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   onChanged: (value) {
                     myProvider.setdutycycle(value);
                   },
-                  decoration:  InputDecoration(
-                    disabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey)),
-                    labelText: 'Duty Cycle (%)',
-                    labelStyle: TextStyle(fontSize: 20),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.blue)),
-                    errorText: Duty_cycle_input_error_text(1, 100, _dutyCycleTextfield!.text)
-                  ),
+                  decoration: InputDecoration(
+                      disabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey)),
+                      labelText: 'Duty Cycle (%)',
+                      labelStyle: TextStyle(fontSize: 20),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
+                      enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.blue)),
+                      errorText: Duty_cycle_input_error_text(
+                          1, 100, _dutyCycleTextfield!.text)),
                 ),
               ),
             ],
@@ -463,36 +467,69 @@ class _leftTextFieldsState extends State<leftTextFields> {
           SizedBox(
             width: 50,
           ),
-          SizedBox(
-            width: 200,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                minimumSize: const Size(150, 50),
+          Column(
+            children: [
+              SizedBox(
+                height: 10,
               ),
+              SizedBox(
+                width: 220,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    minimumSize: const Size(150, 50),
+                  ),
 
-              onPressed: () {
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Presets: '),
+                            content: presetContainer(),
+                          );
+                        });
+                  },
 
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                          title: Text('Presets: '),
-                          content:
-                                presetContainer(),
-                                
-                              );
-                    });
-              },
-
-              icon: const Icon(
-                Icons.save,
-                size: 24.0,
+                  icon: const Icon(
+                    Icons.save,
+                    size: 24.0,
+                  ),
+                  label: const Text('Presets',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400)), // <-- Text
+                ),
               ),
-              label: const Text('Presets',
-                  style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w400)), // <-- Text
-            ),
+              SizedBox(height: 5),
+              SizedBox(
+                width: 220,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    minimumSize: const Size(150, 50),
+                  ),
+
+                  onPressed: () {
+                myProvider.writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    Uint8List.fromList([19, 0, 0, 0, 0]),
+                    true);
+                                },
+
+                  icon: const Icon(
+                    Icons.bolt,
+                    size: 24.0,
+                  ),
+                  label: const Text('Impedence check',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400)), // <-- Text
+                ),
+              ),
+            ],
           ),
           SizedBox(
             width: 50,

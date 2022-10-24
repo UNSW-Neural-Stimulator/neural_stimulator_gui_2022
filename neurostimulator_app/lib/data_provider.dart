@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'dart:convert';
@@ -603,90 +605,90 @@ class Data extends ChangeNotifier {
   String startStimErrorCheck() {
     String formattedWarning = "";
   if (!connected) {
-    	formattedWarning = formattedWarning + "Device is not connected.\n";
+      formattedWarning = formattedWarning + "Device is not connected.\n";
       return formattedWarning;
 
   }
-	if (!_dcMode) {
-		if (_phase1TimeMicrosec > UINT32MAX
-			|| _phase2TimeMicrosec > UINT32MAX
-			|| _interPhaseDelayMicrosec > UINT32MAX
-			|| _interStimDelayMicrosec > UINT32MAX) {
-			
-			formattedWarning = formattedWarning + "Phase time settings are invalid\n";
+  if (!_dcMode) {
+    if (_phase1TimeMicrosec > UINT32MAX
+      || _phase2TimeMicrosec > UINT32MAX
+      || _interPhaseDelayMicrosec > UINT32MAX
+      || _interStimDelayMicrosec > UINT32MAX) {
+      
+      formattedWarning = formattedWarning + "Phase time settings are invalid\n";
 
-			}
-		var interstim_by_freq = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+      }
+    var interstim_by_freq = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
 
-		if (_calculate_interstim_by_freq 
-			&&  interstim_by_freq < 0) {
-			formattedWarning = formattedWarning + "Frequency value is invalid.\n";
+    if (_calculate_interstim_by_freq 
+      &&  interstim_by_freq < 0) {
+      formattedWarning = formattedWarning + "Frequency value is invalid.\n";
 
-			}
-		if (_burstDurationMicrosec <= getpulsePeriod && !_continuousStim) {
-			formattedWarning = formattedWarning + "Burst duration is invalid.\n";
-			}
+      }
+    if (_burstDurationMicrosec <= getpulsePeriod && !_continuousStim) {
+      formattedWarning = formattedWarning + "Burst duration is invalid.\n";
+      }
 
-		if (_dutyCyclePercentage <= 0 || _dutyCyclePercentage > 100 && !_continuousStim) {
-			formattedWarning = formattedWarning + "Duty Cycle is invalid.\n";
-			}
+    if (_dutyCyclePercentage <= 0 || _dutyCyclePercentage > 100 && !_continuousStim) {
+      formattedWarning = formattedWarning + "Duty Cycle is invalid.\n";
+      }
 
-		if (_phase1CurrentMicroAmp > UINT32MAX
-			|| _phase2CurrentMicroAmp > UINT32MAX) {
-			formattedWarning = formattedWarning + "Current values are invalid\n";
-			}
-	} else {
-		if (_dcCurrentTargetMicroAmp > UINT32MAX
-			|| _dcBurstGap > UINT32MAX
-			|| _rampUpTime > UINT32MAX
-			|| _dcHoldTime > UINT32MAX) {
-			formattedWarning = formattedWarning + "DC stimulation values are invalid\n";
-			}
-	}
-	bool stimDurationInvalid = stimulation_duration_minimum(_endStimulationMinute, 
-															_endStimulationSeconds,
-															_burstDurationMicrosec, 
-															_dcHoldTime, 
-															_dcBurstGap, 
-															_dcMode);
-	if (stimDurationInvalid && _endByDuration) {
-		formattedWarning = formattedWarning + "Stimulation duration values are invalid\n";
+    if (_phase1CurrentMicroAmp > UINT32MAX
+      || _phase2CurrentMicroAmp > UINT32MAX) {
+      formattedWarning = formattedWarning + "Current values are invalid\n";
+      }
+  } else {
+    if (_dcCurrentTargetMicroAmp > UINT32MAX
+      || _dcBurstGap > UINT32MAX
+      || _rampUpTime > UINT32MAX
+      || _dcHoldTime > UINT32MAX) {
+      formattedWarning = formattedWarning + "DC stimulation values are invalid\n";
+      }
+  }
+  bool stimDurationInvalid = stimulation_duration_minimum(_endStimulationMinute, 
+                              _endStimulationSeconds,
+                              _burstDurationMicrosec, 
+                              _dcHoldTime, 
+                              _dcBurstGap, 
+                              _dcMode);
+  if (stimDurationInvalid && _endByDuration) {
+    formattedWarning = formattedWarning + "Stimulation duration values are invalid\n";
 
-	}
+  }
 
-	return formattedWarning;
+  return formattedWarning;
   }
 
   ////////////////////////////////////////////////////////////////////
-	Map<String, dynamic> generatePresetMap(String presetname) {
+  Map<String, dynamic> generatePresetMap(String presetname) {
 
-		Map<String, dynamic> presetValuesMap = {
-			//fix burst num
-			//fix pulse num
-			"preset_name": presetname,
-			"dc_mode": _dcMode,
-			"cathodic_first": _cathodicFirst,
-			"phase_one_time": _phase1TimeMicrosec,
-			"phase_two_time": _phase2TimeMicrosec,
-			"inter_phase_gap": _interPhaseDelayMicrosec,
-			"inter_stim_delay": _interStimDelayMicrosec,
-			"dac_phase_one": _phase1CurrentMicroAmp,
-			"dac_phase_two": _phase2CurrentMicroAmp,
-			"ramp_up_time": _rampUpTime,
-			"dc_hold_time": _dcHoldTime,
-			"dc_curr_target": _dcCurrentTargetMicroAmp,
-			"dc_burst_gap": _dcBurstGap,
-			"dc_burst_num": _dcBurstNum,
-			"end_by_minutes": _endStimulationMinute,
-			"end_by_seconds": _endStimulationSeconds,
-			"end_by_value": _endbyvalue,
+    Map<String, dynamic> presetValuesMap = {
+      //fix burst num
+      //fix pulse num
+      "preset_name": presetname,
+      "dc_mode": _dcMode,
+      "cathodic_first": _cathodicFirst,
+      "phase_one_time": _phase1TimeMicrosec,
+      "phase_two_time": _phase2TimeMicrosec,
+      "inter_phase_gap": _interPhaseDelayMicrosec,
+      "inter_stim_delay": _interStimDelayMicrosec,
+      "dac_phase_one": _phase1CurrentMicroAmp,
+      "dac_phase_two": _phase2CurrentMicroAmp,
+      "ramp_up_time": _rampUpTime,
+      "dc_hold_time": _dcHoldTime,
+      "dc_curr_target": _dcCurrentTargetMicroAmp,
+      "dc_burst_gap": _dcBurstGap,
+      "dc_burst_num": _dcBurstNum,
+      "end_by_minutes": _endStimulationMinute,
+      "end_by_seconds": _endStimulationSeconds,
+      "end_by_value": _endbyvalue,
       "end_by_burst": _endByBurst,
       "end_by_duration": _endByDuration,
       "stim_forever": _stimForever,
       "frequency": _frequency,
 
-		};
-		return presetValuesMap;
+    };
+    return presetValuesMap;
   }
 
 
@@ -699,15 +701,16 @@ class Data extends ChangeNotifier {
   /// This allows us to keep BLE things seperated from our presentation layer which means we don't run into
   /// issues when we do stuff like change pages and routes in the UI
 
-  /// The streams is where the device information from connections and scans are stored
+  /// The streams is where the device information from connections, scans and notifications are stored
   StreamSubscription? scanStream;
   StreamSubscription? connectionStream;
+  StreamSubscription? characteristicValueStream; 
 
   /// this is a list of devices that we are connected to, it is a subset of info from our connection stream
   /// We use this for most of the functions below
   List<BleDevice> devices = <BleDevice>[];
 
-  /// get  and set functions to retrieve the connection and scan streams these works the same as for the rest of our variables in the
+  /// get  and set functions to retrieve the connection, scan and notify characteristic streams these works the same as for the rest of our variables in the
   /// provider class
   StreamSubscription? get getScanStream {
     return scanStream;
@@ -717,9 +720,14 @@ class Data extends ChangeNotifier {
     return connectionStream;
   }
 
+  StreamSubscription? get getcharacteristicValueStream { 
+    return characteristicValueStream; 
+  } 
+
 
   bool connected = false;
   bool get getConnected => connected;
+
 
   setScanStream(StreamSubscription stream) {
     scanStream = stream;
@@ -730,6 +738,31 @@ class Data extends ChangeNotifier {
     connectionStream = stream;
     notifyListeners();
   }
+
+  setcharacteristicValueStream(StreamSubscription stream) { 
+    characteristicValueStream = stream; 
+    notifyListeners(); 
+  } 
+
+
+    // subscription values
+    List<int> intArray = [];
+    Map<dynamic, dynamic> char_value = {};
+    List<dynamic> listValue = [0];
+
+    //Impedence Value
+
+    int impedance = 0;
+    
+    setImpedance(int newvalue) {
+      impedance = newvalue;
+      notifyListeners();
+    }
+
+    int get getImpedance {
+      return impedance;
+    } 
+
 
   // This function is
   initialiseBLE() {
@@ -745,12 +778,38 @@ class Data extends ChangeNotifier {
         devices.add(event);
       }
     });
+
+
+    // Listen to Characteristic Value Stream 
+    characteristicValueStream = WinBle.characteristicValueStream.listen((event) { 
+      // TODO: convert CharValue event (notify capture) into list and get error dialogue to
+      // pop up when a new notification is sent through
+      print("CharValue : $event"); 
+
+        char_value = event;
+        listValue = char_value["value"];
+        intArray = [];
+        listValue.forEach((listItem) {
+          intArray.add(listItem);
+        });
+
+        setImpedance(impedenceByteCalculation(intArray[2], intArray[1]));
+
+    }); 
   }
+
+  List<int> get getNotifyIntArray => intArray;
+
+  void clearNotifyArray () {
+    intArray = [];
+  }
+
 
   disposeBLE() {
     WinBle.dispose();
     connectionStream?.cancel();
     scanStream?.cancel();
+    characteristicValueStream?.cancel(); 
   }
 
   List<BleDevice> get getdevices => devices;
@@ -778,15 +837,23 @@ class Data extends ChangeNotifier {
         writeWithResponse: true);
   }
 
-  subsCribeToCharacteristic(address, serviceID, charID) async {
-    await WinBle.subscribeToCharacteristic(
-        address: address, serviceId: serviceID, characteristicId: charID);
+  subsCribeToCharacteristic(address, serviceID, charID) async { 
+    try { 
+      await WinBle.subscribeToCharacteristic(address: address, serviceId: serviceID, characteristicId: charID); 
+      print("Subscribe Successfully"); 
+    } catch (e) { 
+      print("SubscribeCharError : $e"); 
+    } 
   }
 
-  unSubscribeToCharacteristic(address, serviceID, charID) async {
-    await WinBle.unSubscribeFromCharacteristic(
-        address: address, serviceId: serviceID, characteristicId: charID);
-  }
+  unSubscribeToCharacteristic(address, serviceID, charID) async { 
+    try { 
+      await WinBle.unSubscribeFromCharacteristic(address: address, serviceId: serviceID, characteristicId: charID); 
+      print("Unsubscribed Successfully"); 
+    } catch (e) { 
+      print("UnSubscribeError : $e"); 
+    } 
+  } 
 
   disconnect(address) async {
     try {

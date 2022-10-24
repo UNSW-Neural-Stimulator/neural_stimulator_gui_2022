@@ -286,3 +286,12 @@ bool stimulation_duration_minimum(stimduration_minutes, stimduration_seconds, bu
   return false;
 }
 
+int impedenceByteCalculation(int frontbyte, int endByte) {
+  int x = 0;
+
+  frontbyte = frontbyte << 8;
+  
+  x = endByte | frontbyte;
+   
+  return x;
+}

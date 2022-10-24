@@ -111,6 +111,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
     _endStimulationTextField =
         TextEditingController(text: myProvider.getendByValue);
     List<bool> fixedLengthList;
+    
   }
 
   // this calls a rebuild whenever a change is made, it is required for the toggle box
@@ -146,6 +147,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
     var endStimulationTitle = Provider.of<Data>(context).endByDurationTitle;
     var value_one = "";
 
+    var impedanceString = Provider.of<Data>(context).getImpedance.toString();
+
     if (myProvider.getUpdatePreset) {
       setState(() {
         _phase1CurrentTextfield =
@@ -171,6 +174,9 @@ class _RightSideInputsState extends State<RightSideInputs> {
 
     return Column(
       children: [
+        // if (myProvider.getNotifyIntArray != []) {
+        //   print()
+        // },
         if (myProvider.getDcMode && myProvider.getConnected)
           SizedBox(
             height: 45,
@@ -577,31 +583,44 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     )
                   ]),
                 ),
-                // TODO: once impedence check is implemented this should be uncommented. Includes 
-                // a button with its Onpressed function left empty 
-              // SizedBox(height: 5),
-              // SizedBox(
-              //   width: 250,
-              //   child: ElevatedButton.icon(
-              //     style: ElevatedButton.styleFrom(
-              //       primary: Colors.red,
-              //       minimumSize: const Size(150, 50),
-              //     ),
-
-              //     onPressed: () {
-              //       //This shall be updated to run and impedence check
-              //     },
-
-              //     icon: const Icon(
-              //       Icons.bolt,
-              //       size: 24.0,
-              //     ),
-              //     label: const Text('Impedence check',
-              //         style: TextStyle(
-              //             fontSize: 20,
-              //             fontWeight: FontWeight.w400)), // <-- Text
-              //   ),
-              // ),
+              if (myProvider.getNotifyIntArray.isNotEmpty)
+                if (myProvider.getNotifyIntArray[0] != 1) 
+                  SizedBox(
+                  height: 45,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.warning_amber_rounded,
+                          color: Colors.red, size: 45),
+                      Text(
+                        "    ERROR: Stimulator receiving invalid inputs.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+                else
+                 SizedBox(
+                  height: 45,
+                  child: Row(
+                    children: [
+                      Icon(Icons.bolt,
+                          color: Colors.black, size: 45),
+                      Text(
+                        "    Impedance: $impedanceString Ω",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+                
+              else
+                const SizedBox(
+                  height: 45,
+                ),
             ],
           ),
         ),

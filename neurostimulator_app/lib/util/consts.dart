@@ -11,6 +11,11 @@ import 'dart:math';
 
 const SERIAL_COMMAND_INPUT_CHAR_UUID = "c4583a38-ef5a-4526-882f-ea5f5d91dbf3";
 const SERVICE_UUID = "13d47a92-3e31-4bde-89b8-77e55b659c76";
+//firmware
+const NOTIFY_CHAR_UUID = "db2265ab-f886-4adf-907b-b1e6f7ea619f";
+
+// const NOTIFY_CHAR_UUID = "9fbf120d-6301-42d9-8c58-25e699a21dbd"; 
+
 
 ///UINT32MAX is the highest number we can send as a parameter to the firmware
 

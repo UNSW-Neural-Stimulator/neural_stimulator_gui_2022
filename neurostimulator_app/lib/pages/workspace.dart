@@ -94,7 +94,7 @@ class workspaceHome extends StatelessWidget {
                           fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),
                     ),
                     Text(
-                      "Miniature Neuro Stimulator | v3.0",
+                      "Miniature Neuro Stimulator | v4.0",
                       style: GoogleFonts.montserrat(
                           fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)),
                     ),
@@ -133,10 +133,6 @@ class workspaceHome extends StatelessWidget {
                 "\n- Try turning the neurostimulator off and on."
                 "\n\n\n* The current version of this application is compatible for  Windows version 10.0.15014 and above."),
             actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'Cancel'),
-                child: const Text('Cancel'),
-              ),
               TextButton(
                 onPressed: () => Navigator.pop(context, 'OK'),
                 child: const Text('OK'),

@@ -152,9 +152,9 @@ class _RightSideInputsState extends State<RightSideInputs> {
     if (myProvider.getUpdatePreset) {
       setState(() {
         _phase1CurrentTextfield =
-            TextEditingController(text: myProvider.getPhase1Current.toString());
+            TextEditingController(text: myProvider.getPhase1Current.abs().toString());
         _phase2CurrentTextfield =
-            TextEditingController(text: myProvider.getPhase2Current.toString());
+            TextEditingController(text: myProvider.getPhase2Current.abs().toString());
         _dcCurrentTargetTextfield = TextEditingController(
             text: myProvider.getDCCurrentTarget.toString());
         _dcHoldTimeTextfield =
@@ -195,8 +195,8 @@ class _RightSideInputsState extends State<RightSideInputs> {
             ),
           )
         else if (!myProvider.getDcMode &&
-                 (myProvider.getPhase1Current * myProvider.getPhase1Time 
-                 != myProvider.getPhase2Current * myProvider.getPhase2Time))
+                 (myProvider.getPhase1Current.abs() * myProvider.getPhase1Time 
+                 != myProvider.getPhase2Current.abs() * myProvider.getPhase2Time))
         SizedBox(
             height: 45,
             child: Row(
@@ -271,6 +271,12 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     await Future.delayed(
                         const Duration(milliseconds: 1), () {});
                   }
+                  myProvider.writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    start_bytearray,
+                    true);
                 }
               },
               icon: const Icon(
@@ -338,10 +344,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
                         enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue)),
                         errorText: generic_error_string(
-                            myProvider.getPhase1Current,
+                            myProvider.getPhase1Current.abs(),
                             3000,
                             0,
-                            "Must be less than 3000")),
+                            "Must be <= 3000")),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -368,10 +374,10 @@ class _RightSideInputsState extends State<RightSideInputs> {
                         enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.blue)),
                         errorText: generic_error_string(
-                            myProvider.getPhase2Current,
+                            myProvider.getPhase2Current.abs(),
                             3000,
                             0,
-                            "Must be less than 3000")),
+                            "Must be <= 3000")),
                   ),
                 ),
               ],
@@ -603,7 +609,7 @@ class _RightSideInputsState extends State<RightSideInputs> {
                   ]),
                 ),
               if (myProvider.getNotifyIntArray.isNotEmpty)
-                if (myProvider.getNotifyIntArray[0] != 1) 
+                if (myProvider.getNotifyIntArray[0] > 1 ) 
                   SizedBox(
                   height: 45,
                   child: Row(
@@ -619,6 +625,23 @@ class _RightSideInputsState extends State<RightSideInputs> {
                     ],
                   ),
                 )
+                else if (myProvider.getNotifyIntArray[0] == 0) 
+                 SizedBox(
+                  height: 45,
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded,
+                          color: Color.fromARGB(255, 255, 0, 0), size: 45),
+                      Text(
+                        "   Stimulator is out of compliance. \n   Stimulation is stopped.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+                
                 else
                  SizedBox(
                   height: 45,

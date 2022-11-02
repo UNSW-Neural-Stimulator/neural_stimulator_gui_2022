@@ -66,6 +66,10 @@ class Data extends ChangeNotifier {
   bool _cathodicFirst = true;
   bool _anodicFirst = false;
 
+  //Impedence Value: updated via BLE notification from firmware
+
+  int impedance = 0;
+
   ///////////////////////////////////////////////////////////////////////////////////////////////
   ///Map for of all values that are sent to the firmware as parameters for stimulation
   ///each value is stored as an Uint8list
@@ -91,7 +95,6 @@ class Data extends ChangeNotifier {
     "dc_curr_target": Uint8List.fromList([dc_curr_target, 232, 3, 0, 0]),
     "dc_burst_gap": Uint8List.fromList([dc_burst_gap, 0, 0, 0, 0]),
     "dc_burst_num": Uint8List.fromList([dc_burst_num, 0, 0, 0, 0]),
-    "start": start_bytearray,
   };
 
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,7 +186,6 @@ class Data extends ChangeNotifier {
         _interStimDelayMicrosec.toString();
   }
 
-
   setphase1(String phase1TimeStringFromTextfield) {
     _phase1TimeMicrosec = int.tryParse(phase1TimeStringFromTextfield) ?? 0;
     notifyListeners();
@@ -255,6 +257,11 @@ class Data extends ChangeNotifier {
 
   setendbystimulationseconds(String endbyseconds) {
     _endStimulationSeconds = int.tryParse(endbyseconds) ?? 0;
+    notifyListeners();
+  }
+
+  setImpedance(int newvalue) {
+    impedance = newvalue;
     notifyListeners();
   }
 
@@ -394,6 +401,10 @@ class Data extends ChangeNotifier {
 
   bool get getStimForever {
     return _stimForever;
+  }
+
+  int get getImpedance {
+    return impedance;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -552,7 +563,7 @@ class Data extends ChangeNotifier {
     // if ending by duration, calculate the number of bursts that are needed for the specified duration time
     if (_endByDuration) {
       stimduration = (_endStimulationMinute * 60) + _endStimulationSeconds;
-    // print("burstPeriod $burstPeriod");
+      // print("burstPeriod $burstPeriod");
       if (burstPeriod != 0) {
         //burst number is calculated as time divided by duration of each burst
         // returns an interger
@@ -563,10 +574,7 @@ class Data extends ChangeNotifier {
         burstnumber = 1;
       } else {
         burstnumber = 0;
-
       }
-
-
     }
     // if ending by number of bursts, the user inputs the number of bursts
 
@@ -600,68 +608,68 @@ class Data extends ChangeNotifier {
     serial_command_input_char["pulse_num"] =
         bytearray_maker(pulse_num, pulsenumber);
   }
+
   /////////////////////////////////////////////////////////////////////
   // Final start stimulation error check
   String startStimErrorCheck() {
     String formattedWarning = "";
-  if (!connected) {
+    if (!connected) {
       formattedWarning = formattedWarning + "Device is not connected.\n";
       return formattedWarning;
-
-  }
-  if (!_dcMode) {
-    if (_phase1TimeMicrosec > UINT32MAX
-      || _phase2TimeMicrosec > UINT32MAX
-      || _interPhaseDelayMicrosec > UINT32MAX
-      || _interStimDelayMicrosec > UINT32MAX) {
-      
-      formattedWarning = formattedWarning + "Phase time settings are invalid\n";
-
+    }
+    if (!_dcMode) {
+      if (_phase1TimeMicrosec > UINT32MAX ||
+          _phase2TimeMicrosec > UINT32MAX ||
+          _interPhaseDelayMicrosec > UINT32MAX ||
+          _interStimDelayMicrosec > UINT32MAX) {
+        formattedWarning =
+            formattedWarning + "Phase time settings are invalid\n";
       }
-    var interstim_by_freq = calculate_interstim_from_frequency(_frequency, _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
+      var interstim_by_freq = calculate_interstim_from_frequency(_frequency,
+          _phase1TimeMicrosec, _phase2TimeMicrosec, _interPhaseDelayMicrosec);
 
-    if (_calculate_interstim_by_freq 
-      &&  interstim_by_freq < 0) {
-      formattedWarning = formattedWarning + "Frequency value is invalid.\n";
-
+      if (_calculate_interstim_by_freq && interstim_by_freq < 0) {
+        formattedWarning = formattedWarning + "Frequency value is invalid.\n";
       }
-    if (_burstDurationMicrosec <= getpulsePeriod && !_continuousStim) {
-      formattedWarning = formattedWarning + "Burst duration is invalid.\n";
+      if ((_burstDurationMicrosec <= getpulsePeriod) && !_continuousStim) {
+        formattedWarning = formattedWarning + "Burst duration is invalid.\n";
       }
 
-    if (_dutyCyclePercentage <= 0 || _dutyCyclePercentage > 100 && !_continuousStim) {
-      formattedWarning = formattedWarning + "Duty Cycle is invalid.\n";
+      if (_dutyCyclePercentage <= 0 ||
+          _dutyCyclePercentage > 100 && !_continuousStim) {
+        formattedWarning = formattedWarning + "Duty Cycle is invalid.\n";
       }
 
-    if (_phase1CurrentMicroAmp > UINT32MAX
-      || _phase2CurrentMicroAmp > UINT32MAX) {
-      formattedWarning = formattedWarning + "Current values are invalid\n";
+      if (_phase1CurrentMicroAmp > UINT32MAX ||
+          _phase2CurrentMicroAmp > UINT32MAX) {
+        formattedWarning = formattedWarning + "Current values are invalid\n";
       }
-  } else {
-    if (_dcCurrentTargetMicroAmp > UINT32MAX
-      || _dcBurstGap > UINT32MAX
-      || _rampUpTime > UINT32MAX
-      || _dcHoldTime > UINT32MAX) {
-      formattedWarning = formattedWarning + "DC stimulation values are invalid\n";
+    } else {
+      if (_dcCurrentTargetMicroAmp > UINT32MAX ||
+          _dcBurstGap > UINT32MAX ||
+          _rampUpTime > UINT32MAX ||
+          _dcHoldTime > UINT32MAX) {
+        formattedWarning =
+            formattedWarning + "DC stimulation values are invalid\n";
       }
-  }
-  bool stimDurationInvalid = stimulation_duration_minimum(_endStimulationMinute, 
-                              _endStimulationSeconds,
-                              _burstDurationMicrosec, 
-                              _dcHoldTime, 
-                              _dcBurstGap, 
-                              _dcMode);
-  if (stimDurationInvalid && _endByDuration) {
-    formattedWarning = formattedWarning + "Stimulation duration values are invalid\n";
+    }
+    bool stimDurationInvalid = stimulation_duration_minimum(
+        _endStimulationMinute,
+        _endStimulationSeconds,
+        _burstDurationMicrosec,
+        _dcHoldTime,
+        _dcBurstGap,
+        _dcMode);
+    if (stimDurationInvalid && _endByDuration) {
+      formattedWarning =
+          formattedWarning + "Stimulation duration values are invalid\n";
+    }
 
-  }
-
-  return formattedWarning;
+    return formattedWarning;
   }
 
   ////////////////////////////////////////////////////////////////////
   Map<String, dynamic> generatePresetMap(String presetname) {
-
     Map<String, dynamic> presetValuesMap = {
       //fix burst num
       //fix pulse num
@@ -686,13 +694,9 @@ class Data extends ChangeNotifier {
       "end_by_duration": _endByDuration,
       "stim_forever": _stimForever,
       "frequency": _frequency,
-
     };
     return presetValuesMap;
   }
-
-
-
 
   ///////////////////////////////////////////////////////////////
   ///BLE Section
@@ -704,7 +708,7 @@ class Data extends ChangeNotifier {
   /// The streams is where the device information from connections, scans and notifications are stored
   StreamSubscription? scanStream;
   StreamSubscription? connectionStream;
-  StreamSubscription? characteristicValueStream; 
+  StreamSubscription? characteristicValueStream;
 
   /// this is a list of devices that we are connected to, it is a subset of info from our connection stream
   /// We use this for most of the functions below
@@ -720,14 +724,17 @@ class Data extends ChangeNotifier {
     return connectionStream;
   }
 
-  StreamSubscription? get getcharacteristicValueStream { 
-    return characteristicValueStream; 
-  } 
-
+  StreamSubscription? get getcharacteristicValueStream {
+    return characteristicValueStream;
+  }
 
   bool connected = false;
   bool get getConnected => connected;
 
+  void setConnected(bool value) {
+    connected = value;
+    notifyListeners();
+  }
 
   setScanStream(StreamSubscription stream) {
     scanStream = stream;
@@ -739,30 +746,15 @@ class Data extends ChangeNotifier {
     notifyListeners();
   }
 
-  setcharacteristicValueStream(StreamSubscription stream) { 
-    characteristicValueStream = stream; 
-    notifyListeners(); 
-  } 
+  setcharacteristicValueStream(StreamSubscription stream) {
+    characteristicValueStream = stream;
+    notifyListeners();
+  }
 
-
-    // subscription values
-    List<int> intArray = [];
-    Map<dynamic, dynamic> char_value = {};
-    List<dynamic> listValue = [0];
-
-    //Impedence Value
-
-    int impedance = 0;
-    
-    setImpedance(int newvalue) {
-      impedance = newvalue;
-      notifyListeners();
-    }
-
-    int get getImpedance {
-      return impedance;
-    } 
-
+  // subscription values
+  List<int> intArray = [];
+  Map<dynamic, dynamic> char_value = {};
+  List<dynamic> listValue = [0];
 
   // This function is
   initialiseBLE() {
@@ -779,37 +771,35 @@ class Data extends ChangeNotifier {
       }
     });
 
-
-    // Listen to Characteristic Value Stream 
-    characteristicValueStream = WinBle.characteristicValueStream.listen((event) { 
+    // Listen to Characteristic Value Stream
+    characteristicValueStream =
+        WinBle.characteristicValueStream.listen((event) {
       // TODO: convert CharValue event (notify capture) into list and get error dialogue to
       // pop up when a new notification is sent through
-      print("CharValue : $event"); 
+      print("CharValue : $event");
 
-        char_value = event;
-        listValue = char_value["value"];
-        intArray = [];
-        listValue.forEach((listItem) {
-          intArray.add(listItem);
-        });
+      char_value = event;
+      listValue = char_value["value"];
+      intArray = [];
+      listValue.forEach((listItem) {
+        intArray.add(listItem);
+      });
 
-        setImpedance(impedenceByteCalculation(intArray[2], intArray[1]));
-
-    }); 
+      setImpedance(impedenceByteCalculation(intArray[2], intArray[1]));
+    });
   }
 
   List<int> get getNotifyIntArray => intArray;
 
-  void clearNotifyArray () {
+  void clearNotifyArray() {
     intArray = [];
   }
-
 
   disposeBLE() {
     WinBle.dispose();
     connectionStream?.cancel();
     scanStream?.cancel();
-    characteristicValueStream?.cancel(); 
+    characteristicValueStream?.cancel();
   }
 
   List<BleDevice> get getdevices => devices;
@@ -837,23 +827,25 @@ class Data extends ChangeNotifier {
         writeWithResponse: true);
   }
 
-  subsCribeToCharacteristic(address, serviceID, charID) async { 
-    try { 
-      await WinBle.subscribeToCharacteristic(address: address, serviceId: serviceID, characteristicId: charID); 
-      print("Subscribe Successfully"); 
-    } catch (e) { 
-      print("SubscribeCharError : $e"); 
-    } 
+  subsCribeToCharacteristic(address, serviceID, charID) async {
+    try {
+      await WinBle.subscribeToCharacteristic(
+          address: address, serviceId: serviceID, characteristicId: charID);
+      print("Subscribe Successfully");
+    } catch (e) {
+      print("SubscribeCharError : $e");
+    }
   }
 
-  unSubscribeToCharacteristic(address, serviceID, charID) async { 
-    try { 
-      await WinBle.unSubscribeFromCharacteristic(address: address, serviceId: serviceID, characteristicId: charID); 
-      print("Unsubscribed Successfully"); 
-    } catch (e) { 
-      print("UnSubscribeError : $e"); 
-    } 
-  } 
+  unSubscribeToCharacteristic(address, serviceID, charID) async {
+    try {
+      await WinBle.unSubscribeFromCharacteristic(
+          address: address, serviceId: serviceID, characteristicId: charID);
+      print("Unsubscribed Successfully");
+    } catch (e) {
+      print("UnSubscribeError : $e");
+    }
+  }
 
   disconnect(address) async {
     try {
@@ -881,17 +873,16 @@ class Data extends ChangeNotifier {
   bool prepareUpdatePreset = false;
 
   bool get getPrepareUpdatePreset => prepareUpdatePreset;
-  
+
   setPrepareUpdatePreset(bool value) {
     prepareUpdatePreset = value;
     notifyListeners();
   }
 
-
   bool updatePreset = false;
 
   bool get getUpdatePreset => updatePreset;
-  
+
   setUpdatePreset(bool value) {
     updatePreset = value;
     notifyListeners();
@@ -901,7 +892,7 @@ class Data extends ChangeNotifier {
     _dcMode = presetMap["dc_mode"];
     _cathodicFirst = presetMap["cathodic_first"];
     _phase1TimeMicrosec = presetMap["phase_one_time"];
-    _phase2TimeMicrosec= presetMap["phase_two_time"];
+    _phase2TimeMicrosec = presetMap["phase_two_time"];
     _interPhaseDelayMicrosec = presetMap["inter_phase_gap"];
     _interStimDelayMicrosec = presetMap["inter_stim_delay"];
     _phase1CurrentMicroAmp = presetMap["dac_phase_one"];
@@ -925,7 +916,5 @@ class Data extends ChangeNotifier {
     setUpdatePreset(true);
     await Future.delayed(Duration(milliseconds: 50));
     setUpdatePreset(false);
-
   }
-
 }

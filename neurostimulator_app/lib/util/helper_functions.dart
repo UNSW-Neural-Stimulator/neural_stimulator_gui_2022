@@ -172,8 +172,8 @@ String? input_error_text(int min, int max, String unit, String input) {
       break;
   }
 
-  if (inputtedNumberAsInt < min) {
-    return "Input must be greater then \n$min µs";
+  if (inputtedNumberAsInt <= min) {
+    return "Input must be greater than \n$min µs";
   } else if (inputtedNumberAsInt > max) {
     return "Cannot exceed $max µs";
   } else {
@@ -195,8 +195,8 @@ String? Duty_cycle_input_error_text(int min, int max, String input) {
   }
   inputtedNumberAsInt = (inputtedNumber).round();
 
-  if (inputtedNumberAsInt < min) {
-    return "Input must be greater then \n$min";
+  if (inputtedNumberAsInt <= min) {
+    return "Input must be greater than \n$min";
   } else if (inputtedNumberAsInt > max) {
     return "Cannot exceed $max";
   } else {

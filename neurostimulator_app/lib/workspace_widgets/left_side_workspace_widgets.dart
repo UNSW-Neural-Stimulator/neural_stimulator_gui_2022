@@ -10,6 +10,7 @@ import "../data_provider.dart";
 import '../util/consts.dart';
 import '../util/helper_functions.dart';
 import '../persistance/presetList.dart';
+import 'ErrorDialogue.dart';
 
 class leftTextFields extends StatefulWidget {
   final BleDevice device;
@@ -21,7 +22,7 @@ class leftTextFields extends StatefulWidget {
 // Define a corresponding State class.
 // This class holds the data related to the Form.
 class _leftTextFieldsState extends State<leftTextFields> {
-    late BleDevice device = widget.device;
+  late BleDevice device = widget.device;
 
   // Create a text controller and use it to retrieve the current value
   // of the TextField.
@@ -39,7 +40,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
     final Data myProvider = Provider.of<Data>(context, listen: false);
 
     super.initState();
-        device = widget.device;
+    device = widget.device;
 
     _phase1Textfield =
         TextEditingController(text: myProvider.getPhase1Time.toString());
@@ -116,6 +117,7 @@ class _leftTextFieldsState extends State<leftTextFields> {
                   myProvider.subsCribeToCharacteristic(
                       widget.device.address, SERVICE_UUID, NOTIFY_CHAR_UUID);
                   print('ready');
+                  setState(() {myProvider.setConnected(true);});
                 } else {
                   print("error on connection");
                 }
@@ -155,13 +157,13 @@ class _leftTextFieldsState extends State<leftTextFields> {
             width: 20,
           ),
           FlutterSwitch(
-              activeColor: Colors.grey,
+              activeColor: Colors.blue,
               inactiveColor: Colors.blue,
               activeTextColor: Colors.white,
               inactiveTextColor: Colors.white,
               activeTextFontWeight: FontWeight.w400,
               inactiveTextFontWeight: FontWeight.w400,
-              activeText: "Burst mode off",
+              activeText: "Continuous",
               inactiveText: "Burst mode on",
               width: 150,
               height: 40,
@@ -510,20 +512,51 @@ class _leftTextFieldsState extends State<leftTextFields> {
                     minimumSize: const Size(150, 50),
                   ),
 
-                  onPressed: () {
-                myProvider.writeCharacteristic(
-                    device.address,
-                    SERVICE_UUID,
-                    SERIAL_COMMAND_INPUT_CHAR_UUID,
-                    Uint8List.fromList([19, 0, 0, 0, 0]),
-                    true);
-                                },
+                  onPressed: () async {
+                    String allErrors = myProvider.startStimErrorCheck();
+                    if (allErrors != "") {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                                title: Text(
+                                    'Please address the following warnings: '),
+                                content: SingleChildScrollView(
+                                  child: errorDialogue(description: allErrors),
+                                ));
+                          });
+                    } else {
+                      Provider.of<Data>(context, listen: false)
+                          .prepare_stimulation_values();
+                      var serial_command_inputs =
+                          Provider.of<Data>(context, listen: false)
+                              .get_serial_command_input_char;
+                      for (var value in serial_command_inputs.values) {
+                        myProvider.writeCharacteristic(
+                            device.address,
+                            SERVICE_UUID,
+                            SERIAL_COMMAND_INPUT_CHAR_UUID,
+                            value,
+                            true);
+                        await Future.delayed(
+                            const Duration(milliseconds: 1), () {});
+                      }
+                      //Send impedance check request
+                      myProvider.writeCharacteristic(
+                          device.address,
+                          SERVICE_UUID,
+                          SERIAL_COMMAND_INPUT_CHAR_UUID,
+                          Uint8List.fromList([19, 0, 0, 0, 0]),
+                          true);
+                    }
+                    ;
+                  },
 
                   icon: const Icon(
                     Icons.bolt,
                     size: 24.0,
                   ),
-                  label: const Text('Impedence check',
+                  label: const Text('Impedance check',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400)), // <-- Text

@@ -694,6 +694,8 @@ class Data extends ChangeNotifier {
       "end_by_duration": _endByDuration,
       "stim_forever": _stimForever,
       "frequency": _frequency,
+      "burst_duration": _burstDurationMicrosec,
+      "duty_cycle": _dutyCyclePercentage,
     };
     return presetValuesMap;
   }
@@ -909,6 +911,8 @@ class Data extends ChangeNotifier {
     _endByBurst = presetMap["end_by_burst"];
     _stimForever = presetMap["stim_forever"];
     _frequency = presetMap["frequency"];
+    _dutyCyclePercentage = presetMap["duty_cycle"];
+    _burstDurationMicrosec = presetMap["burst_duration"];
     setPrepareUpdatePreset(true);
     await Future.delayed(Duration(milliseconds: 10));
     setPrepareUpdatePreset(false);

@@ -88,13 +88,17 @@ class workspaceHome extends StatelessWidget {
                     SizedBox(
                       height: 70,
                     ),
+                                        Image.asset('assets/images/StimpactLogo.png',
+                         width: 600,
+                        height: 300,
+                        fit:BoxFit.fill),
+                    // Text(
+                    //   "Stimpact",
+                    //   style: GoogleFonts.orbitron(
+                    //       fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),
+                    // ),
                     Text(
-                      "Stimpact",
-                      style: GoogleFonts.orbitron(
-                          fontSize: 80, color: Color.fromARGB(255, 0, 60, 109)),
-                    ),
-                    Text(
-                      "Miniature Neuro Stimulator | v4.0",
+                      "Stimulating Research | v5.0",
                       style: GoogleFonts.montserrat(
                           fontSize: 20, color: Color.fromARGB(255, 0, 60, 109)),
                     ),

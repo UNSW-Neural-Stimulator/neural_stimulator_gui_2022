@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:nstim_app/providers/bluetooth_le_provider.dart';
+import 'package:nstim_app/providers/preset_provider.dart';
 import 'package:nstim_app/providers/service_layer_provider.dart';
 import 'package:nstim_app/util/textfield_helper_functions.dart';
 import 'package:provider/provider.dart';
@@ -86,33 +87,51 @@ class _LeftInputsState extends State<LeftInputs> {
     final BluetoothLEProvider bluetoothLEProvider =
         Provider.of<BluetoothLEProvider>(context);
 
-    // final Presets presetProvider = Provider.of<Presets>(context);
+    final Presets presetProvider = Provider.of<Presets>(context);
     var interstimByFreqString = Provider.of<ServiceLayerProvider>(context)
         .retrieveIntValue("interstimDelay")
         .toString();
     bool showInterstimTextfield = !Provider.of<ServiceLayerProvider>(context)
         .retrieveBoolValue("calculateInterstimByFreq");
 // ///////////////////////////////////////
-    // if (myProvider.getUpdatePreset) {
-    //   setState(() {
-    //     _phase1Textfield =
-    //         TextEditingController(text: myProvider.getPhase1Time.toString());
-    //     _interPhaseDelayTextfield = TextEditingController(
-    //         text: myProvider.getInterPhaseDelay.toString());
-    //     _phase2Textfield =
-    //         TextEditingController(text: myProvider.getPhase2Time.toString());
-    //     _interStimDelayTexfield = TextEditingController(
-    //         text: myProvider.getInterstimDelay.toString());
-    //     _burstDurationTextfield =
-    //         TextEditingController(text: myProvider.getBurstDuration.toString());
-    //     _dutyCycleTextfield =
-    //         TextEditingController(text: myProvider.getDutyCycle.toString());
-    //     _frequencyTextfield =
-    //         TextEditingController(text: myProvider.getFrequency.toString());
-    //     myProvider.setfrequencyNoNotify(myProvider.getFrequency.toString());
-    //     interstim_from_freq = myProvider.getinterstimstring;
-    //   });
-    // }
+    if (serviceLayerProvider.getUpdatePreset) {
+      Future.delayed(Duration.zero, () async {
+      setState(() {
+        _phase1MicrosecTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("phase1TimeMicroSec")
+                .toString());
+        _interPhaseDelayTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("interphaseDelay")
+                .toString());
+        _phase2MicrosecTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("phase2TimeMicroSec")
+                .toString());
+        _interStimDelayTexfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("interstimDelay")
+                .toString());
+        _burstDurationTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("burstDuration")
+                .toString());
+        _dutyCycleTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveIntValue("dutyCyclePercentage")
+                .toString());
+        _frequencyTextfield = TextEditingController(
+            text: serviceLayerProvider
+                .retrieveDoubleValue("frequency")
+                .toString());
+        serviceLayerProvider.updateInterstimByFrequency();
+        interstimByFreqString = Provider.of<ServiceLayerProvider>(context)
+            .retrieveIntValue("interstimDelay")
+            .toString();
+      });
+      });
+    }
 ///////////////////
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,10 +139,9 @@ class _LeftInputsState extends State<LeftInputs> {
         const SizedBox(
           height: 5,
         ),
-                SizedBox(
+        SizedBox(
           height: 10,
         ),
-
         Text(
           "Phase Time Settings",
           style: Theme.of(context).textTheme.headline1,
@@ -270,8 +288,7 @@ class _LeftInputsState extends State<LeftInputs> {
               showOnOff: true,
               onToggle: (bool frequency) {
                 serviceLayerProvider.setBooleanValue(
-                    "calculateInterstimByFreq",
-                    frequency);
+                    "calculateInterstimByFreq", frequency);
                 if (frequency == false) {
                   serviceLayerProvider.setIntegerValue(
                       "interstimDelay",
@@ -349,7 +366,7 @@ class _LeftInputsState extends State<LeftInputs> {
             SizedBox(
               width: 250,
               child: CustomUnitsTextField(
-                enabled: (serviceLayerProvider
+                enabled: (!serviceLayerProvider
                         .retrieveBoolValue("continuousStimOn") &&
                     !serviceLayerProvider.retrieveBoolValue("DCModeOn") &&
                     bluetoothLEProvider.getConnected),
@@ -366,7 +383,7 @@ class _LeftInputsState extends State<LeftInputs> {
             SizedBox(
               width: 250,
               child: TextField(
-                enabled: (serviceLayerProvider
+                enabled: (!serviceLayerProvider
                         .retrieveBoolValue("continuousStimOn") &&
                     !serviceLayerProvider.retrieveBoolValue("DCModeOn") &&
                     bluetoothLEProvider.getConnected),
@@ -435,8 +452,7 @@ class _LeftInputsState extends State<LeftInputs> {
                   onToggle: (bool continuous) {
                     setState(() {
                       serviceLayerProvider.setBooleanValue(
-                          "continuousStimOn",
-                          continuous);
+                          "continuousStimOn", continuous);
                     });
                   },
                   value: serviceLayerProvider
@@ -458,15 +474,13 @@ class _LeftInputsState extends State<LeftInputs> {
                   showOnOff: true,
                   onToggle: (bool cathodic) {
                     serviceLayerProvider.setBooleanValue(
-                        "cathodicFirst",
-                        cathodic);
+                        "cathodicFirst", cathodic);
                   },
                   value: serviceLayerProvider.retrieveBoolValue(
                       "cathodicFirst")), // remove `listen: false`
             )
           ],
         ),
-
       ],
     );
   }

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:nstim_app/persistance/presetList.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:win_ble/win_ble.dart';
@@ -55,10 +56,10 @@ class _ConnectionBarState extends State<ConnectionBar> {
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(primary: Colors.red),
               onPressed: () async {
-                if (await bluetoothLEProvider.disconnect(widget.device.address) ==
-                    true) {
                   bluetoothLEProvider.unSubscribeToCharacteristic(
                       widget.device.address, SERVICE_UUID, NOTIFY_CHAR_UUID);
+                if (await bluetoothLEProvider.disconnect(widget.device.address) ==
+                    true) {
                   setState(() {});
                   print('disconnected');
                 } else {
@@ -81,14 +82,14 @@ class _ConnectionBarState extends State<ConnectionBar> {
                   ),
 
                   onPressed: () {
-                    // showDialog(
-                    //     context: context,
-                    //     builder: (BuildContext context) {
-                    //       return AlertDialog(
-                    //         title: Text('Presets: '),
-                    //         content: presetContainer(),
-                    //       );
-                    //     });
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Presets: '),
+                            content: presetContainer(),
+                          );
+                        });
                   },
 
                   icon: const Icon(

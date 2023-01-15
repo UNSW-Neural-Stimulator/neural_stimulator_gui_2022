@@ -34,10 +34,13 @@ class BluetoothLEProvider extends ChangeNotifier {
     return characteristicValueStream;
   }
 
-
+  int get getImpedance {
+    return impedance;
+  }
   // Connection Status variables
   bool connected = false;
   bool get getConnected => connected;
+  int impedance = 0;
 
   void setConnected(bool value) {
     connected = value;
@@ -58,6 +61,13 @@ class BluetoothLEProvider extends ChangeNotifier {
     characteristicValueStream = stream;
     notifyListeners();
   }
+
+  setImpedance(int newvalue) {
+    impedance = newvalue;
+    print("to $impedance");
+    notifyListeners();
+  }
+
 
   // subscription values
   List<int> intArray = [];
@@ -92,9 +102,8 @@ class BluetoothLEProvider extends ChangeNotifier {
         intArray.add(listItem);
       });
 
-
-    //TODO
-      // setImpedance(impedenceByteCalculation(intArray[2], intArray[1]));
+      print("setting impedence");
+      setImpedance(impedenceByteCalculation(intArray[2], intArray[1]));
     });
   }
 
@@ -159,7 +168,7 @@ class BluetoothLEProvider extends ChangeNotifier {
   disconnect(address) async {
     try {
       await WinBle.disconnect(address);
-      connected = false;
+      setConnected(false);
 
       return true;
     } catch (e) {

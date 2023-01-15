@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:nstim_app/providers/service_layer_provider.dart';
+import 'package:nstim_app/widgets/workspaceWidgets/workspaceComponents/error_dialogue.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:win_ble/win_ble.dart';
@@ -26,6 +27,8 @@ class _RightCommandBarState extends State<RightCommandBar> {
         Provider.of<BluetoothLEProvider>(context);
     final ServiceLayerProvider serviceLayerProvider =
         Provider.of<ServiceLayerProvider>(context);
+    var impedanceString = Provider.of<BluetoothLEProvider>(context).getImpedance.toString();
+
     return Column(
       children: [
         Row(
@@ -42,7 +45,100 @@ class _RightCommandBarState extends State<RightCommandBar> {
                   Icons.warning_rounded,
                   color: Colors.amber,
                   size: 35,
+                ),
+        if (!bluetoothLEProvider.getConnected)
+                    SizedBox(
+            height: 45,
+            child: Row(
+              children: const [
+                Text(
+                  "     Device is not connected.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 )
+              ],
+            ),
+          )
+
+else if (bluetoothLEProvider.getNotifyIntArray.isNotEmpty)
+                if (bluetoothLEProvider.getNotifyIntArray[0] > 1 ) 
+                  SizedBox(
+                  height: 45,
+                  child: Row(
+                    children: const [
+
+                      Text(
+                        "    ERROR: Stimulator receiving invalid inputs.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+                else if (bluetoothLEProvider.getNotifyIntArray[0] == 0) 
+                 SizedBox(
+                  height: 45,
+                  child: Row(
+                    children: [
+
+                      Text(
+                        "   Stimulator is out of compliance. \n   Stimulation is stopped.",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+
+
+
+        else if (serviceLayerProvider.retrieveBoolValue("DCModeOn"))
+          SizedBox(
+            height: 45,
+            child: Row(
+              children: const [
+                Text(
+                  "    CAUTION: DC stimulation can be unsafe \n    if not used appropriately.",
+                  style: TextStyle(
+                                        fontSize: 15,
+                    fontWeight: FontWeight.w500, 
+
+                  ),
+                )
+              ],
+            ),
+          )
+        else if (!serviceLayerProvider.retrieveBoolValue("DCModeOn") &&
+                 (serviceLayerProvider.retrieveIntValue("phase1Current").abs() * serviceLayerProvider.retrieveIntValue("phase1TimeMicroSec") 
+                 != serviceLayerProvider.retrieveIntValue("phase2Current").abs() * serviceLayerProvider.retrieveIntValue("phase1TimeMicroSec")))
+        SizedBox(
+            height: 45,
+            child: Row(
+              children: const [
+
+                Text(
+                  "    CAUTION: The waveform is charge\n    imbalanced.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                )
+              ],
+            ),
+          )
+        else
+          const SizedBox(
+            height: 45,
+          ),
+
+
+
+
+
               ]),
             ),
             const SizedBox(
@@ -59,59 +155,76 @@ class _RightCommandBarState extends State<RightCommandBar> {
                     ),
 
                     onPressed: () async {
-                      // String allErrors = myProvider.startStimErrorCheck();
-                      // if (allErrors != "") {
-                      //   showDialog(3
-                      //       context: context,
-                      //       builder: (BuildContext context) {
-                      //         return AlertDialog(
-                      //             title: Text(
-                      //                 'Please address the following warnings: '),
-                      //             content: SingleChildScrollView(
-                      //               child: errorDialogue(description: allErrors),
-                      //             ));
-                      //       });
-                      // } else {
-                      //   Provider.of<Data>(context, listen: false)
-                      //       .prepare_stimulation_values();
-                      //   var serial_command_inputs =
-                      //       Provider.of<Data>(context, listen: false)
-                      //           .get_serial_command_input_char;
-                      //   for (var value in serial_command_inputs.values) {
-                      //     myProvider.writeCharacteristic(
-                      //         device.address,
-                      //         SERVICE_UUID,
-                      //         SERIAL_COMMAND_INPUT_CHAR_UUID,
-                      //         value,
-                      //         true);
-                      //     await Future.delayed(
-                      //         const Duration(milliseconds: 1), () {});
-                      //   }
-                      //   //Send impedance check request
-                      //   myProvider.writeCharacteristic(
-                      //       device.address,
-                      //       SERVICE_UUID,
-                      //       SERIAL_COMMAND_INPUT_CHAR_UUID,
-                      //       Uint8List.fromList([19, 0, 0, 0, 0]),
-                      //       true);
-                      // }
-                      // ;
+                                              bluetoothLEProvider.clearNotifyArray();
+                      setState(() {
+                        
+                      });
+                      String allErrors = serviceLayerProvider.startStimErrorCheck(bluetoothLEProvider.getConnected);
+                      if (allErrors != "") {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                  title: Text(
+                                      'Please address the following warnings: '),
+                                  content: SingleChildScrollView(
+                                    child: ErrorDialogue(description: allErrors),
+                                  ));
+                            });
+                      } else {
+                        Provider.of<ServiceLayerProvider>(context, listen: false)
+                            .prepare_stimulation_values();
+                        var serial_command_inputs =
+                            Provider.of<ServiceLayerProvider>(context, listen: false)
+                                .getSerialCommandInputChar;
+                        for (var value in serial_command_inputs.values) {
+                          bluetoothLEProvider.writeCharacteristic(
+                              device.address,
+                              SERVICE_UUID,
+                              SERIAL_COMMAND_INPUT_CHAR_UUID,
+                              value,
+                              true);
+                          await Future.delayed(
+                              const Duration(milliseconds: 1), () {});
+                        }
+                        //Send impedance check request
+                        bluetoothLEProvider.writeCharacteristic(
+                            device.address,
+                            SERVICE_UUID,
+                            SERIAL_COMMAND_INPUT_CHAR_UUID,
+                            Uint8List.fromList([19, 0, 0, 0, 0]),
+                            true);
+                      }
+                      ;
                     },
 
                     icon: const Icon(
                       Icons.bolt,
                       size: 24.0,
                     ),
-                    label: const Text('Impedance check',
+                    label: const Text('Run impedance check',
                         style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 15,
                             fontWeight: FontWeight.w400)), // <-- Text
                   ),
                 ),
                 Container(
+                  alignment: Alignment.center,
                   height: 40,
                   width: 220,
                   color: const Color.fromARGB(255, 230, 230, 240),
+                  child: SizedBox(
+                  height: 45,
+                  child:
+                      Text(
+                        " $impedanceString Ω",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      )
+
+                ),
                 )
               ],
             )
@@ -149,37 +262,37 @@ class _RightCommandBarState extends State<RightCommandBar> {
               ),
 
               onPressed: () async {
-                // String allErrors = myProvider.startStimErrorCheck();
-                // if (allErrors != "") {
-                //   showDialog(
-                //       context: context,
-                //       builder: (BuildContext context) {
-                //         return AlertDialog(
-                //             title:
-                //                 Text('Please address the following warnings: '),
-                //             content: SingleChildScrollView(
-                //               child: errorDialogue(description: allErrors),
-                //             ));
-                //       });
-                // } else {
-                //   Provider.of<Data>(context, listen: false)
-                //       .prepare_stimulation_values();
-                //   var serial_command_inputs =
-                //       Provider.of<Data>(context, listen: false)
-                //           .get_serial_command_input_char;
-                //   for (var value in serial_command_inputs.values) {
-                //     myProvider.writeCharacteristic(device.address, SERVICE_UUID,
-                //         SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
-                //     await Future.delayed(
-                //         const Duration(milliseconds: 1), () {});
-                //   }
-                //   myProvider.writeCharacteristic(
-                //     device.address,
-                //     SERVICE_UUID,
-                //     SERIAL_COMMAND_INPUT_CHAR_UUID,
-                //     start_bytearray,
-                //     true);
-                // }
+                String allErrors = serviceLayerProvider.startStimErrorCheck(bluetoothLEProvider.getConnected);
+                if (allErrors != "") {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                            title:
+                                Text('Please address the following warnings: '),
+                            content: SingleChildScrollView(
+                              child: ErrorDialogue(description: allErrors),
+                            ));
+                      });
+                } else {
+                  Provider.of<ServiceLayerProvider>(context, listen: false)
+                      .prepare_stimulation_values();
+                  var serial_command_inputs =
+                      Provider.of<ServiceLayerProvider>(context, listen: false)
+                          .getSerialCommandInputChar;
+                  for (var value in serial_command_inputs.values) {
+                    bluetoothLEProvider.writeCharacteristic(device.address, SERVICE_UUID,
+                        SERIAL_COMMAND_INPUT_CHAR_UUID, value, true);
+                    await Future.delayed(
+                        const Duration(milliseconds: 1), () {});
+                  }
+                  bluetoothLEProvider.writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    start_bytearray,
+                    true);
+                }
               },
               icon: const Icon(
                 Icons.bolt,
@@ -199,12 +312,12 @@ class _RightCommandBarState extends State<RightCommandBar> {
               ),
 
               onPressed: () {
-                // myProvider.writeCharacteristic(
-                //     device.address,
-                //     SERVICE_UUID,
-                //     SERIAL_COMMAND_INPUT_CHAR_UUID,
-                //     Uint8List.fromList([2, 0, 0, 0, 0]),
-                //     true);
+                bluetoothLEProvider.writeCharacteristic(
+                    device.address,
+                    SERVICE_UUID,
+                    SERIAL_COMMAND_INPUT_CHAR_UUID,
+                    Uint8List.fromList([2, 0, 0, 0, 0]),
+                    true);
               },
               icon: const Icon(
                 Icons.stop_outlined,

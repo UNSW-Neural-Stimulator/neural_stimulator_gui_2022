@@ -74,6 +74,29 @@ class _RightInputsState extends State<RightInputs> {
         Provider.of<ServiceLayerProvider>(context);
     final BluetoothLEProvider bluetoothLEProvider =
         Provider.of<BluetoothLEProvider>(context);
+
+
+    if (serviceLayerProvider.getUpdatePreset) {
+      setState(() {
+    _phase1CurrentTextfield = TextEditingController(
+        text:
+            serviceLayerProvider.retrieveIntValue("phase1Current").toString());
+    _phase2CurrentTextfield = TextEditingController(
+        text:
+            serviceLayerProvider.retrieveIntValue("phase2Current").toString());
+    _dcCurrentTargetTextfield = TextEditingController(
+        text: serviceLayerProvider.retrieveIntValue("DCCurrent").toString());
+    _dcHoldTimeTextfield = TextEditingController(
+        text: serviceLayerProvider.retrieveIntValue("DCHoldtime").toString());
+    _dcBurstGapTextfield = TextEditingController(
+        text: serviceLayerProvider.retrieveIntValue("DCBurstGap").toString());
+    _rampUpTimeTextfield = TextEditingController(
+        text: serviceLayerProvider.retrieveIntValue("RampUpTime").toString());
+      });
+    }
+
+
+
     return Column(
       children: [
         SizedBox(
@@ -226,7 +249,7 @@ class _RightInputsState extends State<RightInputs> {
                     bluetoothLEProvider.getConnected,
                 controller: _rampUpTimeTextfield,
                 onChanged: (value) {
-                  serviceLayerProvider.setIntegerValue("RampUpTime", value);
+                  serviceLayerProvider.setIntegerValue("rampUpTime", value);
                 },
                 labelText: 'Ramp Up/Down Time ',
                 minValue: 0,
